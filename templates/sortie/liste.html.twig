@@ -1,0 +1,73 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Gestion des sorties{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="container col-md-8">
+            {% for message in app.session.flashBag.get('success') %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+            {% for message in app.session.flashBag.get('danger') %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
+            <div class="card ">
+                <div class="card-header">Liste des vendues</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Produit</th>
+                                <th>Quantite vendue</th>
+                                <th>PrixUnit</th>
+                                <th>Montant</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                            {% for s in sortie %}
+                                <tr>
+                                    <th>{{ s.produit }}</th>
+                                    <th>{{ s.qtSortie }}</th>
+                                    <th>{{ s.prixUnit | number_format(0, ',', ' ') }}</th>
+                                    <th>{{ s.total | number_format(0, ',', ' ') }}</th>
+                                    <th>{{ s.dateSortie|date('d/m/Y') }}</th>
+                                    <td>
+                                        <a href="{{ path('sortie_modifier', {'id': s.id}) }}" ><i class="fa fa-edit"></i></a>
+                                        <a href="{{ path('sortie_delete', {'id': s.id}) }}" ><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+
+                    </div>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            {% if total > limit %}
+                                {% set pages = (total / limit)|round(0, 'ceil') %}
+                                {% for i in 1..pages %}
+                                    {% if i == page %}
+                                        <li class="page-item active" aria-current="page">
+                                            <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="{{ path('sortie_liste', {'page': i}) }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="container col-md-4">
+            <!-- Pending Requests Card Example -->
+            <div class="card">
+                <div class="card-header">Formulaire de gestion des produits</div>
+                <div class="card-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

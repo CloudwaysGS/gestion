@@ -1,0 +1,35 @@
+
+    {% extends 'accueil.html.twig' %}
+
+    {% block title %}Chargement{% endblock %}
+
+    {% block body %}
+        <div class="container col-md-12">
+            <a href="{{ path('add_user') }}" class="btn btn-primary">Nouveau utilisateur</a>
+            <div class="card ">
+                <div class="card-header">Liste des clients</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Prenom</th>
+                                <th>Nom</th>
+                                <th>Adresse</th>
+                                <th>Téléphone</th>
+
+                            </tr>
+                            {% for user in user %}
+                                <tr>
+                                    <th>{{ user.prenom }}</th>
+                                    <th>{{ user.nom }}</th>
+                                    <th>{{ user.adresse }}</th>
+                                    <th>{{ user.telephone }}</th>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    {% endblock %}

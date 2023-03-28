@@ -1,0 +1,52 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Chargement{% endblock %}
+
+{% block body %}
+    <div class="container col-md-12">
+
+        <div class="card ">
+            <div class="card-header">Liste des clients</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Nombre de produit</th>
+                            <th>Client</th>
+                            <th>Adresse</th>
+                            <th>Téléphone</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                        </tr>
+                        {% for c in chargement %}
+                            <tr>
+                                <th>{{ c.nombre }}</th>
+                                <th>{{ c.nomClient }}</th>
+                                <th>{{ c.adresse }}</th>
+                                <th>{{ c.telephone }}</th>
+                                <th>{{ c.total }}</th>
+                                <th>{{ c.date | date('d/m/Y H:i:s') }}</th>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        {% if total > limit %}
+                            {% set pages = (total / limit)|round(0, 'ceil') %}
+                            {% for i in 1..pages %}
+                                {% if i == page %}
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item"><a class="page-link" href="{{ path('liste_chargement', {'page': i}) }}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+{% endblock %}

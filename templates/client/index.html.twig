@@ -1,0 +1,64 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Hello ClientController!{% endblock %}
+
+{% block body %}
+    {% for message in app.session.flashBag.get('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="container col-md-8">
+            <div class="card ">
+                <div class="card-header">Liste des clients</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Nom client</th>
+                                <th>Adresse</th>
+                                <th>Telephone</th>
+                                <th>Ville</th>
+                                <th>action</th>
+                            </tr>
+                            {% for c in client %}
+                                <tr>
+                                    <th>{{ c.nom }}</th>
+                                    <th>{{ c.adresse }}</th>
+                                    <th>{{ c.telephone }}</th>
+                                    <th>{{ c.ville }}</th>
+                                    <th>
+                                    </th>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            {% if total > limit %}
+                                {% set pages = (total / limit)|round(0, 'ceil') %}
+                                {% for i in 1..pages %}
+                                    {% if i == page %}
+                                        <li class="page-item active" aria-current="page">
+                                            <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="{{ path('client_liste', {'page': i}) }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="container col-md-4">
+            <div class="card">
+                <div class="card-header">Formulaire de gestion des clients</div>
+                <div class="card-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
