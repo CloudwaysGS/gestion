@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Dette;
 use App\Entity\Paiement;
+use App\Entity\Search;
 use App\Form\PaiementType;
+use App\Form\SearchType;
 use App\Repository\PaiementRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use MercurySeries\FlashyBundle\FlashyNotifier;
@@ -22,19 +24,30 @@ class PaiementController extends AbstractController
         $form = $this->createForm(PaiementType::class, $p, array(
             'action' => $this->generateUrl('paiement_add'),
         ));
+
+        $search = new Search();
+        $form2 = $this->createForm(SearchType::class, $search);
+        $form2->handleRequest($request);
+        $paiements = [];
+        $nom = $search->getNom();
+        if ($nom) {
+            $paiements = $paiement->findByName($nom);
+        } else {
+            $paiements = $paiement->findAllOrderedByDate();
+        }
         $page = $request->query->getInt('page', 1); // current page number
         $limit = 10; // number of products to display per page
-        $paiement = $paiement->findAll();
-        $total = count($paiement);
+        $total = count($paiements);
         $offset = ($page - 1) * $limit;
-        $paiement = array_slice($paiement, $offset, $limit);
+        $paiements = array_slice($paiements, $offset, $limit);
         return $this->render('paiement/index.html.twig', [
             'controller_name' => 'ClientController',
-            'paiement'=>$paiement,
+            'paiements'=>$paiements,
             'total' => $total,
             'page' => $page,
             'limit' => $limit,
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'form2' => $form2->createView()
         ]);
         return $this->render('paiement/index.html.twig');
     }

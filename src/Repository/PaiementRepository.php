@@ -39,6 +39,27 @@ class PaiementRepository extends ServiceEntityRepository
         }
     }
 
+    public function findAllOrderedByDate()
+    {
+        return $this->createQueryBuilder('p')
+            ->orderBy('p.datePaiement', 'DESC')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+    // src/Repository/ProduitRepository.php
+
+    public function findByName($nom)
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.client', 'c')
+            ->andWhere('c.nom LIKE :nom')
+            ->setParameter('nom', '%'.$nom.'%')
+            ->orderBy('p.client', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Paiement[] Returns an array of Paiement objects
 //     */

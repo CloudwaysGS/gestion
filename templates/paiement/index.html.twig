@@ -6,6 +6,18 @@
     {% for message in app.session.flashBag.get('success') %}
         <div class="alert alert-success">{{ message }}</div>
     {% endfor %}
+    {{ form_start(form2) }}
+    <div class="form-row align-items-end">
+        <div class="col">
+            {{ form_row(form2.nom) }}
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Recherche</button>
+            </div>
+        </div>
+    </div>
+    {{ form_end(form2) }}
     <a href="{{ path('dette_add') }}" class="btn btn-primary m-2">liste dettes</a>
     <div class="row">
         <div class="container col-md-8">
@@ -21,7 +33,7 @@
                                 <th>Date</th>
                                 <th>action</th>
                             </tr>
-                            {% for p in paiement %}
+                            {% for p in paiements %}
                                 <tr>
                                     <th>{{ p.client.nom }}</th>
                                     <th>{{ p.montant }}</th>
