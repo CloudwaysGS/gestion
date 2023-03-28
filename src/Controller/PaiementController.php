@@ -55,6 +55,7 @@ class PaiementController extends AbstractController
             $montantPaiement = $paiement->getMontant();
             $reste = $montantDette - $montantPaiement;
             if ($Dette->getStatut() == 'payée') {
+                dd('ok');
                 $this->addFlash('danger','La dette a déjà été réglée.');
                 return $this->redirectToRoute('dette_liste');
             }
@@ -66,6 +67,8 @@ class PaiementController extends AbstractController
                 $Dette->setStatut('payée');
                 $this->addFlash('success', 'La dette a été payé');
             }
+            $Dette->setReste($reste);
+            $paiement->setReste($reste);
             $manager->persist($paiement);
             $manager->flush();
             $this->addFlash('success', 'Le paiement a été enregistrée avec succès.');
