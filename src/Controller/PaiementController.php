@@ -42,38 +42,50 @@ class PaiementController extends AbstractController
     #[Route('/paiement/add', name: 'paiement_add')]
     public function add(EntityManagerInterface $manager, Request $request, FlashyNotifier $flashy): Response
     {
-        $paiement = new Paiement();
+        $payment = new Paiement();
         $date = new \DateTime();
-        $paiement->setDatePaiement($date);
-        $form = $this->createForm(PaiementType::class, $paiement);
+        $payment->setDatePaiement($date);
+        $form = $this->createForm(PaiementType::class, $payment);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $client = $paiement->getClient();
-            $dette = $client->getDette();
-            $Dette = $dette->first();
-            $montantDette = $Dette->getReste();
-            $montantPaiement = $paiement->getMontant();
-            $reste = $montantDette - $montantPaiement;
-            if ($Dette->getStatut() == 'payée') {
-                dd('ok');
-                $this->addFlash('danger','La dette a déjà été réglée.');
-                return $this->redirectToRoute('dette_liste');
-            }
-            if ($reste < 0) {
-                $this->addFlash('danger','Vous avez payé plus que votre dette, '.abs($reste).'f vous sera remboursé.');
-                $Dette->setMontantDette($reste);
-                return $this->redirectToRoute('dette_liste');
-            } elseif ($reste == 0){
-                $Dette->setStatut('payée');
-                $this->addFlash('success', 'La dette a été payé');
-            }
-            $Dette->setReste($reste);
-            $paiement->setReste($reste);
-            $manager->persist($paiement);
-            $manager->flush();
-            $this->addFlash('success', 'Le paiement a été enregistrée avec succès.');
-            return $this->redirectToRoute('dette_liste');
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->redirectToRoute('paiement_liste');
         }
+
+        $client = $payment->getClient();
+        $currentDebt = $client->getDette()->first();
+        $remainingDebt = (!$currentDebt || !method_exists($currentDebt, 'getReste')) ? null : $currentDebt->getReste();
+        if (is_null($remainingDebt)) {
+            $flashy->error('Aucune dette n\'a été trouvée pour ce client.');
+            return $this->redirectToRoute('paiement_liste');
+        }
+
+        $paymentAmount = $payment->getMontant();
+
+        if ($currentDebt->getStatut() == 'payée') {
+            $flashy->error('La dette a déjà été réglée.');
+            return $this->redirectToRoute('paiement_liste');
+        }
+
+        $remainingDebt -= $paymentAmount;
+
+        if ($remainingDebt < 0) {
+            $flashy->warning($client->getNom().' a payé plus que ce qu\'il devait');
+            $currentDebt->setMontantDette($remainingDebt);
+            return $this->redirectToRoute('paiement_liste');
+        }
+        if ($remainingDebt == 0){
+            $currentDebt->setStatut('payée');
+            $flashy->success('La dette a été payée.');
+        }
+
+        $currentDebt->setReste($remainingDebt);
+        $payment->setReste($remainingDebt);
+
+        $manager->persist($payment);
+        $manager->flush();
+
+        $flashy->success('Le paiement a été enregistré avec succès.');
         return $this->redirectToRoute('paiement_liste');
     }
 
