@@ -39,14 +39,25 @@ class PaiementRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllOrderedByDate()
+    public function findAllOrderedByDate($limit, $offset)
     {
         return $this->createQueryBuilder('p')
             ->orderBy('p.datePaiement', 'DESC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
+
+    public function countAll(): int
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb->select('COUNT(p)');
+        $query = $qb->getQuery();
+        return $query->getSingleScalarResult();
+    }
+
+
     // src/Repository/ProduitRepository.php
 
     public function findByName($nom)
@@ -55,7 +66,7 @@ class PaiementRepository extends ServiceEntityRepository
             ->join('p.client', 'c')
             ->andWhere('c.nom LIKE :nom')
             ->setParameter('nom', '%'.$nom.'%')
-            ->orderBy('p.client', 'DESC')
+            ->orderBy('p.datePaiement', 'DESC')
             ->getQuery()
             ->getResult();
     }

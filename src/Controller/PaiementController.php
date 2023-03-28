@@ -28,18 +28,12 @@ class PaiementController extends AbstractController
         $search = new Search();
         $form2 = $this->createForm(SearchType::class, $search);
         $form2->handleRequest($request);
-        $paiements = [];
         $nom = $search->getNom();
-        if ($nom) {
-            $paiements = $paiement->findByName($nom);
-        } else {
-            $paiements = $paiement->findAllOrderedByDate();
-        }
         $page = $request->query->getInt('page', 1); // current page number
         $limit = 10; // number of products to display per page
-        $total = count($paiements);
+        $total = $nom ? count($paiement->findByName($nom)) : $paiement->countAll();
         $offset = ($page - 1) * $limit;
-        $paiements = array_slice($paiements, $offset, $limit);
+        $paiements = $nom ? $paiement->findByName($nom, $limit, $offset) : $paiement->findAllOrderedByDate($limit, $offset);
         return $this->render('paiement/index.html.twig', [
             'controller_name' => 'ClientController',
             'paiements'=>$paiements,
@@ -49,8 +43,8 @@ class PaiementController extends AbstractController
             'form' => $form->createView(),
             'form2' => $form2->createView()
         ]);
-        return $this->render('paiement/index.html.twig');
     }
+
 
     #[Route('/paiement/add', name: 'paiement_add')]
     public function add(EntityManagerInterface $manager, Request $request, FlashyNotifier $flashy): Response

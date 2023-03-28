@@ -18,7 +18,7 @@
             {% for message in app.session.flashBag.get('danger') %}
                 <div class="alert alert-danger">{{ message }}</div>
             {% endfor %}
-            <a href="{{ path('facture_delete_all') }}" class="btn btn-primary">Nouveau Facture</a>
+            <a href="{{ path('facture_delete_all') }}" class="btn btn-primary">Enrégistrer</a>
             <a href="{{ path('liste_chargement') }}" class="btn btn-primary">Mes factures</a>
             <a href="{{ path('facture_export') }}" class="btn btn-primary">Exporter en pdf</a>
             {% for message in app.session.flashBag.get('danger') %}
@@ -39,27 +39,28 @@
                             {% set total = 0 %}
                             {% for f in facture %}
                                 <tr>
-                                    <th>{{ f.quantite }}</th>
-                                    <th>{% if f.produit.count() > 0 %}
+                                    <td>{{ f.quantite }}</td>
+                                    <td>{% if f.produit.count() > 0 %}
                                             {{ f.produit[0].libelle }}
                                         {% endif %}
-                                    </th>
-                                    <th> {% if f.produit.count() > 0 %}
+                                    </td>
+                                    <td onclick="editField(event)">
+                                        {% if f.produit.count() > 0 %}
                                             {{ f.produit[0].prixUnit|number_format(0, ',', ' ') }}
                                         {% endif %}
-                                    </th>
-                                    <th>{{ f.montant | number_format(0, ',', ' ') }}</th>
-                                    <th>
+                                    </td>
+                                    <td onclick="editField(event)">{{ f.montant | number_format(0, ',', ' ') }}</td>
+                                    <td>
                                         <a title="supprimer" href="{{ path('facture_delete', {'id':f.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
-                                    </th>
+                                    </td>
                                 </tr>
                                 {% set total = total + f.montant %}
                             {% endfor %}
-                            <th>Total</th>
-                            <th></th>
-                            <th></th>
-                            <th>{{ total|number_format(0, ',', ' ') }} f </th>
-                            <th></th>
+                            <td>Total</td>
+                            <td></td>
+                            <td></td>
+                            <td>{{ total|number_format(0, ',', ' ') }} f </td>
+                            <td></td>
                         </table>
                     </div>
                 </div>
@@ -94,4 +95,44 @@
             });
         });
     </script>
+
+    <script>
+        function editField(event, field, id) {
+            const td = event.target;
+            const value = td.innerText.trim();
+            td.innerHTML = `<input type="text" value="${value}" onblur="updateField(event, '${field}', ${id})" />`;
+        }
+
+        function updateField(event, field, id) {
+            const input = event.target;
+            const td = input.parentNode;
+            const value = input.value.trim();
+            td.innerHTML = value;
+            if (field === 'quantite') {
+                updateMontant(id);
+            } else if (field === 'prixUnit') {
+                updateMontant(id);
+                updateTotal();
+            }
+        }
+
+        function updateMontant(id) {
+            const quantite = parseInt(document.querySelector(`#facture_liste tr:nth-child(${id+1}) td:nth-child(1)`).innerText);
+            const prixUnit = parseInt(document.querySelector(`#facture_liste tr:nth-child(${id+1}) td:nth-child(3)`).innerText.replace(/\s/g, ''));
+            const montant = quantite * prixUnit;
+            document.querySelector(`#facture_liste tr:nth-child(${id+1}) td:nth-child(4)`).innerText = montant.toLocaleString('fr-FR');
+        }
+
+        function updateTotal() {
+            const montants = document.querySelectorAll('#facture_liste td:nth-child(4)');
+            let total = 0;
+            for (let i = 0; i < montants.length; i++) {
+                total += parseInt(montants[i].innerText.replace(/\s/g, ''));
+            }
+            document.querySelector('#total').innerText = total.toLocaleString('fr-FR');
+        }
+
+    </script>
+
+
 {% endblock %}

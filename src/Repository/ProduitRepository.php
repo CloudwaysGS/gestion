@@ -39,13 +39,14 @@ class ProduitRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllOrderedByDate()
+    public function findAllOrderedByDate($limit, $offset)
     {
         return $this->createQueryBuilder('p')
             ->orderBy('p.releaseDate', 'DESC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
     // src/Repository/ProduitRepository.php
 
@@ -57,6 +58,14 @@ class ProduitRepository extends ServiceEntityRepository
             ->orderBy('p.libelle', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function countAll(): int
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb->select('COUNT(p)');
+        $query = $qb->getQuery();
+        return $query->getSingleScalarResult();
     }
 
 

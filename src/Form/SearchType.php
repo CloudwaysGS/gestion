@@ -15,9 +15,10 @@ class SearchType extends AbstractType
         $builder
             ->add('nom',TextType::class, array(
                 'label' => false,
+                'required' => false,
                 'attr' => array(
                     'class' => 'form-control form-group',
-                    'placeholder' => 'Produit recherché...',
+                    'placeholder' => 'Recherche...',
                 )
             ))
         ;

@@ -27,18 +27,12 @@ class ProduitController extends AbstractController
         $search = new Search();
         $form2 = $this->createForm(SearchType::class, $search);
         $form2->handleRequest($request);
-        $produits = [];
-            $nom = $search->getNom();
-            if ($nom) {
-                $produits = $prod->findByName($nom);
-            } else {
-                $produits = $prod->findAllOrderedByDate();
-            }
+        $nom = $search->getNom();
         $page = $request->query->getInt('page', 1); // current page number
         $limit = 10; // number of products to display per page
-        $total = count($produits);
+        $total = $nom ? count($prod->findByName($nom)) : $prod->countAll();
         $offset = ($page - 1) * $limit;
-        $produits = array_slice($produits, $offset, $limit);
+        $produits = $nom ? $prod->findByName($nom, $limit, $offset) : $prod->findAllOrderedByDate($limit, $offset);
         $flashy->info('Vous avez '.$total.' produits pour l\'instant');
         return $this->render('produit/liste.html.twig', [
             'controller_name' => 'ProduitController',

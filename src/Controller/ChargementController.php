@@ -22,6 +22,7 @@ class ChargementController extends AbstractController
         $total = count($chargement);
         $offset = ($page - 1) * $limit;
         $chargement = array_slice($chargement, $offset, $limit);
+
         return $this->render('chargement/index.html.twig', [
             'controller_name' => 'ChargementController',
             'chargement' => $chargement,
