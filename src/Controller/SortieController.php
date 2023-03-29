@@ -25,10 +25,9 @@ class SortieController extends AbstractController
         ));
         $page = $request->query->getInt('page', 1); // current page number
         $limit = 10; // number of products to display per page
-        $sortie = $sort->findAllOrderedByDate();
-        $total = count($sortie);
+        $total = $sort->countAll();
         $offset = ($page - 1) * $limit;
-        $sortie = array_slice($sortie, $offset, $limit);
+        $sortie = $sort->findAllOrderedByDate($limit, $offset);
         return $this->render('sortie/liste.html.twig', [
             'controller_name' => 'SortieController',
             'sortie'=>$sortie,
@@ -88,7 +87,8 @@ class SortieController extends AbstractController
         $offset = ($page - 1) * $limit;
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Update the modified sale
+            $update = $sortie->getQtSortie() * $sortie->getPrixUnit();
+            $sortie->setTotal($update);
             $manager->flush();
             $this->addFlash('success', 'La sortie a été modifiée avec succès.');
             return $this->redirectToRoute('sortie_liste');

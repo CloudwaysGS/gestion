@@ -26,10 +26,9 @@ class EntreeController extends AbstractController
         ));
         $page = $request->query->getInt('page', 1); // current page number
         $limit = 10; // number of products to display per page
-        $entree = $entre->findAllOrderedByDate();
-        $total = count($entree);
+        $total = $entre->countAll();
         $offset = ($page - 1) * $limit;
-        $entree = array_slice($entree, $offset, $limit);
+        $entree = $entre->findAllOrderedByDate($limit, $offset);
         return $this->render('entree/liste.html.twig', [
             'controller_name' => 'EntreeController',
             'entree'=>$entree,
@@ -95,6 +94,8 @@ class EntreeController extends AbstractController
         $offset = ($page - 1) * $limit;
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $update = $entree->getPrixUnit() * $entree->getQtEntree();
+            $entree->setTotal($update);
             $manager->flush();
             $this->addFlash('success', 'Le produit entrée a été modifiée avec succès.');
             return $this->redirectToRoute('entree_liste');

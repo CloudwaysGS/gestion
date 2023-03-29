@@ -39,13 +39,22 @@ class EntreeRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllOrderedByDate()
+    public function findAllOrderedByDate($limit, $offset)
     {
         return $this->createQueryBuilder('p')
             ->orderBy('p.dateEntree', 'DESC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
+    }
+
+    public function countAll(): int
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb->select('COUNT(p)');
+        $query = $qb->getQuery();
+        return $query->getSingleScalarResult();
     }
 
 //    /**

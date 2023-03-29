@@ -39,13 +39,22 @@ class SortieRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllOrderedByDate()
+    public function findAllOrderedByDate($limit, $offset)
     {
-        return $this->createQueryBuilder('s')
-            ->orderBy('s.dateSortie', 'DESC')
+        return $this->createQueryBuilder('p')
+            ->orderBy('p.dateSortie', 'DESC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
+    }
+
+    public function countAll(): int
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb->select('COUNT(p)');
+        $query = $qb->getQuery();
+        return $query->getSingleScalarResult();
     }
 
 //    /**
