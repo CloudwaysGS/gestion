@@ -61,37 +61,6 @@ class DetteController extends AbstractController
         return $this->redirectToRoute('dette_liste');
     }
 
-    #[Route('/dette/{id}/modifier', name: 'dette_modifier')]
-    public function modifier(EntityManagerInterface $entityManager, Request $request, Dette $dette)
-    {
-        $form = $this->createForm(UpdateType::class, $dette);
-        $form->handleRequest($request);
-
-        if (!$form->isSubmitted() || !$form->isValid()) {
-            return $this->render('dette/modifier.html.twig', [
-                'form' => $form->createView(),
-                'dette' => $dette,
-            ]);
-        }
-        $date = new \DateTime();
-        $dette = $dette->setDatePaiement($date);
-        $avance = $dette->getMontantDette() - $dette->getMontantAvance();
-        $dette->setMontantDette($avance);
-        if ($avance == 0) {
-            $dette->setStatut('payée');
-            $this->addFlash('success', 'La dette a été payée.');
-        } elseif ($avance < 0) {
-            $message = "Le client a payé plus que ce qu'il devait.";
-            $this->addFlash('danger', $message);
-            return $this->redirectToRoute('dette_liste');
-        }
-
-        $entityManager->persist($dette);
-        $entityManager->flush();
-
-        return $this->redirectToRoute('dette_liste');
-    }
-
     #[Route('/dette/delete/{id}', name: 'dette_delete')]
     public function delete(Dette $dette, DetteRepository $repository){
         $avance = $dette->getMontantDette() - $dette->getMontantAvance();

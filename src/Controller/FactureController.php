@@ -85,6 +85,50 @@ class FactureController extends AbstractController
         return $this->redirectToRoute('facture_liste', ['total' => $total]);
     }
 
+    #[Route('/facture/edit', name: 'facture_edit')]
+    public function edit(EntityManagerInterface $manager, Request $request): JsonResponse
+    {
+        $factureId = $request->request->get('factureId');
+        $newPrice = $request->request->get('prixUnit');
+        $newAmount = $request->request->get('montant');
+
+        $facture = $manager->getRepository(Facture::class)->find($factureId);
+
+        $facture->setPrixUnit($newPrice);
+        $facture->setMontant($newAmount);
+
+        $manager->flush();
+
+        return new JsonResponse([
+            'success' => true
+        ]);
+    }
+
+    #[Route('/facture/save', name: 'facture_save')]
+    public function saveFacture(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        $factureRepository = $entityManager->getRepository(Facture::class);
+
+        if (is_array($data)) {
+            foreach ($data as $row) {
+                $facture = $factureRepository->findOneBy(['quantite' => $row['quantite']]);
+                if ($facture) {
+                    $facture->setPrixUnit($row['prixUnit']);
+                    $facture->setMontant($row['quantite'] * $row['prixUnit']);
+                }
+            }
+
+            $entityManager->flush();
+
+            return new JsonResponse(['status' => 'success']);
+        } else {
+            return new JsonResponse(['status' => 'error', 'message' => 'Les données envoyées ne sont pas valides.']);
+        }
+    }
+
+
+
     #[Route('/facture/delete/{id}', name: 'facture_delete')]
     public function delete(Facture $facture, EntityManagerInterface $entityManager)
     {

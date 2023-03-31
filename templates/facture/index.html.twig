@@ -21,6 +21,7 @@
             <a href="{{ path('facture_delete_all') }}" class="btn btn-primary">Enrégistrer</a>
             <a href="{{ path('liste_chargement') }}" class="btn btn-primary">Mes factures</a>
             <a href="{{ path('facture_export') }}" class="btn btn-primary">Exporter en pdf</a>
+            <a id="enregistrer" onclick="saveChanges()" class="btn btn-primary">Enregistrer</a>
             {% for message in app.session.flashBag.get('danger') %}
                 <div class="alert alert-danger">{{ message }}</div>
             {% endfor %}
@@ -44,12 +45,12 @@
                                             {{ f.produit[0].libelle }}
                                         {% endif %}
                                     </td>
-                                    <td onclick="editField(event)">
+                                    <td contenteditable="true" onclick="editCell(this)">
                                         {% if f.produit.count() > 0 %}
                                             {{ f.produit[0].prixUnit|number_format(0, ',', ' ') }}
                                         {% endif %}
                                     </td>
-                                    <td onclick="editField(event)">{{ f.montant | number_format(0, ',', ' ') }}</td>
+                                    <td contenteditable="true" onclick="editCell(this)">{{ f.montant | number_format(0, ',', ' ') }}</td>
                                     <td>
                                         <a title="supprimer" href="{{ path('facture_delete', {'id':f.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
                                     </td>
@@ -97,42 +98,55 @@
     </script>
 
     <script>
-        function editField(event, field, id) {
-            const td = event.target;
-            const value = td.innerText.trim();
-            td.innerHTML = `<input type="text" value="${value}" onblur="updateField(event, '${field}', ${id})" />`;
-        }
-
-        function updateField(event, field, id) {
-            const input = event.target;
-            const td = input.parentNode;
-            const value = input.value.trim();
-            td.innerHTML = value;
-            if (field === 'quantite') {
-                updateMontant(id);
-            } else if (field === 'prixUnit') {
-                updateMontant(id);
-                updateTotal();
+        function editCell(cell) {
+            var content = cell.innerHTML.trim();
+            var newValue = prompt("Modifier la valeur :", content);
+            if (newValue != null && newValue != content) {
+                cell.innerHTML = newValue;
+                updateMontant(cell.parentNode);
             }
         }
 
-        function updateMontant(id) {
-            const quantite = parseInt(document.querySelector(`#facture_liste tr:nth-child(${id+1}) td:nth-child(1)`).innerText);
-            const prixUnit = parseInt(document.querySelector(`#facture_liste tr:nth-child(${id+1}) td:nth-child(3)`).innerText.replace(/\s/g, ''));
-            const montant = quantite * prixUnit;
-            document.querySelector(`#facture_liste tr:nth-child(${id+1}) td:nth-child(4)`).innerText = montant.toLocaleString('fr-FR');
+        function updateMontant(row) {
+            var quantite = parseInt(row.cells[0].innerHTML.trim());
+            var prixUnit = parseInt(row.cells[2].innerHTML.trim().replace(/\s/g, ""));
+            var montant = quantite * prixUnit;
+            row.cells[3].innerHTML = montant.toLocaleString("fr-FR");
         }
 
-        function updateTotal() {
-            const montants = document.querySelectorAll('#facture_liste td:nth-child(4)');
-            let total = 0;
-            for (let i = 0; i < montants.length; i++) {
-                total += parseInt(montants[i].innerText.replace(/\s/g, ''));
+        function saveChanges() {
+            var rows = document.getElementById("facture_liste").rows;
+            var facture = [];
+            for (var i = 1; i < rows.length - 1; i++) {
+                var row = rows[i];
+                var quantite = parseInt(row.cells[0].innerHTML.trim());
+                var prixUnit = parseInt(row.cells[2].innerHTML.trim().replace(/\s/g, ""));
+                var montant = parseInt(row.cells[3].innerHTML.trim().replace(/\s/g, ""));
+                facture.push({
+                    quantite: quantite,
+                    prixUnit: prixUnit,
+                    montant: montant
+                });
             }
-            document.querySelector('#total').innerText = total.toLocaleString('fr-FR');
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        alert("Les modifications ont été enregistrées avec succès !");
+                    } else {
+                        alert("Une erreur est survenue lors de l'enregistrement des modifications.");
+                    }
+                }
+            };
+            xhr.open("POST", "/facture/save", true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.continue = function() {
+                var data = JSON.stringify(facture);
+                console.log(data);
+                xhr.send(data); } ;
+            xhr.continue();
         }
 
     </script>
-
 
 {% endblock %}
