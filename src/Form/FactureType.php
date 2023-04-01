@@ -43,13 +43,13 @@ class FactureType extends AbstractType
                 )
             ))
 
-           /* ->add('prixUnit',TextType::class,array(
+            ->add('prixUnit',TextType::class,array(
                 'label' => false,
                 'required' => false,
                 'attr' => array(
                     'class' => 'form-control form-group',
                     'placeholder' => 'prix unitaire'                ),
-            ))*/
+            ))
 
             ->add('produit', null, [
                 'label' => false,

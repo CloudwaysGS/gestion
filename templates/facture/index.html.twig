@@ -21,7 +21,6 @@
             <a href="{{ path('facture_delete_all') }}" class="btn btn-primary">Enrégistrer</a>
             <a href="{{ path('liste_chargement') }}" class="btn btn-primary">Mes factures</a>
             <a href="{{ path('facture_export') }}" class="btn btn-primary">Exporter en pdf</a>
-            <a id="enregistrer" onclick="saveChanges()" class="btn btn-primary">Enregistrer</a>
             {% for message in app.session.flashBag.get('danger') %}
                 <div class="alert alert-danger">{{ message }}</div>
             {% endfor %}
@@ -47,7 +46,7 @@
                                     </td>
                                     <td>
                                         {% if f.produit.count() > 0 %}
-                                            {{ f.produit[0].prixUnit|number_format(0, ',', ' ') }}
+                                            {{ f.prixUnit|number_format(0, ',', ' ') }}
                                         {% endif %}
                                     </td>
                                     <td>{{ f.montant | number_format(0, ',', ' ') }}</td>

@@ -25,19 +25,15 @@ class FactureController extends AbstractController
     #[Route('/facture', name: 'facture_liste')]
     public function index(FactureRepository $fac, Request $request): Response
     {
-        $sumQuantite = $fac->createQueryBuilder('f')
-            ->select('SUM(f.quantite)')
-            ->getQuery()
-            ->getSingleScalarResult();
         $facture = new Facture();
         $form = $this->createForm(FactureType::class, $facture, array(
             'action' => $this->generateUrl('facture_add'),
         ));
+        $form->remove('prixUnit');
         $facture = $fac->findAllOrderedByDate();
         return $this->render('facture/index.html.twig', [
             'controller_name' => 'FactureController',
             'facture' => $facture,
-            'sumQuantite' => $sumQuantite,
             'form' => $form->createView()
         ]);
     }
@@ -47,7 +43,6 @@ class FactureController extends AbstractController
     {
         $facture = new Facture();
         $form = $this->createForm(FactureType::class, $facture);
-        $form->remove('prixUnit');
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $produit = $facture->getProduit()->first();
@@ -98,6 +93,7 @@ class FactureController extends AbstractController
         $form = $this->createForm(FactureType::class, $facture);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $facture->setPrixUnit($facture->getPrixUnit());
             $facture->setMontant($facture->getQuantite() * $facture->getPrixUnit());
             $entityManager->persist($form->getData());
             $entityManager->flush();
@@ -187,7 +183,7 @@ class FactureController extends AbstractController
             $data[] = array(
                 'Quantité achetée' => $f->getQuantite(),
                 'Produit' => $f->getProduit()->first()->getLibelle(),
-                'Prix unitaire' => $f->getProduit()->first()->getPrixUnit(),
+                'Prix unitaire' => $f->getPrixUnit(),
                 'Montant' => $f->getMontant(),
             );
             $total += $f->getMontant();
