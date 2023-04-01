@@ -45,13 +45,14 @@
                                             {{ f.produit[0].libelle }}
                                         {% endif %}
                                     </td>
-                                    <td contenteditable="true" onclick="editCell(this)">
+                                    <td>
                                         {% if f.produit.count() > 0 %}
                                             {{ f.produit[0].prixUnit|number_format(0, ',', ' ') }}
                                         {% endif %}
                                     </td>
-                                    <td contenteditable="true" onclick="editCell(this)">{{ f.montant | number_format(0, ',', ' ') }}</td>
+                                    <td>{{ f.montant | number_format(0, ',', ' ') }}</td>
                                     <td>
+                                        <a title="Modifier" href="{{ path('modifier',{'id':f.id}) }}"><i class="fa fa-edit"></i></a>
                                         <a title="supprimer" href="{{ path('facture_delete', {'id':f.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
                                     </td>
                                 </tr>
@@ -74,79 +75,8 @@
 {% block javascripts %}
     <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
     <script>
-        var form = $('#form');
-        form.on('submit', function(event) {
-            event.preventDefault();
-            $.ajax({
-                type: form.attr('method'),
-                url: form.attr('action'),
-                data: form.serialize(),
-                success: function(response) {
-                    if (response.status === 'error') {
-                        alert(response.message);
-                    } else {
-                        var updatedTable = $(response).find('#facture_liste');
-                        $('#facture_liste').html(updatedTable.html());
-                        form[0].reset();
-                    }
-                },
-                error: function(xhr, status, error) {
-                    alert('Une erreur est survenue : ' + error);
-                }
-            });
-        });
+        
     </script>
 
-    <script>
-        function editCell(cell) {
-            var content = cell.innerHTML.trim();
-            var newValue = prompt("Modifier la valeur :", content);
-            if (newValue != null && newValue != content) {
-                cell.innerHTML = newValue;
-                updateMontant(cell.parentNode);
-            }
-        }
-
-        function updateMontant(row) {
-            var quantite = parseInt(row.cells[0].innerHTML.trim());
-            var prixUnit = parseInt(row.cells[2].innerHTML.trim().replace(/\s/g, ""));
-            var montant = quantite * prixUnit;
-            row.cells[3].innerHTML = montant.toLocaleString("fr-FR");
-        }
-
-        function saveChanges() {
-            var rows = document.getElementById("facture_liste").rows;
-            var facture = [];
-            for (var i = 1; i < rows.length - 1; i++) {
-                var row = rows[i];
-                var quantite = parseInt(row.cells[0].innerHTML.trim());
-                var prixUnit = parseInt(row.cells[2].innerHTML.trim().replace(/\s/g, ""));
-                var montant = parseInt(row.cells[3].innerHTML.trim().replace(/\s/g, ""));
-                facture.push({
-                    quantite: quantite,
-                    prixUnit: prixUnit,
-                    montant: montant
-                });
-            }
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        alert("Les modifications ont été enregistrées avec succès !");
-                    } else {
-                        alert("Une erreur est survenue lors de l'enregistrement des modifications.");
-                    }
-                }
-            };
-            xhr.open("POST", "/facture/save", true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.continue = function() {
-                var data = JSON.stringify(facture);
-                console.log(data);
-                xhr.send(data); } ;
-            xhr.continue();
-        }
-
-    </script>
 
 {% endblock %}

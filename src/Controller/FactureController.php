@@ -47,6 +47,7 @@ class FactureController extends AbstractController
     {
         $facture = new Facture();
         $form = $this->createForm(FactureType::class, $facture);
+        $form->remove('prixUnit');
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $produit = $facture->getProduit()->first();
@@ -75,59 +76,38 @@ class FactureController extends AbstractController
                 $manager->flush();
             }
         }
-        $total = $manager->getRepository(Facture::class)->createQueryBuilder('f')
+        $total = $manager->createQueryBuilder()
             ->select('SUM(f.montant)')
-            ->where('f.etat = 1')
+            ->from(Facture::class, 'f')
+            ->where('f.etat = :etat')
+            ->setParameter('etat', 1)
             ->getQuery()
             ->getSingleScalarResult();
+        $total = is_null($total) ? 0 : $total;
+
         $facture->setTotal($total);
+
         $manager->flush();
         return $this->redirectToRoute('facture_liste', ['total' => $total]);
     }
 
-    #[Route('/facture/edit', name: 'facture_edit')]
-    public function edit(EntityManagerInterface $manager, Request $request): JsonResponse
+    #[Route('/produit/modifier/{id}', name: 'modifier')]
+    public function modifier($id, FactureRepository $repo, Request $request, EntityManagerInterface $entityManager): Response
     {
-        $factureId = $request->request->get('factureId');
-        $newPrice = $request->request->get('prixUnit');
-        $newAmount = $request->request->get('montant');
-
-        $facture = $manager->getRepository(Facture::class)->find($factureId);
-
-        $facture->setPrixUnit($newPrice);
-        $facture->setMontant($newAmount);
-
-        $manager->flush();
-
-        return new JsonResponse([
-            'success' => true
+        $facture = $repo->find($id);
+        $form = $this->createForm(FactureType::class, $facture);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $facture->setMontant($facture->getQuantite() * $facture->getPrixUnit());
+            $entityManager->persist($form->getData());
+            $entityManager->flush();
+            return $this->redirectToRoute("facture_liste");
+        }
+        return $this->render('facture/index.html.twig', [
+            'facture' => $facture,
+            'form' => $form->createView(),
         ]);
     }
-
-    #[Route('/facture/save', name: 'facture_save')]
-    public function saveFacture(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $data = json_decode($request->getContent(), true);
-        $factureRepository = $entityManager->getRepository(Facture::class);
-
-        if (is_array($data)) {
-            foreach ($data as $row) {
-                $facture = $factureRepository->findOneBy(['quantite' => $row['quantite']]);
-                if ($facture) {
-                    $facture->setPrixUnit($row['prixUnit']);
-                    $facture->setMontant($row['quantite'] * $row['prixUnit']);
-                }
-            }
-
-            $entityManager->flush();
-
-            return new JsonResponse(['status' => 'success']);
-        } else {
-            return new JsonResponse(['status' => 'error', 'message' => 'Les données envoyées ne sont pas valides.']);
-        }
-    }
-
-
 
     #[Route('/facture/delete/{id}', name: 'facture_delete')]
     public function delete(Facture $facture, EntityManagerInterface $entityManager)
