@@ -77,8 +77,12 @@ class PaiementController extends AbstractController
         $remainingDebt -= $paymentAmount;
 
         if ($remainingDebt < 0) {
-            $flashy->warning($client->getNom().' a payé plus que ce qu\'il devait');
-            $currentDebt->setMontantDette($remainingDebt);
+            $flashy->warning($client->getNom().' a payé plus que ce qu\'il devait et on doit lui  rembourser '.abs($remainingDebt).' F');
+            $currentDebt->setStatut('payée');
+            $currentDebt->setReste($remainingDebt);
+            $payment->setReste('0');
+            $manager->persist($payment);
+            $manager->flush();
             return $this->redirectToRoute('paiement_liste');
         }
         if ($remainingDebt == 0){

@@ -23,6 +23,7 @@ class ClientType extends AbstractType
             ))
             ->add('adresse',TextType::class, array(
                 'label' => 'Adresse',
+                'required' => false,
                 'attr' => array(
                     'class' => 'form-control form-group')
             ))

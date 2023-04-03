@@ -15,6 +15,16 @@ class ChargementController extends AbstractController
     #[Route('/chargement', name: 'liste_chargement')]
     public function index(ChargementRepository $charge, Request $request): Response
     {
+        $firstDayOfMonth = new \DateTime('first day of this month');
+        $lastDayOfMonth = new \DateTime('last day of this month');
+        $sumTotalMonth = $charge->createQueryBuilder('c')
+            ->select('SUM(c.total)')
+            ->where('c.date BETWEEN :startOfMonth AND :endOfMonth')
+            ->setParameter('startOfMonth', $firstDayOfMonth)
+            ->setParameter('endOfMonth', $lastDayOfMonth)
+            ->getQuery()
+            ->getSingleScalarResult();
+        $sumTotalMonth = is_null($sumTotalMonth) ? 0 : $sumTotalMonth;
         $today = new DateTimeImmutable();
         $chargement = $charge->findAllOrderedByDate();
         $page = $request->query->getInt('page', 1);

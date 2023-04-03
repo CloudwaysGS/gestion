@@ -8,6 +8,7 @@ use App\Form\DetteType;
 use App\Form\UpdateType;
 use App\Repository\DetteRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,7 +41,7 @@ class DetteController extends AbstractController
     }
 
     #[Route('/dette/add', name: 'dette_add')]
-    public function add(EntityManagerInterface $manager, Request $request): Response
+    public function add(EntityManagerInterface $manager, Request $request, FlashyNotifier $notifier): Response
     {
         $dette = new Dette();
         $form = $this->createForm(DetteType::class, $dette);
@@ -56,15 +57,14 @@ class DetteController extends AbstractController
             }
             $manager->persist($dette);
             $manager->flush();
-            $this->addFlash('success', 'L\'entrée a été enregistrée avec succès.');
+            $notifier->success('L\'entrée a été enregistrée avec succès.');
         }
         return $this->redirectToRoute('dette_liste');
     }
 
     #[Route('/dette/delete/{id}', name: 'dette_delete')]
     public function delete(Dette $dette, DetteRepository $repository){
-        $avance = $dette->getMontantDette() - $dette->getMontantAvance();
-        if ($dette->getMontantDette() != 0){
+        if ($dette->getStatut() != 'payée'){
             $this->addFlash('danger', 'La dette n\'a pas encore été réglée.');
             return $this->redirectToRoute('dette_liste');
         }

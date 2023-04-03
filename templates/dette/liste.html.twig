@@ -4,10 +4,10 @@
 
 {% block body %}
     {% for message in app.session.flashBag.get('success') %}
-        <div class="alert alert-success">{{ message }}</div>
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
     {% endfor %}
     {% for message in app.session.flashBag.get('danger') %}
-        <div class="alert alert-danger">{{ message }}</div>
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
     {% endfor %}
     <a href="{{ path('paiement_add') }}" class="btn btn-primary m-2">remboursement</a>
     <div class="row">
@@ -20,7 +20,9 @@
                             <tr>
                                 <th>Nom client</th>
                                 <th>Montant dette</th>
-                                <th>Reste</th>
+                                {% if dette %}
+                                    <th>{{ dette[0].reste < 0 ? 'A Remettre' : 'Reste' }}</th>
+                                {% endif %}
                                 <th>Date</th>
                                 <th>statut</th>
                                 <th>action</th>
@@ -29,13 +31,22 @@
                                 <tr>
                                     <th>{{ d.client }}</th>
                                     <th>{{ d.montantDette | number_format(0, ',', ' ') }}</th>
-                                    <th>{{ d.reste | number_format(0, ',', ' ') }}</th>
+                                    {% if is_numeric(d.reste) %}
+                                        <th style="color: {{ d.reste < 0 ? 'red' : 'inherit' }}">
+                                            {{ d.reste < 0 ? -d.reste : d.reste | number_format(0, ',', ' ') }}
+                                        </th>
+                                    {% else %}
+                                        <th>{{ d.reste }}</th>
+                                    {% endif %}
+
+
+
                                     <th>{{ d.dateCreated | date('d/m/Y') }}</th>
                                     <th style="color: {% if d.statut == 'payée' %}#1cc88a{% else %}red{% endif %}">{{ d.statut }}</th>
                                     <th>
                                         <a title="Avance" href="{{ path('paiement_add', {'id':d.id}) }}"><i class='far fa-address-card'></i></a>
                                         <a title="detail"  class="open-modal"><i class="fa fa-edit"></i></a>
-                                        <a title="supprimer" href="{{ path('dette_delete', {'id':d.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                        <a title="supprimer" href="{{ path('dette_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
                                     </th>
                                 </tr>
                             {% endfor %}
@@ -116,5 +127,12 @@
             });
         });
     </script>
-
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 10000);
+    </script>
 {% endblock %}

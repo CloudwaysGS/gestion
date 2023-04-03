@@ -3,19 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Chargement;
-use App\Entity\Client;
 use App\Entity\Facture;
 use App\Entity\Produit;
 use App\Form\FactureType;
-use App\Repository\ChargementRepository;
 use App\Repository\FactureRepository;
-use App\Repository\ProduitRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,7 +33,7 @@ class FactureController extends AbstractController
     }
 
     #[Route('/facture/add', name: 'facture_add')]
-    public function add(EntityManagerInterface $manager, Request $request): Response
+    public function add(EntityManagerInterface $manager, Request $request, FlashyNotifier $flashy): Response
     {
         $facture = new Facture();
         $form = $this->createForm(FactureType::class, $facture);
@@ -48,17 +42,11 @@ class FactureController extends AbstractController
             $produit = $facture->getProduit()->first();
             $p = $manager->getRepository(Produit::class)->find($produit);
             if ($p->getQtStock() < $facture->getQuantite()) {
-                $response = new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock(),
-                ]);
-                return $response;
+                $this->addFlash('danger','La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
+                return $this->redirectToRoute('facture_liste');
             } else if ($facture->getQuantite() <= 0) {
-                $response = new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'Entrée une quantité positive svp!',
-                ]);
-                return $response;
+                $this->addFlash('danger','Entrée une quantité positive svp!');
+                return $this->redirectToRoute('facture_liste');
             } else {
                 $date = new \DateTime();
                 $facture->setDate($date);
@@ -71,6 +59,7 @@ class FactureController extends AbstractController
                 $manager->flush();
             }
         }
+
         $total = $manager->createQueryBuilder()
             ->select('SUM(f.montant)')
             ->from(Facture::class, 'f')

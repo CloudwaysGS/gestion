@@ -18,10 +18,10 @@
     <div class="row">
      <div class="container col-md-9">
          {% for message in app.session.flashBag.get('success') %}
-             <div class="alert alert-success">{{ message }}</div>
+             <div id="flash-message" class="alert alert-success">{{ message }}</div>
          {% endfor %}
          {% for message in app.session.flashBag.get('danger') %}
-             <div class="alert alert-danger">{{ message }}</div>
+             <div id="flash-message" class="alert alert-danger">{{ message }}</div>
          {% endfor %}
      <div class="card ">
         <div class="card-header"><span class="page-link">Liste des produits<span class="sr-only">(current)</span></span>
@@ -83,4 +83,18 @@
          </div>
      </div>
  </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 10000);
+    </script>
+
+
+
 {% endblock %}

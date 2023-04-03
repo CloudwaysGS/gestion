@@ -60,7 +60,6 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
         $sumTotal24H = is_null($sumTotal24H) ? 0 : $sumTotal24H;
-
         // obtenir la date de début et de fin du mois en cours
         $firstDayOfMonth = new \DateTime('first day of this month');
         $lastDayOfMonth = new \DateTime('last day of this month');
@@ -74,13 +73,11 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
         $sumTotalMonth = is_null($sumTotalMonth) ? 0 : $sumTotalMonth;
-
         $date = new \DateTime();
 
         $anneeCourante = date('Y');
         $firstDayOfMonth = new \DateTime('first day of this month');
         $lastDayOfMonth = new \DateTime('last day of this month');
-
         foreach ($sortie as $s) {
             $date = $s->getDateSortie();
             $date = $s->getDateSortie();
@@ -92,7 +89,6 @@ class AccueilController extends AbstractController
                 }
             }
         }
-
         $sortieTotalMonth += $sumTotalMonth;
 
         $sortietotal24H += $sumTotal24H;
