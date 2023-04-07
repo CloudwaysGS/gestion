@@ -105,8 +105,34 @@ class AccueilController extends AbstractController
         }
         $gainMoisCourant = $sortieTotalMonth - $entreetotal;
 
-        $sortieAnnuelle = $sortieTotalMonth;
-        $entreeAnnuelle = $entreetotal;
+        $sortieAnnuelle = 0;
+        $firstDayOfYear = new \DateTime('first day of January ' . $anneeCourante);
+        $lastDayOfYear = new \DateTime('last day of December ' . $anneeCourante);
+
+        foreach ($sortie as $s) {
+            $date = $s->getDateSortie();
+            if ($date >= $firstDayOfYear && $date <= $lastDayOfYear) {
+                $montant = $s->getQtSortie() * $s->getPrixUnit();
+                $sortieAnnuelle += $montant;
+            }
+        }
+        $sortieAnnuelle += $sumTotalMonth;
+
+        $entreeAnnuelle = 0;
+        $firstDayOfYear = new \DateTime('first day of January ' . $anneeCourante);
+        $lastDayOfYear = new \DateTime('last day of December ' . $anneeCourante);
+
+        foreach ($entree as $e) {
+            $date = $e->getDateEntree();
+            if ($date >= $firstDayOfYear && $date <= $lastDayOfYear) {
+                $montant = $e->getQtEntree() * $e->getPrixUnit();
+                $entreeAnnuelle += $montant;
+            }
+        }
+
+
+        /*$sortieAnnuelle = $sortieTotalMonth;*/
+        /*$entreeAnnuelle = $entreetotal;*/
         $anneePrecedente = $anneeCourante - 1;
 
         $gainAnnuel = $sortieAnnuelle - $entreeAnnuelle;
