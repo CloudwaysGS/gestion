@@ -41,7 +41,7 @@ class FactureController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $produit = $facture->getProduit()->first();
             $p = $manager->getRepository(Produit::class)->find($produit);
-            if ($p->getQtStock() < $facture->getQuantite()) {
+            if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
                 $this->addFlash('danger','La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
                 return $this->redirectToRoute('facture_liste');
             } else if ($facture->getQuantite() <= 0) {
