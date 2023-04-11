@@ -49,7 +49,7 @@ class Facture
     #[ORM\ManyToOne(inversedBy: 'factures')]
     private ?Client $client = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255,nullable: true)]
     private ?string $search = null;
 
     public function __construct()
