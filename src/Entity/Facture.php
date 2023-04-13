@@ -49,9 +49,6 @@ class Facture
     #[ORM\ManyToOne(inversedBy: 'factures')]
     private ?Client $client = null;
 
-    #[ORM\Column(length: 255,nullable: true)]
-    private ?string $search = null;
-
     public function __construct()
     {
         $this->produit = new ArrayCollection();
@@ -210,15 +207,4 @@ class Facture
         $this->nomClient = $nomClient;
     }
 
-    public function getSearch(): ?string
-    {
-        return $this->search;
-    }
-
-    public function setSearch(?string $search): self
-    {
-        $this->search = $search;
-
-        return $this;
-    }
 }
