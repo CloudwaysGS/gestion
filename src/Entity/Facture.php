@@ -206,5 +206,4 @@ class Facture
     {
         $this->nomClient = $nomClient;
     }
-
 }
