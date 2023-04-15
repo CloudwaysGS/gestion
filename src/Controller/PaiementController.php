@@ -63,14 +63,14 @@ class PaiementController extends AbstractController
         $currentDebt = $client->getDette()->first();
         $remainingDebt = (!$currentDebt || !method_exists($currentDebt, 'getReste')) ? null : $currentDebt->getReste();
         if (is_null($remainingDebt)) {
-            $flashy->error('Aucune dette n\'a été trouvée pour ce client.');
+            $this->addFlash('danger','Aucune dette n\'a été trouvée pour ce client.');
             return $this->redirectToRoute('paiement_liste');
         }
 
         $paymentAmount = $payment->getMontant();
 
         if ($currentDebt->getStatut() == 'payée') {
-            $flashy->error('La dette a déjà été réglée.');
+            $this->addFlash('success','La dette a déjà été réglée.');
             return $this->redirectToRoute('paiement_liste');
         }
 
@@ -87,7 +87,7 @@ class PaiementController extends AbstractController
         }
         if ($remainingDebt == 0){
             $currentDebt->setStatut('payée');
-            $flashy->success('La dette a été payée.');
+            $this->addFlash('success','La dette a été payée.');
         }
 
         $currentDebt->setReste($remainingDebt);
@@ -96,7 +96,7 @@ class PaiementController extends AbstractController
         $manager->persist($payment);
         $manager->flush();
 
-        $flashy->success('Le paiement a été enregistré avec succès.');
+        $this->addFlash('success','Le paiement a été enregistré avec succès.');
         return $this->redirectToRoute('paiement_liste');
     }
 

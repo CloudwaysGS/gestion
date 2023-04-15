@@ -88,6 +88,11 @@ class SortieController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $update = $sortie->getQtSortie() * $sortie->getPrixUnit();
+            $p = $manager->getRepository(Produit::class)->find($sortie->getProduit()->getId());
+            $stock = $p->getQtStock() - $sortie->getQtSortie();
+            $montant = $stock * $p->getPrixUnit();
+            $p->setTotal($montant);
+            $p->setQtStock($stock);
             $sortie->setTotal($update);
             $manager->flush();
             $this->addFlash('success', 'La sortie a été modifiée avec succès.');

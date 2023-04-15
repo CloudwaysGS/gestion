@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class FactureController extends AbstractController
 {
+    private $enregistrerClicked = false;
     #[Route('/facture', name: 'facture_liste')]
     public function index(FactureRepository $fac, Request $request): Response
     {
@@ -116,41 +117,42 @@ class FactureController extends AbstractController
     #[Route('/facture/delete_all', name: 'facture_delete_all')]
     public function deleteAll(EntityManagerInterface $entityManager, FactureRepository $fac)
     {
-        $repository = $entityManager->getRepository(Facture::class);
-        $factures = $repository->findBy(['etat' => 1]);
-        $client = null;
-        $adresse = null;
-        $telephone = null;
-        if (!empty($factures) && !empty($factures[0]->getClient())) {
-            $client = $factures[0]->getClient()->getNom();
-            $adresse = $factures[0]->getClient()->getAdresse();
-            $telephone = $factures[0]->getClient()->getTelephone();
-        }
-        // Save invoices to the Chargement table
-        $chargement = new Chargement();
-        $chargement->setNomClient($client);
-        $chargement->setAdresse($adresse);
-        $chargement->setTelephone($telephone);
-        $chargement->setNombre(count($factures));
-        if ($chargement->getNombre() == 0) {
+        if (!$this->enregistrerClicked) {
+            $repository = $entityManager->getRepository(Facture::class);
+            $factures = $repository->findBy(['etat' => 1]);
+            $client = null;
+            $adresse = null;
+            $telephone = null;
+            if (!empty($factures) && !empty($factures[0]->getClient())) {
+                $client = $factures[0]->getClient()->getNom();
+                $adresse = $factures[0]->getClient()->getAdresse();
+                $telephone = $factures[0]->getClient()->getTelephone();
+            }
+            // Save invoices to the Chargement table
+            $chargement = new Chargement();
+            $chargement->setNomClient($client);
+            $chargement->setAdresse($adresse);
+            $chargement->setTelephone($telephone);
+            $chargement->setNombre(count($factures));
+            if ($chargement->getNombre() == 0) {
+                return $this->redirectToRoute('facture_liste');
+            }
+            $date = new \DateTime();
+            $chargement->setDate($date);
+            $total = 0;
+            foreach ($factures as $facture) {
+                $total = $facture->getTotal();
+                $facture->setEtat(0);
+                $facture->setChargement($chargement);
+                $chargement->addFacture($facture);
+                $entityManager->persist($facture);
+            }
+            $chargement->setTotal($total);
+            $entityManager->persist($chargement);
+            $entityManager->flush();
             return $this->redirectToRoute('facture_liste');
         }
-        $date = new \DateTime();
-        $chargement->setDate($date);
-        $total = 0;
-        foreach ($factures as $facture) {
-            $total = $facture->getTotal();
-            $facture->setEtat(0);
-            $facture->setChargement($chargement);
-            $chargement->addFacture($facture);
-            $entityManager->persist($facture);
-        }
-        $chargement->setTotal($total);
-        $entityManager->persist($chargement);
-        $entityManager->flush();
-        return $this->redirectToRoute('facture_liste');
     }
-
 
     #[Route('/facture/export', name: 'facture_export')]
     public function export(FactureRepository $fac): Response
