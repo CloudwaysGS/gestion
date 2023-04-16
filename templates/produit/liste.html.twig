@@ -4,7 +4,7 @@
 
 {% block body %}
     {{ form_start(form2) }}
-    <div class="form-row align-items-end">
+    <div class="form-row align-items-end m-2">
         <div class="col">
             {{ form_row(form2.nom) }}
         </div>
@@ -89,12 +89,12 @@
     <script>
         setTimeout(function() {
             var flashMessage = document.getElementById('flash-message');
-            if (flashMessage !== null) {
+            while (flashMessage !== null) {
                 flashMessage.remove();
+                flashMessage = document.getElementById('flash-message');
             }
         }, 10000);
     </script>
-
 
 
 {% endblock %}

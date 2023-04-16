@@ -25,16 +25,6 @@ class AccueilController extends AbstractController
     ): Response
     {
         $prenomNom = $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom();
-            $produits = $prod->createQueryBuilder('p')
-            ->select('p')
-            ->where('p.qtStock < :qtStock')
-            ->setParameter('qtStock', 10)
-            ->getQuery()
-            ->getResult();
-
-        foreach ($produits as $p){
-            $this->addFlash('danger', "La quantité en stock ".$p->getLibelle()." est en baisse: ".$p->getQtStock());
-        }
 
         $total = $prod->createQueryBuilder('p')
             ->select('COUNT(p.id)')
@@ -158,7 +148,7 @@ class AccueilController extends AbstractController
             $sortieVariation = ($sortieAnnuelle - $sortieAnneePrecedente) / $sortieAnneePrecedente * 100;
         }
         $entreeVariation = ($entreeAnneePrecedente != 0) ? (($entreeAnnuelle - $entreeAnneePrecedente) / $entreeAnneePrecedente * 100) : 0;
-/*        $flashy->success('Bonjour '.$prenomNom.' Je vous souhaite une excellente journée remplie de joie. Bonne journée !');*/
+        $flashy->success('Bonjour '.$prenomNom.' Je vous souhaite une excellente journée remplie de joie. Bonne journée !');
         return $this->render('accueil.html.twig', [
             'controller_name' => 'AccueilController',
             'total' => $total,

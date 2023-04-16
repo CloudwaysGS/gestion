@@ -47,7 +47,7 @@ class PaiementController extends AbstractController
 
 
     #[Route('/paiement/add', name: 'paiement_add')]
-    public function add(EntityManagerInterface $manager, Request $request, FlashyNotifier $flashy): Response
+    public function add(EntityManagerInterface $manager, Request $request): Response
     {
         $payment = new Paiement();
         $date = new \DateTime();
@@ -77,7 +77,7 @@ class PaiementController extends AbstractController
         $remainingDebt -= $paymentAmount;
 
         if ($remainingDebt < 0) {
-            $flashy->warning($client->getNom().' a payé plus que ce qu\'il devait et on doit lui  rembourser '.abs($remainingDebt).' F');
+            $this->addFlash('danger',$client->getNom().' a payé plus que ce qu\'il devait et on doit lui  rembourser '.abs($remainingDebt).' F');
             $currentDebt->setStatut('payée');
             $currentDebt->setReste($remainingDebt);
             $payment->setReste('0');
@@ -100,6 +100,40 @@ class PaiementController extends AbstractController
         return $this->redirectToRoute('paiement_liste');
     }
 
+    #[Route('/paiement/edit/{id}', name: 'paiement_edit')]
+    public function edit($id, PaiementRepository $repository, Request $request, EntityManagerInterface $entityManager)
+    {
+        $paiement = $repository->find($id);
+        $search = new Search();
+        $form = $this->createForm(PaiementType::class, $paiement);
+        $form2 = $this->createForm(SearchType::class, $search);
+        $total = $repository->count([]);
+        $page = $request->query->getInt('page', 1); // current page number
+        $limit = 10; // number of products to display per page
+        $offset = ($page - 1) * $limit;
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()){
+            $entityManager->persist($form->getData());
+            $entityManager->flush();
+            return $this->redirectToRoute("paiement_liste");
+        }
+        return $this->render('paiement/index.html.twig',[
+            'paiements' => $paiement,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'form' => $form->createView(),
+            'form2' => $form2->createView()
+        ]);
+    }
+
+    #[Route('/paiement/delete/{id}', name: 'paiement_delete')]
+    public function delete(Paiement $paiement, EntityManagerInterface $entityManager){
+        $entityManager->remove($paiement); // supprimer le client après avoir supprimé toutes les dettes associées
+        $entityManager->flush();
+        $this->addFlash('success', 'Le paiement a été supprimé avec succès');
+        return $this->redirectToRoute('paiement_liste');
+    }
 
 
 }

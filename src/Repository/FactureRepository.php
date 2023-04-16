@@ -42,6 +42,7 @@ class FactureRepository extends ServiceEntityRepository
     public function findAllOrderedByDate()
     {
         return $this->createQueryBuilder('f')
+            ->orderBy('f.date', 'DESC')
             ->where('f.etat = :etat')
             ->setParameter('etat', '1')
             ->getQuery()

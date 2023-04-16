@@ -20,6 +20,16 @@ class ProduitController extends AbstractController
     #[Route('/produit/liste', name: 'produit_liste')]
     public function index(ProduitRepository $prod, Request $request, FlashyNotifier $flashy): Response
     {
+        $produits = $prod->createQueryBuilder('p')
+            ->select('p')
+            ->where('p.qtStock < :qtStock')
+            ->setParameter('qtStock', 10)
+            ->getQuery()
+            ->getResult();
+
+        foreach ($produits as $p){
+            $this->addFlash('danger', "La quantité en stock ".$p->getLibelle()." est en baisse: ".$p->getQtStock());
+        }
         $p = new Produit();
         $form = $this->createForm(ProduitType::class, $p, [
             'action' => $this->generateUrl('produit_add')

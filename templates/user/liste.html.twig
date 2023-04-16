@@ -20,16 +20,19 @@
                             <tr>
                                 <th>Prenom</th>
                                 <th>Nom</th>
-                                <th>Adresse</th>
+                                <th>email</th>
                                 <th>Téléphone</th>
-
+                                <th>Action</th>
                             </tr>
                             {% for user in user %}
                                 <tr>
                                     <th>{{ user.prenom }}</th>
                                     <th>{{ user.nom }}</th>
-                                    <th>{{ user.adresse }}</th>
+                                    <th>{{ user.email }}</th>
                                     <th>{{ user.telephone }}</th>
+                                    <th>
+                                        <a title="supprimer" href="{{ path('user_delete', {'id':user.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    </th>
                                 </tr>
                             {% endfor %}
                         </table>

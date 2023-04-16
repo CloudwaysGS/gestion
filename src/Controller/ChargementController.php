@@ -2,9 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Chargement;
 use App\Repository\ChargementRepository;
-use App\Repository\FactureRepository;
 use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,5 +42,26 @@ class ChargementController extends AbstractController
             'limit' => $limit,
         ]);
     }
+
+    #[Route('/chargement/delete/{id}', name: 'chargement_delete')]
+    public function delete($id, EntityManagerInterface $entityManager)
+    {
+        $chargements = $entityManager->getRepository(Chargement::class)->find($id);
+        if (!$chargements) {
+            throw $this->createNotFoundException('Chargement non trouvé');
+        }
+
+        $factures = $chargements->getFacture(); // récupérer toutes les factures associées
+        foreach ($factures as $facture) {
+            $entityManager->remove($facture); // supprimer chaque facture
+        }
+        $entityManager->remove($chargements); // supprimer le chargement après avoir supprimé toutes les factures associées
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le chargement a été supprimé avec succès');
+        return $this->redirectToRoute('liste_chargement');
+    }
+
+
 
 }

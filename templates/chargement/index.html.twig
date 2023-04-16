@@ -23,6 +23,7 @@
                             <th>Téléphone</th>
                             <th>Total</th>
                             <th>Date</th>
+                            <th>Action</th>
                         </tr>
                         {% for c in chargement %}
                             <tr>
@@ -32,6 +33,9 @@
                                 <th>{{ c.telephone }}</th>
                                 <th>{{ c.total }}</th>
                                 <th>{{ c.date | date('d/m/Y H:i:s') }}</th>
+                                <th>
+                                    <a title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                </th>
                             </tr>
                         {% endfor %}
                     </table>

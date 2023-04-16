@@ -34,7 +34,7 @@ class FactureController extends AbstractController
     }
 
     #[Route('/facture/add', name: 'facture_add')]
-    public function add(EntityManagerInterface $manager, Request $request, FlashyNotifier $flashy): Response
+    public function add(EntityManagerInterface $manager,FactureRepository $factureRepository, Request $request, FlashyNotifier $flashy): Response
     {
         $facture = new Facture();
         $form = $this->createForm(FactureType::class, $facture);
@@ -53,6 +53,17 @@ class FactureController extends AbstractController
                 $facture->setDate($date);
                 $facture->setPrixUnit($p->getPrixUnit());
                 $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
+                $produitLibelle = $facture->getProduit()->first()->getLibelle();
+                $fp = $factureRepository->findAll();
+                foreach ($fp as $fact) {
+                    foreach ($fact->getProduit() as $produit) {
+                        if ($produit->getLibelle() === $produitLibelle) {
+                            $this->addFlash('danger', $produit->getLibelle().' a déjà été ajouté précédemment.');
+                            return $this->redirectToRoute('facture_liste');
+                        }
+                    }
+                }
+
                 $manager->persist($facture);
                 $manager->flush();
                 //Mise à jour du produit
@@ -202,7 +213,7 @@ class FactureController extends AbstractController
         $pdf->AddPage();
 
         // Titre de la facture
-        $pdf->SetFont('Arial', 'B', 20);
+        $pdf->SetFont('Arial', 'B', 15);
         $pdf->Cell(0, 20, 'Facture', 0, 1, 'C');
         $pdf->Ln(0);
         $securityContext = $this->container->get('security.authorization_checker');
@@ -210,21 +221,22 @@ class FactureController extends AbstractController
         $adresse = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getAdresse() : 'Anonyme';
         $phone = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getTelephone() : 'Anonyme';
         // Informations sur le commerçant
-        $pdf->SetFont('Arial', 'B', 15);
-        $pdf->Cell(0, 10, 'COMMERCANT : '.$prenomNom, 0, 1, 'C');
-        $pdf->Cell(0, 10, 'ADRESSE : '.$adresse, 0, 1,'C');
-        $pdf->Cell(0, 10, 'TELEPHONE : '.$phone, 0, 1,'C');
+        $pdf->SetFont('Arial', '', 12);
+        $pdf->Cell(0, 5, 'COMMERCANT : '.$prenomNom, 0, 1, 'C');
+        $pdf->SetFont('Arial', '', 12);
+        $pdf->Cell(0, 5, 'ADRESSE : '.$adresse, 0, 1,'C');
+        $pdf->Cell(0, 5, 'TELEPHONE : '.$phone, 0, 1,'C');
         $pdf->Ln(0);
 
-        // Informations sur le client
+// Informations sur le client
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell(0, 10, 'Informations sur le client', 0, 1,'C');
         $pdf->Ln(0);
         foreach ($clientData as $key => $value) {
             $pdf->SetFont('Arial', '', 12);
-            $pdf->Cell(0, 5, utf8_decode($key) . ' :', 0, 1, 'C');
+            $pdf->Cell(80, 5, utf8_decode($key) . ' :', 0, 0, 'R');
             $pdf->SetFont('Arial', 'B', 10);
-            $pdf->Cell(0, 5, utf8_decode($value), 0, 1, 'C');
+            $pdf->Cell(0, 5, utf8_decode($value), 0, 1, 'L');
         }
         $pdf->Ln(2);
 
