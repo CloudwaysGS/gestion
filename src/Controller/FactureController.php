@@ -54,7 +54,7 @@ class FactureController extends AbstractController
                 $facture->setPrixUnit($p->getPrixUnit());
                 $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
                 $produitLibelle = $facture->getProduit()->first()->getLibelle();
-                $fp = $factureRepository->findAll();
+                $fp = $factureRepository->findAllOrderedByDate();
                 foreach ($fp as $fact) {
                     foreach ($fact->getProduit() as $produit) {
                         if ($produit->getLibelle() === $produitLibelle) {
@@ -221,14 +221,15 @@ class FactureController extends AbstractController
         $adresse = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getAdresse() : 'Anonyme';
         $phone = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getTelephone() : 'Anonyme';
         // Informations sur le commerçant
+        $pdf->Rect(10, 25, 190, 25, 'D'); // bordure autour des informations
         $pdf->SetFont('Arial', '', 12);
         $pdf->Cell(0, 5, 'COMMERCANT : '.$prenomNom, 0, 1, 'C');
         $pdf->SetFont('Arial', '', 12);
         $pdf->Cell(0, 5, 'ADRESSE : '.$adresse, 0, 1,'C');
         $pdf->Cell(0, 5, 'TELEPHONE : '.$phone, 0, 1,'C');
-        $pdf->Ln(0);
+        $pdf->Ln(2);
 
-// Informations sur le client
+        // Informations sur le client
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell(0, 10, 'Informations sur le client', 0, 1,'C');
         $pdf->Ln(0);
@@ -239,6 +240,7 @@ class FactureController extends AbstractController
             $pdf->Cell(0, 5, utf8_decode($value), 0, 1, 'L');
         }
         $pdf->Ln(2);
+
 
         // Affichage des en-têtes du tableau
         foreach ($headers as $header) {
