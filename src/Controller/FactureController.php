@@ -10,6 +10,7 @@ use App\Repository\FactureRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -43,11 +44,17 @@ class FactureController extends AbstractController
             $produit = $facture->getProduit()->first();
             $p = $manager->getRepository(Produit::class)->find($produit);
             if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
-                $this->addFlash('danger','La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
-                return $this->redirectToRoute('facture_liste');
+                $response = new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock(),
+                ]);
+                return $response;
             } else if ($facture->getQuantite() <= 0) {
-                $this->addFlash('danger','Entrée une quantité positive svp!');
-                return $this->redirectToRoute('facture_liste');
+                $response = new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'Entrée une quantité positive svp!',
+                ]);
+                return $response;
             } else {
                 $date = new \DateTime();
                 $facture->setDate($date);
@@ -58,7 +65,11 @@ class FactureController extends AbstractController
                 foreach ($fp as $fact) {
                     foreach ($fact->getProduit() as $produit) {
                         if ($produit->getLibelle() === $produitLibelle) {
-                            $this->addFlash('danger', $produit->getLibelle().' a déjà été ajouté précédemment.');
+                            $response = new JsonResponse([
+                                'status' => 'error',
+                                'message' => $produit->getLibelle().' a déjà été ajouté précédemment.',
+                            ]);
+                            return $response;
                             return $this->redirectToRoute('facture_liste');
                         }
                     }

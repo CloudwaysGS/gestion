@@ -74,6 +74,30 @@
 {% endblock %}
 
 {% block javascripts %}
+
+    <script>
+        var form = $('#form');
+        form.on('submit', function(event) {
+            event.preventDefault();
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function(response) {
+                    if (response.status === 'error') {
+                        alert(response.message);
+                    } else {
+                        var updatedTable = $(response).find('#facture_liste');
+                        $('#facture_liste').html(updatedTable.html());
+                        form[0].reset();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('Une erreur est survenue : ' + error);
+                }
+            });
+        });
+    </script>
     <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
     <script>
         setTimeout(function() {
