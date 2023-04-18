@@ -36,15 +36,22 @@ class UserController extends AbstractController
     #[Route('/user_create', name: 'add_user')]
     public function add_class(EntityManagerInterface $manager,
                               Request $request,
-                              FlashyNotifier $flashy): Response
+                              FlashyNotifier $flashy,
+                              UserRepository $userRepository): Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid()){
+            $existingUser = $userRepository->findBy(['email' => $user->getEmail()]);
+            if (!empty($existingUser)) {
+                $this->addFlash('danger','Cet utilisateur existe déjà');
+                return $this->redirectToRoute("user_liste");
+            }
+
             $plainPassword = $user->getPassword();
             $user->setPassword($this->hasher->hashPassword($user, $plainPassword));
-            $flashy->success('Utilisateur a été crée avec success');
+            $flashy->success('Utilisateur a été créé avec success');
             $manager->persist($user);
             $manager->flush();
 
@@ -55,6 +62,7 @@ class UserController extends AbstractController
             'form' => $form->createView()
         ]);
     }
+
 
 
     #[Route('/user/{id}', name: 'user_details')]

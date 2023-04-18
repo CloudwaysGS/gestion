@@ -118,15 +118,13 @@ class FactureController extends AbstractController
     }
 
     #[Route('/facture/delete/{id}', name: 'facture_delete')]
-    public function delete(Facture $facture, EntityManagerInterface $entityManager)
+    public function delete(Facture $facture,EntityManagerInterface $entityManager, FactureRepository $repository)
     {
         $produit = $facture->getProduit()->first();
         $p = $entityManager->getRepository(Produit::class)->find($produit);
         $quantite = $facture->getQuantite();
 
-        $facture->setEtat(0); // Mise à jour de l'état de la facture
-        $entityManager->persist($facture);
-        $entityManager->flush();
+        $repository->remove($facture); // Mise à jour de l'état de la facture
 
         // Restaurer la quantité de stock du produit
         $p->setQtStock($p->getQtStock() + $quantite);
@@ -232,18 +230,25 @@ class FactureController extends AbstractController
         $adresse = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getAdresse() : 'Anonyme';
         $phone = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getTelephone() : 'Anonyme';
         // Informations sur le commerçant
-        $pdf->Rect(10, 25, 190, 25, 'D'); // bordure autour des informations
         $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell(0, 5, 'COMMERCANT : '.$prenomNom, 0, 1, 'C');
+        $pdf->Cell(80, 5, 'Commercant :', 0, 0, 'R');
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(0, 5, $prenomNom, 0, 1, 'L');
         $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell(0, 5, 'ADRESSE : '.$adresse, 0, 1,'C');
-        $pdf->Cell(0, 5, 'TELEPHONE : '.$phone, 0, 1,'C');
-        $pdf->Ln(2);
+        $pdf->Cell(80, 5, 'Adresse :', 0, 0, 'R');
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(0, 5, $adresse, 0, 1, 'L');
+        $pdf->SetFont('Arial', '', 12);
+        $pdf->Cell(80, 5, 'Telephone :', 0, 0, 'R');
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(0, 5, $phone, 0, 1, 'L');
+        $pdf->Ln(1);
 
-        // Informations sur le client
+// Informations sur le client
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell(0, 10, 'Informations sur le client', 0, 1,'C');
         $pdf->Ln(0);
+
         foreach ($clientData as $key => $value) {
             $pdf->SetFont('Arial', '', 12);
             $pdf->Cell(80, 5, utf8_decode($key) . ' :', 0, 0, 'R');
@@ -251,6 +256,7 @@ class FactureController extends AbstractController
             $pdf->Cell(0, 5, utf8_decode($value), 0, 1, 'L');
         }
         $pdf->Ln(2);
+
 
 
         // Affichage des en-têtes du tableau

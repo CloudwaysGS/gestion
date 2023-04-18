@@ -17,9 +17,21 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ProduitController extends AbstractController
 {
+
+
     #[Route('/produit/liste', name: 'produit_liste')]
     public function index(ProduitRepository $prod, Request $request, FlashyNotifier $flashy): Response
     {
+        $firstDayOfMonth = new \DateTime('first day of this month');
+        $lastDayOfMonth = new \DateTime('last day of this month');
+        $today = new \DateTime();
+        $twoDaysBeforeEndOfMonth = clone $lastDayOfMonth;
+        $twoDaysBeforeEndOfMonth->sub(new \DateInterval('P2D'));
+
+        if ($today >= $twoDaysBeforeEndOfMonth) {
+            $flashy->warning('Attention : Il ne reste plus que deux jours avant la fin du mois en cours !');
+            $this->addFlash('warning','Attention : Il ne reste plus que deux jours avant la fin du mois en cours !');
+        }
         $produits = $prod->createQueryBuilder('p')
             ->select('p')
             ->where('p.qtStock < :qtStock')

@@ -7,6 +7,7 @@ use App\Repository\EntreeRepository;
 use App\Repository\FactureRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\SortieRepository;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -93,6 +94,16 @@ class AccueilController extends AbstractController
                 }
             }
         }
+
+        $today = new \DateTime();
+        $twoDaysBeforeEndOfMonth = clone $lastDayOfMonth;
+        $twoDaysBeforeEndOfMonth->sub(new \DateInterval('P2D'));
+
+        if ($today >= $twoDaysBeforeEndOfMonth) {
+            $this->addFlash('warning','Attention : Il ne reste plus que deux jours avant la fin du mois en cours !');
+        }
+
+
         $gainMoisCourant = $sortieTotalMonth - $entreetotal;
 
         $sortieAnnuelle = 0;
@@ -148,7 +159,7 @@ class AccueilController extends AbstractController
             $sortieVariation = ($sortieAnnuelle - $sortieAnneePrecedente) / $sortieAnneePrecedente * 100;
         }
         $entreeVariation = ($entreeAnneePrecedente != 0) ? (($entreeAnnuelle - $entreeAnneePrecedente) / $entreeAnneePrecedente * 100) : 0;
-        $flashy->success('Bonjour '.$prenomNom.' Je vous souhaite une excellente journée remplie de joie. Bonne journée !');
+        $flashy->success('Bonjour '.$prenomNom.' Bienvenue dans Approvisionnement Gestion Stock de Abs. Bonne journée !');
         return $this->render('accueil.html.twig', [
             'controller_name' => 'AccueilController',
             'total' => $total,

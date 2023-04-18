@@ -21,7 +21,7 @@
 
             <a href="{{ path('facture_delete_all') }}" class="btn btn-primary" onclick="onEnregistrerClicked()">Enrégistrer</a>
             <a href="{{ path('liste_chargement') }}" class="btn btn-primary">Mes factures</a>
-            <a href="{{ path('client_add') }}" class="btn btn-primary">Nouveau client</a>
+            <a href="{{ path('client_add') }}" class="btn btn-primary">Créer le client</a>
             <a href="{{ path('facture_export') }}" class="btn btn-primary" onclick="onExportClicked()">Exporter en pdf</a>
             {% for message in app.session.flashBag.get('danger') %}
                 <div class="alert alert-danger">{{ message }}</div>
