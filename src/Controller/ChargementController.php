@@ -75,7 +75,6 @@ class ChargementController extends AbstractController
         // Générer le contenu HTML du PDF
         $html = '<h1>Produits</h1>';
         foreach ($factures as $facture) {
-            dd($factures);
         }
 
         // Générer le PDF avec dompdf

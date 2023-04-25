@@ -57,7 +57,18 @@ class PayoffSupplierRepository extends ServiceEntityRepository
         return $query->getSingleScalarResult();
     }
 
+    // src/Repository/ProduitRepository.php
 
+    public function findByName($nom)
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.fournisseur', 'c')
+            ->andWhere('c.nom LIKE :nom')
+            ->setParameter('nom', '%'.$nom.'%')
+            ->orderBy('p.datePaiement', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 //    /**
 //     * @return PayoffSupplier[] Returns an array of PayoffSupplier objects
 //     */

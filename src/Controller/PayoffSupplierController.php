@@ -60,7 +60,7 @@ class PayoffSupplierController extends AbstractController
         $currentDebt = $client->getDetteFounisseur()->first();
         $remainingDebt = (!$currentDebt || !method_exists($currentDebt, 'getReste')) ? null : $currentDebt->getReste();
         if (is_null($remainingDebt)) {
-            $this->addFlash('danger','Aucune dette n\'a été trouvée pour ce client.');
+            $this->addFlash('danger','Aucune dette n\'a été trouvée pour ce fournisseur.');
             return $this->redirectToRoute('payoff_supplier_liste');
         }
 
@@ -97,4 +97,38 @@ class PayoffSupplierController extends AbstractController
         return $this->redirectToRoute('payoff_supplier_liste');
     }
 
+    #[Route('/payoff_supplier/edit/{id}', name: 'payoff_supplier_edit')]
+    public function edit($id, PayoffSupplierRepository $repository, Request $request, EntityManagerInterface $entityManager)
+    {
+        $paiement = $repository->find($id);
+        $search = new Search();
+        $form = $this->createForm(PayoffSupplierType::class, $paiement);
+        $form2 = $this->createForm(SearchType::class, $search);
+        $total = $repository->count([]);
+        $page = $request->query->getInt('page', 1); // current page number
+        $limit = 10; // number of products to display per page
+        $offset = ($page - 1) * $limit;
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()){
+            $entityManager->persist($form->getData());
+            $entityManager->flush();
+            return $this->redirectToRoute("payoff_supplier_liste");
+        }
+        return $this->render('payoff_supplier/index.html.twig',[
+            'paiements' => $paiement,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'form' => $form->createView(),
+            'form2' => $form2->createView()
+        ]);
+    }
+
+    #[Route('/payoff_supplier/delete/{id}', name: 'payoff_supplier_delete')]
+    public function delete(PayoffSupplier $paiement, EntityManagerInterface $entityManager){
+        $entityManager->remove($paiement); // supprimer le client après avoir supprimé toutes les dettes associées
+        $entityManager->flush();
+        $this->addFlash('success', 'Le paiement a été supprimé avec succès');
+        return $this->redirectToRoute('payoff_supplier_liste');
+    }
 }

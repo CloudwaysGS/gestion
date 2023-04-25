@@ -10,7 +10,7 @@
         <div id="flash-message" class="alert alert-danger">{{ message }}</div>
     {% endfor %}
     {{ form_start(form2) }}
-    <div class="form-row align-items-end">
+    <div class="m-2 form-row align-items-end">
         <div class="col">
             {{ form_row(form2.nom) }}
         </div>
@@ -42,10 +42,10 @@
                                     <th>{{ p.montant }}</th>
                                     <th>{{ p.reste }}</th>
                                     <th>{{ p.datePaiement | date('d/m/Y') }}</th>
-                                    {#<th>
-                                        <a title="Modifier" href="{{ path('paiement_edit',{'id':p.id}) }}"><i class="fa fa-edit"></i></a>
-                                        <a title="supprimer" href="{{ path('chargement_delete', {'id':p.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
-                                    </th>#}
+                                    <th>
+                                        <a title="Modifier" href="{{ path('payoff_supplier_edit',{'id':p.id}) }}"><i class="fa fa-edit"></i></a>
+                                        <a title="supprimer" href="{{ path('payoff_supplier_delete', {'id':p.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    </th>
                                 </tr>
                             {% endfor %}
                         </table>

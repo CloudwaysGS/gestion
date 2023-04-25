@@ -61,4 +61,15 @@ class DetteFounisseurController extends AbstractController
         return $this->redirectToRoute('dette_founisseur_liste');
     }
 
+    #[Route('/dette_founisseur/delete/{id}', name: 'dette_founisseur_delete')]
+    public function delete(DetteFournisseur $dette, DetteFournisseurRepository $repository){
+        if ($dette->getStatut() != 'payée'){
+            $this->addFlash('danger', 'La dette n\'a pas encore été réglée.');
+            return $this->redirectToRoute('dette_founisseur_liste');
+        }
+        $repository->remove($dette,true);
+        $this->addFlash('success', 'La dette a été supprimé avec succès');
+        return $this->redirectToRoute('dette_founisseur_liste');
+    }
+
 }

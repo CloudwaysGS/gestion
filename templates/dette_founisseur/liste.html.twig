@@ -46,11 +46,10 @@
 
                                     <th>{{ d.date | date('d/m/Y') }}</th>
                                     <th style="color: {% if d.statut == 'payée' %}#1cc88a{% else %}red{% endif %}">{{ d.statut }}</th>
-                                    {#<th>
-                                        <a title="Avance" href="{{ path('paiement_add', {'id':d.id}) }}"><i class='far fa-address-card'></i></a>
-                                        <a title="detail"  class="open-modal"><i class="fa fa-edit"></i></a>
-                                        <a title="supprimer" href="{{ path('dette_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
-                                    </th>#}
+                                    <th>
+                                        <a title="Avance" href="{{ path('payoff_supplier_add', {'id':d.id}) }}"><i class='far fa-address-card'></i></a>
+                                        <a title="supprimer" href="{{ path('dette_founisseur_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    </th>
                                 </tr>
                             {% endfor %}
                         </table>
