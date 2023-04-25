@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\Fournisseur;
+use App\Form\FournisseurType;
+use App\Repository\FournisseurRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class FournisseurController extends AbstractController
+{
+    #[Route('/fournisseur', name: 'fournisseur_liste')]
+    public function index(FournisseurRepository $fournisseur, Request $request): Response
+    {
+        $c = new Fournisseur();
+        $form = $this->createForm(FournisseurType::class, $c, array(
+            'action' => $this->generateUrl('fournisseur_add'),
+        ));
+        $page = $request->query->getInt('page', 1); // current page number
+        $limit = 10; // number of products to display per page
+        $client = $fournisseur->findAllOrderedByDate();
+        $total = count($client);
+        $offset = ($page - 1) * $limit;
+        $client = array_slice($client, $offset, $limit);
+        return $this->render('fournisseur/index.html.twig', [
+            'controller_name' => 'FournisseurController',
+            'client'=>$client,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'form' => $form->createView()
+        ]);
+        return $this->render('fournisseur/index.html.twig');
+    }
+
+    #[Route('/fournisseur/add', name: 'fournisseur_add')]
+    public function add(EntityManagerInterface $manager, Request $request): Response
+    {
+        $client = new Fournisseur();
+        $date = new \DateTime();
+        $client->setDate($date);
+        $form = $this->createForm(FournisseurType::class, $client);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $manager->persist($client);
+            $manager->flush();
+            $this->addFlash('success', 'L\'entrée a été enregistrée avec succès.');
+        }
+        return $this->redirectToRoute('fournisseur_liste');
+    }
+}

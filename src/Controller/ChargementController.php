@@ -6,6 +6,7 @@ use App\Entity\Chargement;
 use App\Repository\ChargementRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Dompdf\Dompdf;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -60,6 +61,37 @@ class ChargementController extends AbstractController
 
         $this->addFlash('success', 'Le chargement a été supprimé avec succès');
         return $this->redirectToRoute('liste_chargement');
+    }
+
+    #[Route('/chargement/extraire/{id}', name: 'extraire')]
+    public function extraire(EntityManagerInterface $entityManager, $id)
+    {
+        $chargements = $entityManager->getRepository(Chargement::class)->find($id);
+        if (!$chargements) {
+            throw $this->createNotFoundException('Chargement non trouvé');
+        }
+
+        $factures = $chargements->getFacture(); // récupérer toutes les factures associées
+        // Générer le contenu HTML du PDF
+        $html = '<h1>Produits</h1>';
+        foreach ($factures as $facture) {
+            dd($factures);
+        }
+
+        // Générer le PDF avec dompdf
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Envoyer le PDF en réponse
+        return new Response(
+            $dompdf->output(),
+            200,
+            array(
+                'Content-Type' => 'application/pdf'
+            )
+        );
     }
 
 
