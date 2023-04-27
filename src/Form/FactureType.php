@@ -5,6 +5,7 @@ namespace App\Form;
 
 use App\Entity\Client;
 use App\Entity\Facture;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -21,6 +22,7 @@ class FactureType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $libelle = "";
         $builder
             ->add('client', EntityType::class, [
                 'class' => Client::class,
@@ -58,7 +60,15 @@ class FactureType extends AbstractType
                     'style' => 'height: 20rem;', // ajout de la hauteur personnalisée
                 ],
                 'required' => false,
+                'query_builder' => function(EntityRepository $er) use ($libelle) {
+                    return $er->createQueryBuilder('p')
+                        ->where('p.libelle LIKE :libelle')
+                        ->setParameter('libelle', '%'.$libelle.'%')
+                        ->orderBy('p.libelle', 'ASC');
+                },
             ])
+
+
             ->add('Ajouter', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')
             ))
