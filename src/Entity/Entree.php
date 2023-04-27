@@ -33,6 +33,9 @@ class Entree
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0')]
     private ?string $total = null;
 
+    #[ORM\ManyToOne(inversedBy: 'Entree')]
+    private ?Fournisseur $fournisseur = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -106,6 +109,18 @@ class Entree
     public function setTotal(string $total): self
     {
         $this->total = $total;
+
+        return $this;
+    }
+
+    public function getFournisseur(): ?Fournisseur
+    {
+        return $this->fournisseur;
+    }
+
+    public function setFournisseur(?Fournisseur $fournisseur): self
+    {
+        $this->fournisseur = $fournisseur;
 
         return $this;
     }

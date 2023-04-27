@@ -17,6 +17,7 @@
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <tr>
+                                <th>Fournisseur</th>
                                 <th>Produit</th>
                                 <th>Quantite acheté</th>
                                 <th>PrixUnit</th>
@@ -26,6 +27,7 @@
                             </tr>
                             {% for e in entree %}
                                 <tr>
+                                    <th>{{ e.fournisseur }}</th>
                                     <th>{{ e.produit }}</th>
                                     <th>{{ e.qtEntree }}</th>
                                     <th>{{ e.prixUnit | number_format(0, ',', ' ') }}</th>

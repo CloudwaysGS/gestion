@@ -51,7 +51,7 @@ class EntreeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $this->getUser();
             if (!$user){
-                throw new Exception("Aucun utilisateur n'est actuellement connecté");
+                throw $this->createNotFoundException("Aucun utilisateur n'est actuellement connecté");
             }
             $montant = $entree->getPrixUnit() * $entree->getQtEntree();
             $entree->setTotal($montant);
@@ -114,7 +114,7 @@ class EntreeController extends AbstractController
     #[Route('/entree/delete/{id}', name: 'entrer_delete')]
     public function delete(Entree $entree, EntreeRepository $repository){
         $repository->remove($entree,true);
-        $this->addFlash('danger', 'Le produit entrée a été supprimé avec succès');
+        $this->addFlash('success', 'Le produit entrée a été supprimé avec succès');
         return $this->redirectToRoute('entree_liste');
     }
 }

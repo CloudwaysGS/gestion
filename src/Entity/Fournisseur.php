@@ -31,10 +31,14 @@ class Fournisseur
     #[ORM\OneToMany(mappedBy: 'fournisseur', targetEntity: DetteFournisseur::class)]
     private Collection $DetteFounisseur;
 
+    #[ORM\OneToMany(mappedBy: 'fournisseur', targetEntity: Entree::class)]
+    private Collection $Entree;
+
     public function __construct()
     {
         $this->PayoffSupplier = new ArrayCollection();
         $this->DetteFounisseur = new ArrayCollection();
+        $this->Entree = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -142,5 +146,35 @@ class Fournisseur
     {
         // TODO: Implement __toString() method.
         return $this->nom;
+    }
+
+    /**
+     * @return Collection<int, Entree>
+     */
+    public function getEntree(): Collection
+    {
+        return $this->Entree;
+    }
+
+    public function addEntree(Entree $entree): self
+    {
+        if (!$this->Entree->contains($entree)) {
+            $this->Entree->add($entree);
+            $entree->setFournisseur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEntree(Entree $entree): self
+    {
+        if ($this->Entree->removeElement($entree)) {
+            // set the owning side to null (unless already changed)
+            if ($entree->getFournisseur() === $this) {
+                $entree->setFournisseur(null);
+            }
+        }
+
+        return $this;
     }
 }

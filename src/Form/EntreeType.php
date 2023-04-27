@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Entree;
+use App\Entity\Fournisseur;
 use App\Entity\Produit;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -17,6 +18,15 @@ class EntreeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('fournisseur',EntityType::class, array(
+                'class' => Fournisseur::class,
+                'label' => false,
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                    ),
+                'placeholder' => 'Nom du fournisseur    ',
+                'required' => false,
+            ))
             ->add('produit',EntityType::class, array(
                 'class' => Produit::class,
                 'label' => false,

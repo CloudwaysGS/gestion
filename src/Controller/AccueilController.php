@@ -55,7 +55,7 @@ class AccueilController extends AbstractController
         $firstDayOfMonth = new \DateTime('first day of this month');
         $lastDayOfMonth = new \DateTime('last day of this month');
 
-// utiliser ces dates pour récupérer la somme totale pour le mois
+        // utiliser ces dates pour récupérer la somme totale pour le mois
         $sumTotalMonth = $charge->createQueryBuilder('c')
             ->select('SUM(c.total)')
             ->where('c.date BETWEEN :startOfMonth AND :endOfMonth')

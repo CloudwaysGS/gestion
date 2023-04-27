@@ -44,7 +44,7 @@
                                     <th>{{ p.datePaiement | date('d/m/Y') }}</th>
                                     <th>
                                         <a title="Modifier" href="{{ path('paiement_edit',{'id':p.id}) }}"><i class="fa fa-edit"></i></a>
-                                        <a title="supprimer" href="{{ path('chargement_delete', {'id':p.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                        <a title="supprimer" href="{{ path('paiement_delete', {'id':p.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
                                     </th>
                                 </tr>
                             {% endfor %}

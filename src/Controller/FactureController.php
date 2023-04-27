@@ -183,18 +183,14 @@ class FactureController extends AbstractController
             return $this->redirectToRoute('facture_liste');
         }
         $client = $facture[0]->getClient();
-        $clientData = array(
-            'Nom du client' => $client ? $client->getNom() : '',
-            'Adresse du client' => $client ? $client->getAdresse() : '',
-            'Téléphone du client' => $client ? $client->getTelephone() : '',
-        );
+
         $data = array();
         $total = 0;
         foreach ($facture as $f) {
             $data[] = array(
                 'Quantité achetée' => $f->getQuantite(),
                 'Produit' => $f->getProduit()->first()->getLibelle(),
-                'Prix unitaire' => $f->getPrixUnit(),
+                'Prix unitaire' => $f->getProduit()->first()->getPrixUnit(),
                 'Montant' => $f->getMontant(),
             );
             $total += $f->getMontant();
@@ -222,42 +218,29 @@ class FactureController extends AbstractController
         $pdf->AddPage();
 
         // Titre de la facture
-        $pdf->SetFont('Arial', 'B', 15);
-        $pdf->Cell(0, 20, 'Facture', 0, 1, 'C');
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 10, 'Facture', 0, 1, 'C');
         $pdf->Ln(0);
         $securityContext = $this->container->get('security.authorization_checker');
         $prenomNom = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom() : 'Anonyme';
         $adresse = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getAdresse() : 'Anonyme';
         $phone = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getTelephone() : 'Anonyme';
         // Informations sur le commerçant
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->Cell(0, 5, 'COMMERCANT : '.$prenomNom, 0, 1, 'C');
+        $pdf->Cell(0, 5, 'ADRESSE : '.$adresse, 0, 1,'C');
+        $pdf->Cell(0, 5, 'TELEPHONE : '.$phone, 0, 1,'C');
+        $pdf->Ln(0);
+        // Informations sur le client
         $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell(80, 5, 'Commercant :', 0, 0, 'R');
-        $pdf->SetFont('Arial', 'B', 10);
-        $pdf->Cell(0, 5, $prenomNom, 0, 1, 'L');
-        $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell(80, 5, 'Adresse :', 0, 0, 'R');
-        $pdf->SetFont('Arial', 'B', 10);
-        $pdf->Cell(0, 5, $adresse, 0, 1, 'L');
-        $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell(80, 5, 'Telephone :', 0, 0, 'R');
-        $pdf->SetFont('Arial', 'B', 10);
-        $pdf->Cell(0, 5, $phone, 0, 1, 'L');
-        $pdf->Ln(1);
-
-// Informations sur le client
-        $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell(0, 10, 'Informations sur le client', 0, 1,'C');
         $pdf->Ln(0);
-
-        foreach ($clientData as $key => $value) {
-            $pdf->SetFont('Arial', '', 12);
-            $pdf->Cell(80, 5, utf8_decode($key) . ' :', 0, 0, 'R');
-            $pdf->SetFont('Arial', 'B', 10);
-            $pdf->Cell(0, 5, utf8_decode($value), 0, 1, 'L');
-        }
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->Cell(0, 5, 'Nom du client : ' . ($client ? $client->getNom() : ''), 0, 1, 'C');
+        $pdf->Cell(0, 5, 'Adresse du client : '. ($client ? $client->getAdresse() : ''), 0, 1,'C');
+        $pdf->Cell(0, 5, 'Telephone du client : '. ($client ? $client->getTelephone() : ''), 0, 1,'C');
+        $pdf->Ln(0);
         $pdf->Ln(2);
-
-
 
         // Affichage des en-têtes du tableau
         foreach ($headers as $header) {
