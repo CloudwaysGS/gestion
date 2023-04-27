@@ -245,7 +245,7 @@ class FactureController extends AbstractController
         // Affichage des en-têtes du tableau
         foreach ($headers as $header) {
             $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(45, 10, utf8_decode($header), 1, 0, 'C');
+            $pdf->Cell(47, 10, utf8_decode($header), 1, 0, 'C');
         }
         $pdf->Ln();
 
@@ -253,15 +253,15 @@ class FactureController extends AbstractController
         foreach ($data as $row) {
             foreach ($row as $key => $value) {
                 $pdf->SetFont('Arial', '', 12);
-                $pdf->Cell(45, 10, utf8_decode($value), 1, 0, 'C');
+                $pdf->Cell(47, 10, utf8_decode($value), 1, 0, 'C');
             }
             $pdf->Ln();
         }
 
 // Affichage du total de la facture
         $pdf->SetFont('Arial', 'B', 12);
-        $pdf->Cell(135, -10, '              Total', 1, 0, 'L');
-        $pdf->Cell(45, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C');
+        $pdf->Cell(141, -10, '              Total', 1, 0, 'L');
+        $pdf->Cell(47, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C');
 
 // Téléchargement du fichier PDF
         $pdf->Output('D', $filename);
