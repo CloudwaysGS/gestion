@@ -218,27 +218,27 @@ class FactureController extends AbstractController
         $pdf->AddPage();
 
         // Titre de la facture
-        $pdf->SetFont('Arial', 'B', 12);
-        $pdf->Cell(0, 10, 'Facture', 0, 1, 'C');
+        $pdf->SetFont('Arial','BI',12);
+        $pdf->Cell(0, 10, 'Facture', 1, 1, 'C');
         $pdf->Ln(0);
         $securityContext = $this->container->get('security.authorization_checker');
         $prenomNom = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom() : 'Anonyme';
         $adresse = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getAdresse() : 'Anonyme';
         $phone = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getTelephone() : 'Anonyme';
         // Informations sur le commerçant
-        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetFont('Arial', 'I', 9);
         $pdf->Cell(0, 5, 'COMMERCANT : '.$prenomNom, 0, 1, 'C');
         $pdf->Cell(0, 5, 'ADRESSE : '.$adresse, 0, 1,'C');
         $pdf->Cell(0, 5, 'TELEPHONE : '.$phone, 0, 1,'C');
         $pdf->Ln(0);
         // Informations sur le client
-        $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell(0, 10, 'Informations sur le client', 0, 1,'C');
+        $pdf->SetFont('Arial', 'BI', 12);
+        $pdf->Cell(0, 6, 'Informations sur le client', 1, 1,'C');
         $pdf->Ln(0);
-        $pdf->SetFont('Arial', 'B', 9);
-        $pdf->Cell(0, 5, 'Nom du client : ' . ($client ? $client->getNom() : ''), 0, 1, 'C');
-        $pdf->Cell(0, 5, 'Adresse du client : '. ($client ? $client->getAdresse() : ''), 0, 1,'C');
-        $pdf->Cell(0, 5, 'Telephone du client : '. ($client ? $client->getTelephone() : ''), 0, 1,'C');
+        $pdf->SetFont('Arial', 'I', 9);
+        $pdf->Cell(0, 5, 'CLIENT : ' . ($client ? $client->getNom() : ''), 0, 1, 'C');
+        $pdf->Cell(0, 5, 'ADRESSE : '. ($client ? $client->getAdresse() : ''), 0, 1,'C');
+        $pdf->Cell(0, 5, 'TELEPHONE : '. ($client ? $client->getTelephone() : ''), 0, 1,'C');
         $pdf->Ln(0);
         $pdf->Ln(2);
 

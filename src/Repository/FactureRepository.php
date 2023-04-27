@@ -49,11 +49,11 @@ class FactureRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByName($nom)
+    public function findByName($libelle)
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.libelle LIKE :libelle')
-            ->setParameter('libelle', '%'.$nom.'%')
+            ->setParameter('libelle', '%'.$libelle.'%')
             ->orderBy('p.libelle', 'ASC')
             ->getQuery()
             ->getResult();
