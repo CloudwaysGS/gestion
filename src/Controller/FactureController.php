@@ -247,7 +247,7 @@ class FactureController extends AbstractController
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
         foreach ($headers as $header) {
             $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(47, 10, utf8_decode($header), 1, 0, 'C', true); // true pour la couleur de fond
+            $pdf->Cell(47.5, 10, utf8_decode($header), 1, 0, 'C', true); // true pour la couleur de fond
         }
         $pdf->Ln();
 
@@ -255,7 +255,7 @@ class FactureController extends AbstractController
         foreach ($data as $row) {
             foreach ($row as $key => $value) {
                 $pdf->SetFont('Arial', '', 12);
-                $pdf->Cell(47, 10, utf8_decode($value), 1, 0, 'C');
+                $pdf->Cell(47.5, 10, utf8_decode($value), 1, 0, 'C');
             }
             $pdf->Ln();
         }
@@ -266,8 +266,8 @@ class FactureController extends AbstractController
 // Affichage du total de la facture
         $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
-        $pdf->Cell(141, -10, 'Total', 1, 0, 'L', true); // true pour la couleur de fond
-        $pdf->Cell(47, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C',true);
+        $pdf->Cell(142.5, -10, 'Total', 1, 0, 'L', true); // true pour la couleur de fond
+        $pdf->Cell(47.5, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C',true);
 
         // Téléchargement du fichier PDF
         $pdf->Output('D', $filename);
