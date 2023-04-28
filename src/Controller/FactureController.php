@@ -177,14 +177,20 @@ class FactureController extends AbstractController
     #[Route('/facture/export', name: 'facture_export')]
     public function export(FactureRepository $fac): Response
     {
+        // Récupérer toutes les factures triées par date
         $facture = $fac->findAllOrderedByDate();
+
         if (!empty($facture)) {
-            $client = end($facture)->getClient();
-            $client = ($client === null) ? reset($facture)->getClient() : $client;
+            // Récupérer le client de la dernière facture si présent, sinon récupérer le client de la première facture
+            $lastFacture = end($facture);
+            $firstFacture = reset($facture);
+            $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
         } else {
-            $this->addFlash('danger', 'Pas de facture trouver. Veuillez ajouter une facture');
+            // Rediriger vers la liste des factures avec un message d'erreur si aucune facture n'a été trouvée
+            $this->addFlash('danger', 'Pas de facture trouvée. Veuillez ajouter une facture');
             return $this->redirectToRoute('facture_liste');
         }
+
         $data = [];
         $total = 0;
         foreach ($facture as $f) {
@@ -233,12 +239,13 @@ class FactureController extends AbstractController
         $pdf->Cell(70, 5, 'COMMERCANT : '.$prenomNom, 0, 0, 'L');
         $pdf->Cell(120, 5, 'CLIENT : ' . ($client ? $client->getNom() : ''), 0, 1, 'R');
 
-        $pdf->Cell(70, 5, 'ADRESSE : '.$adresse, 0, 0, 'L');
+        $pdf->Cell(70, 5, 'ADRESSE : '.$adresse.' / Kaolack', 0, 0, 'L');
         $pdf->Cell(120, 5, 'ADRESSE : '. ($client ? $client->getAdresse() : ''), 0, 1, 'R');
 
         $pdf->Cell(70, 5, 'TELEPHONE : '.$phone, 0, 0, 'L');
         $pdf->Cell(120, 5, 'TELEPHONE : '. ($client ? $client->getTelephone() : ''), 0, 1, 'R');
 
+        $pdf->Cell(70, 5, 'NINEA : 0848942 - RC : 10028', 0, 1, 'L');
         $pdf->Ln(2);
 
 
