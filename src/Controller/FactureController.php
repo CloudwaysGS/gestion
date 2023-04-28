@@ -178,39 +178,38 @@ class FactureController extends AbstractController
     public function export(FactureRepository $fac): Response
     {
         $facture = $fac->findAllOrderedByDate();
-        if (empty($facture)) {
+        if (!empty($facture)) {
+            $client = end($facture)->getClient();
+            $client = ($client === null) ? reset($facture)->getClient() : $client;
+        } else {
             $this->addFlash('danger', 'Pas de facture trouver. Veuillez ajouter une facture');
             return $this->redirectToRoute('facture_liste');
         }
-        $client = $facture[0]->getClient();
-
-        $data = array();
+        $data = [];
         $total = 0;
         foreach ($facture as $f) {
-            $data[] = array(
+            $produit = $f->getProduit()->first();
+            $data[] = [
                 'Quantité achetée' => $f->getQuantite(),
-                'Produit' => $f->getProduit()->first()->getLibelle(),
-                'Prix unitaire' => $f->getProduit()->first()->getPrixUnit(),
+                'Produit' => $produit->getLibelle(),
+                'Prix unitaire' => $produit->getPrixUnit(),
                 'Montant' => $f->getMontant(),
-            );
+            ];
             $total += $f->getMontant();
         }
-        $data[] = array(
+        $data[] = [
             'Quantité achetée' => '',
             'Produit' => '',
             'Prix unitaire' => '',
             'Montant total' => '',
-        );
+        ];
         $headers = array(
             'Quantité',
             'Produit',
             'Prix unitaire',
             'Montant',
         );
-        $filename = '';
-        if ($client !== null) {
-            $filename = $client->getNom();
-        }
+        $filename = $client !== null ? $client->getNom() : '';
         $filename .= date("Y-m-d_H-i", time()) . ".pdf";
 
         // Initialisation du PDF
@@ -219,32 +218,40 @@ class FactureController extends AbstractController
 
         // Titre de la facture
         $pdf->SetFont('Arial','BI',12);
-        $pdf->Cell(0, 10, 'Facture', 1, 1, 'C');
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
+        $pdf->Cell(0, 10, 'Facture', 1, 1, 'C', true);
         $pdf->Ln(1);
-        $securityContext = $this->container->get('security.authorization_checker');
-        $prenomNom = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom() : 'Anonyme';
-        $adresse = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getAdresse() : 'Anonyme';
-        $phone = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getTelephone() : 'Anonyme';
 
+        $prenomNom = $this->getUser() ? $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom() : 'Anonyme';
+        $adresse = $this->getUser() ? $this->getUser()->getAdresse() : 'Anonyme';
+        $phone = $this->getUser() ? $this->getUser()->getTelephone() : 'Anonyme';
         // Informations sur le commerçant et client
         $pdf->SetFont('Arial', 'I', 9);
+        $pdf->SetTextColor(51, 51, 51); // Couleur du texte des informations
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
         $pdf->Cell(70, 5, 'COMMERCANT : '.$prenomNom, 0, 0, 'L');
         $pdf->Cell(120, 5, 'CLIENT : ' . ($client ? $client->getNom() : ''), 0, 1, 'R');
-        $pdf->Cell(70, 5, 'ADRESSE : '.$adresse, 0, 0,'L');
-        $pdf->Cell(120, 5, 'ADRESSE : '. ($client ? $client->getAdresse() : ''), 0, 1,'R');
-        $pdf->Cell(70, 5, 'TELEPHONE : '.$phone, 0, 0,'L');
-        $pdf->Cell(120, 5, 'TELEPHONE : '. ($client ? $client->getTelephone() : ''), 0, 1,'R');
+
+        $pdf->Cell(70, 5, 'ADRESSE : '.$adresse, 0, 0, 'L');
+        $pdf->Cell(120, 5, 'ADRESSE : '. ($client ? $client->getAdresse() : ''), 0, 1, 'R');
+
+        $pdf->Cell(70, 5, 'TELEPHONE : '.$phone, 0, 0, 'L');
+        $pdf->Cell(120, 5, 'TELEPHONE : '. ($client ? $client->getTelephone() : ''), 0, 1, 'R');
+
         $pdf->Ln(2);
 
 
         // Affichage des en-têtes du tableau
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
         foreach ($headers as $header) {
             $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(47, 10, utf8_decode($header), 1, 0, 'C');
+            $pdf->Cell(47, 10, utf8_decode($header), 1, 0, 'C', true); // true pour la couleur de fond
         }
         $pdf->Ln();
 
-// Affichage des données de la facture
+        // Affichage des données de la facture
         foreach ($data as $row) {
             foreach ($row as $key => $value) {
                 $pdf->SetFont('Arial', '', 12);
@@ -253,15 +260,17 @@ class FactureController extends AbstractController
             $pdf->Ln();
         }
 
-// Affichage du total de la facture
+        // Affichage du total de la facture
         $pdf->SetFont('Arial', 'B', 12);
-        $pdf->Cell(141, -10, '              Total', 1, 0, 'L');
-        $pdf->Cell(47, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C');
 
-// Téléchargement du fichier PDF
+// Affichage du total de la facture
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
+        $pdf->Cell(141, -10, 'Total', 1, 0, 'L', true); // true pour la couleur de fond
+        $pdf->Cell(47, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C',true);
+
+        // Téléchargement du fichier PDF
         $pdf->Output('D', $filename);
         exit;
-
-
     }
 }
