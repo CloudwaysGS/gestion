@@ -22,16 +22,11 @@ class ProduitController extends AbstractController
     #[Route('/produit/liste', name: 'produit_liste')]
     public function index(ProduitRepository $prod, Request $request, FlashyNotifier $flashy): Response
     {
-        $firstDayOfMonth = new \DateTime('first day of this month');
         $lastDayOfMonth = new \DateTime('last day of this month');
         $today = new \DateTime();
-        $twoDaysBeforeEndOfMonth = clone $lastDayOfMonth;
-        $twoDaysBeforeEndOfMonth->sub(new \DateInterval('P2D'));
+        $remainingDays = $lastDayOfMonth->diff($today)->days;
+        $message = ($remainingDays === 2) ? "Attention : Il ne reste que 2 jours avant la fin du mois en cours !" : (($remainingDays === 1) ? "Attention : Il ne reste plus que 1 jour avant la fin du mois en cours !" : "");
 
-        if ($today >= $twoDaysBeforeEndOfMonth) {
-            $flashy->warning('Attention : Il ne reste plus que deux jours avant la fin du mois en cours !');
-            $this->addFlash('warning','Attention : Il ne reste plus que deux jours avant la fin du mois en cours !');
-        }
         $produits = $prod->createQueryBuilder('p')
             ->select('p')
             ->where('p.qtStock < :qtStock')
@@ -63,7 +58,8 @@ class ProduitController extends AbstractController
             'page' => $page,
             'limit' => $limit,
             'form' => $form->createView(),
-            'form2' => $form2->createView()
+            'form2' => $form2->createView(),
+            'message' => $message
         ]);
     }
 

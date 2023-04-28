@@ -94,21 +94,19 @@ class AccueilController extends AbstractController
                 }
             }
         }
-
+        //Il ne reste que 2 jours avant la fin du mois en cours
+        $lastDayOfMonth = new \DateTime('last day of this month');
         $today = new \DateTime();
-        $twoDaysBeforeEndOfMonth = clone $lastDayOfMonth;
-        $twoDaysBeforeEndOfMonth->sub(new \DateInterval('P2D'));
-
-        if ($today >= $twoDaysBeforeEndOfMonth) {
-            $this->addFlash('warning','Attention : Il ne reste plus que deux jours avant la fin du mois en cours !');
-        }
-
+        $remainingDays = $lastDayOfMonth->diff($today)->days;
+        $message = ($remainingDays === 2) ? "Attention : Il ne reste que 2 jours avant la fin du mois en cours !" : (($remainingDays === 1) ? "Attention : Il ne reste plus que 1 jour avant la fin du mois en cours !" : "");
 
         $gainMoisCourant = $sortieTotalMonth - $entreetotal;
 
         $sortieAnnuelle = 0;
         $firstDayOfYear = new \DateTime('first day of January ' . $anneeCourante);
         $lastDayOfYear = new \DateTime('last day of December ' . $anneeCourante);
+        $remainingDaysOfYear = $lastDayOfYear->diff($today)->days;
+        $messageAnnee = ($remainingDaysOfYear <= 2) ? "Attention : Il ne reste que 2 jours avant la fin de l'année en cours !" : "";
 
         foreach ($sortie as $s) {
             $date = $s->getDateSortie();
@@ -175,6 +173,8 @@ class AccueilController extends AbstractController
             'gainAnnuel' => $gainAnnuel,
             'entreeAnneePrecedente' => $entreeAnneePrecedente,
             'sortieAnneePrecedente' => $sortieAnneePrecedente,
+            'message' => $message,
+            'messageAnnee' => $messageAnnee
         ]);
 
     }

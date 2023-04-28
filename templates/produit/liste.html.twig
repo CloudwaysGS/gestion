@@ -23,6 +23,11 @@
          {% for message in app.session.flashBag.get('danger') %}
              <div id="flash-message" class="alert alert-danger">{{ message }}</div>
          {% endfor %}
+         {% if message %}
+             <div class="alert alert-warning" role="alert">
+                 {{ message }}
+             </div>
+         {% endif %}
      <div class="card ">
         <div class="card-header"><span class="page-link">Liste des produits<span class="sr-only">(current)</span></span>
         </div>
