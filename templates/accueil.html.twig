@@ -65,6 +65,10 @@
             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">ADMINISTRATION</h6>
+                    {% if is_granted('ROLE_USER') %}
+                        <a class="collapse-item" href="{{ path('facture_liste') }}">Gestion des Facture</a>
+                        <a class="collapse-item" href="{{ path('sortie_liste') }}">Gestion des sorties</a>
+                    {% endif %}
                     {% if is_granted('ROLE_VENDEUR') %}
                         <a class="collapse-item" href="{{ path('facture_liste') }}">Gestion des Facture</a>
                         <a class="collapse-item" href="{{ path('sortie_liste') }}">Gestion des sorties</a>

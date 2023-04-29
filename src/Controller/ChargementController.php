@@ -47,6 +47,20 @@ class ChargementController extends AbstractController
         ]);
     }
 
+    #[Route('/chargement/extraire/{id}', name: 'extraire')]
+    public function extraire(Chargement $chargement)
+    {
+        $facture = new Facture();
+        $factures = $chargement->addFacture($facture);
+        foreach ($factures->getFacture() as $facture) {
+            $f = $facture->getChargement()->getFacture()->toArray();
+        }
+        return $this->render('chargement/extraire.html.twig', [
+            'controller_name' => 'ChargementController',
+            'f' => $f
+        ]);
+    }
+
     #[Route('/chargement/delete/{id}', name: 'chargement_delete')]
     public function delete($id, EntityManagerInterface $entityManager)
     {
@@ -65,22 +79,5 @@ class ChargementController extends AbstractController
         $this->addFlash('success', 'Le chargement a été supprimé avec succès');
         return $this->redirectToRoute('liste_chargement');
     }
-
-    #[Route('/chargement/extraire/{id}', name: 'extraire')]
-    public function extraire(EntityManagerInterface $entityManager, Chargement $chargement, $id)
-    {
-        $facture = new Facture();
-        $factures = $chargement->addFacture($facture);
-        foreach ($factures->getFacture() as $facture) {
-            $f = $facture->getChargement()->getFacture()->toArray();
-        }
-        return $this->render('chargement/extraire.html.twig', [
-            'controller_name' => 'ChargementController',
-            'f' => $f
-        ]);
-    }
-
-
-
 
 }

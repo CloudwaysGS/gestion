@@ -211,7 +211,7 @@ class FactureController extends AbstractController
         ];
         $headers = array(
             'Quantité',
-            'Produit',
+            'Désignation',
             'Prix unitaire',
             'Montant',
         );
