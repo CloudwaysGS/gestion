@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Chargement;
+use App\Entity\Client;
+use App\Entity\Facture;
 use App\Repository\ChargementRepository;
+use App\Repository\FactureRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Dompdf\Dompdf;
@@ -64,34 +67,19 @@ class ChargementController extends AbstractController
     }
 
     #[Route('/chargement/extraire/{id}', name: 'extraire')]
-    public function extraire(EntityManagerInterface $entityManager, $id)
+    public function extraire(EntityManagerInterface $entityManager, Chargement $chargement, $id)
     {
-        $chargements = $entityManager->getRepository(Chargement::class)->find($id);
-        if (!$chargements) {
-            throw $this->createNotFoundException('Chargement non trouvé');
+        $facture = new Facture();
+        $factures = $chargement->addFacture($facture);
+        foreach ($factures->getFacture() as $facture) {
+            $f = $facture->getChargement()->getFacture()->toArray();
         }
-
-        $factures = $chargements->getFacture(); // récupérer toutes les factures associées
-        // Générer le contenu HTML du PDF
-        $html = '<h1>Produits</h1>';
-        foreach ($factures as $facture) {
-        }
-
-        // Générer le PDF avec dompdf
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-
-        // Envoyer le PDF en réponse
-        return new Response(
-            $dompdf->output(),
-            200,
-            array(
-                'Content-Type' => 'application/pdf'
-            )
-        );
+        return $this->render('chargement/extraire.html.twig', [
+            'controller_name' => 'ChargementController',
+            'f' => $f
+        ]);
     }
+
 
 
 

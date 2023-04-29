@@ -270,7 +270,7 @@ class FactureController extends AbstractController
         // Affichage du total de la facture
         $pdf->SetFont('Arial', 'B', 12);
 
-// Affichage du total de la facture
+        // Affichage du total de la facture
         $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
         $pdf->Cell(142.5, -10, 'Total', 1, 0, 'L', true); // true pour la couleur de fond

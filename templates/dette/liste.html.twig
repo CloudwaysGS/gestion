@@ -95,23 +95,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <table class="table table-bordered">
-                        <tr>
-                            <th>Nom client</th>
-                            <th>Montant dette</th>
-                            <th>Montant avance</th>
-                            <th>Date</th>
-
-                        </tr>
-                        {% for d in dette %}
-                            <tr>
-                                <th>{{ d.client }}</th>
-                                <th>{{ d.montantDette | number_format(0, ',', ' ') }}</th>
-                                <th>{{ d.montantAvance | number_format(0, ',', ' ') }}</th>
-                                <th>{{ d.dateCreated | date('d/m/Y') }}</th>
-                            </tr>
-                        {% endfor %}
-                    </table>
+                    MODAL
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
