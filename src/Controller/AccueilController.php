@@ -27,6 +27,7 @@ class AccueilController extends AbstractController
     {
         $prenomNom = $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom();
 
+        //Compte nombre de produit
         $total = $prod->createQueryBuilder('p')
             ->select('COUNT(p.id)')
             ->getQuery()
@@ -34,14 +35,12 @@ class AccueilController extends AbstractController
         $total = is_null($total) ? 0 : $total;
 
         $sortie = $sortie->findAll();
-        $sortietotal24H = 0;
-        $sortieTotalMonth = 0;
-
         $entree = $entree->findAll();
+
         $entreetotal24H = 0;
         $entreetotal = 0;
-        $date = null;
 
+        //Somme des produit achetés aujourd'hui dans facture
         $today = new \DateTime();
         $today->setTime(0, 0, 0);
         $sumTotal24H = $charge->createQueryBuilder('c')
@@ -51,11 +50,26 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
         $sumTotal24H = is_null($sumTotal24H) ? 0 : $sumTotal24H;
-        // obtenir la date de début et de fin du mois en cours
-        $firstDayOfMonth = new \DateTime('first day of this month');
-        $lastDayOfMonth = new \DateTime('last day of this month');
 
-        // utiliser ces dates pour récupérer la somme totale pour le mois
+        //Calcul du total des sorties effectuées dans les dernières 24 heures
+        $sortietotal24H = 0;
+        $now = new \DateTime();
+        $twentyFourHoursAgo = $now->modify('-24 hours');
+        foreach ($sortie as $s) {
+            $date = $s->getDateSortie();
+            if ($date >= $twentyFourHoursAgo) {
+                $montant = $s->getTotal();
+                $sortietotal24H += $montant;
+            }
+        }
+        $sortietotal24H += $sumTotal24H;
+
+
+        // obtenir la date de début et de fin du mois en cours
+        $firstDayOfMonth = date('Y-m-01'); // Récupère le premier jour du mois courant
+        $lastDayOfMonth = date('Y-m-d', strtotime('+1 month -1 day', strtotime($firstDayOfMonth)));
+
+        //Récupérer la somme totale pour le mois des facture
         $sumTotalMonth = $charge->createQueryBuilder('c')
             ->select('SUM(c.total)')
             ->where('c.date BETWEEN :startOfMonth AND :endOfMonth')
@@ -64,30 +78,28 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
         $sumTotalMonth = is_null($sumTotalMonth) ? 0 : $sumTotalMonth;
-        $date = new \DateTime();
 
+        // le calcul du total des sorties effectuées dans le mois courant
         $anneeCourante = date('Y');
-        $firstDayOfMonth = new \DateTime('first day of this month');
-        $lastDayOfMonth = new \DateTime('last day of this month');
+        $moisCourant = date('m');
+        $firstDayOfMonth = new \DateTime("$anneeCourante-$moisCourant-01");
+        $lastDayOfMonth = new \DateTime("$anneeCourante-$moisCourant-01");
+        $lastDayOfMonth->modify('last day of this month');
+        $sortieTotalMonth = 0;
         foreach ($sortie as $s) {
             $date = $s->getDateSortie();
-            $date = $s->getDateSortie();
             if ($date >= $firstDayOfMonth && $date <= $lastDayOfMonth) {
-                $montant = $s->getQtSortie() * $s->getPrixUnit();
+                $montant = $s->getTotal();
                 $sortieTotalMonth += $montant;
-                if ($date->format('Y-m-d') == date('Y-m-d')) {
-                    $sortietotal24H += $montant;
-                }
             }
         }
         $sortieTotalMonth += $sumTotalMonth;
 
-        $sortietotal24H += $sumTotal24H;
-
+        //Calcul du total des entrées effectuées dans les dernières 24 heures
         foreach ($entree as $e) {
             $date = $e->getDateEntree();
             if ($date >= $firstDayOfMonth && $date <= $lastDayOfMonth) {
-                $montant = $e->getQtEntree() * $e->getPrixUnit();
+                $montant = $e->getTotal();
                 $entreetotal += $montant;
                 if ($date->format('Y-m-d') == date('Y-m-d')) {
                     $entreetotal24H += $montant;
@@ -95,7 +107,6 @@ class AccueilController extends AbstractController
             }
         }
         //Il ne reste que 2 jours avant la fin du mois en cours
-        $lastDayOfMonth = new \DateTime('last day of this month');
         $today = new \DateTime();
         $remainingDays = $lastDayOfMonth->diff($today)->days;
         $message = ($remainingDays === 2) ? "Attention : Il ne reste que 2 jours avant la fin du mois en cours !" : (($remainingDays === 1) ? "Attention : Il ne reste plus que 1 jour avant la fin du mois en cours !" : "");
@@ -108,6 +119,15 @@ class AccueilController extends AbstractController
         $remainingDaysOfYear = $lastDayOfYear->diff($today)->days;
         $messageAnnee = ($remainingDaysOfYear <= 2) ? "Attention : Il ne reste que 2 jours avant la fin de l'année en cours !" : "";
 
+        $sumTotalYear = $charge->createQueryBuilder('c')
+            ->select('SUM(c.total)')
+            ->where('c.date BETWEEN :startOfYear AND :endOfYear')
+            ->setParameter('startOfYear', $firstDayOfYear)
+            ->setParameter('endOfYear', $lastDayOfYear)
+            ->getQuery()
+            ->getSingleScalarResult();
+        $sumTotalYear = is_null($sumTotalYear) ? 0 : $sumTotalYear;
+
         foreach ($sortie as $s) {
             $date = $s->getDateSortie();
             if ($date >= $firstDayOfYear && $date <= $lastDayOfYear) {
@@ -115,19 +135,21 @@ class AccueilController extends AbstractController
                 $sortieAnnuelle += $montant;
             }
         }
-        $sortieAnnuelle += $sumTotalMonth;
+        $sortieAnnuelle += $sumTotalYear;
 
         $entreeAnnuelle = 0;
-        $firstDayOfYear = new \DateTime('first day of January ' . $anneeCourante);
-        $lastDayOfYear = new \DateTime('last day of December ' . $anneeCourante);
+        $anneeCourante = date('Y');
+        $firstDayOfYear = new \DateTime("$anneeCourante-01-01");
+        $lastDayOfYear = new \DateTime("$anneeCourante-12-31");
 
         foreach ($entree as $e) {
             $date = $e->getDateEntree();
             if ($date >= $firstDayOfYear && $date <= $lastDayOfYear) {
-                $montant = $e->getQtEntree() * $e->getPrixUnit();
+                $montant = $e->getTotal();
                 $entreeAnnuelle += $montant;
             }
         }
+
 
 
         /*$sortieAnnuelle = $sortieTotalMonth;*/

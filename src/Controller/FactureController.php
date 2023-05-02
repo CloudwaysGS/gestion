@@ -13,34 +13,54 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Security;
 
 class FactureController extends AbstractController
 {
     private $enregistrerClicked = false;
     #[Route('/facture', name: 'facture_liste')]
-    public function index(FactureRepository $fac, Request $request): Response
+    public function index(FactureRepository $fac, Request $request, SessionInterface $session): Response
     {
+        // Récupération de toutes les factures
+        $factures = $fac->findAllOrderedByDate();
+
+        // Stockage des factures dans la session
+        $session->set('factures', $factures);
+
+        // Création du formulaire et suppression du champ 'prixUnit'
         $facture = new Facture();
         $form = $this->createForm(FactureType::class, $facture, array(
             'action' => $this->generateUrl('facture_add'),
         ));
         $form->remove('prixUnit');
-        $facture = $fac->findAllOrderedByDate();
+
+        // Affichage de la vue avec les variables à transmettre
         return $this->render('facture/index.html.twig', [
             'controller_name' => 'FactureController',
-            'facture' => $facture,
+            'facture' => $factures,
             'form' => $form->createView()
         ]);
     }
 
     #[Route('/facture/add', name: 'facture_add')]
-    public function add(EntityManagerInterface $manager,FactureRepository $factureRepository, Request $request, FlashyNotifier $flashy): Response
+    public function add(EntityManagerInterface $manager,FactureRepository $factureRepository, Request $request, Security $security,SessionInterface $session): Response
     {
+        $user = $security->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté pour accéder à cette page.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $facture = new Facture();
         $form = $this->createForm(FactureType::class, $facture);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $sessionKey = 'factures_' . $user->getId();
+            $userFactures = $session->get($sessionKey, []);
+            $userFactures[] = $facture;
+            $session->set($sessionKey, $userFactures);
             $produit = $facture->getProduit()->first();
             $p = $manager->getRepository(Produit::class)->find($produit);
             if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
