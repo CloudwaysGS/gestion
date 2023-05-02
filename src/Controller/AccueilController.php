@@ -113,12 +113,14 @@ class AccueilController extends AbstractController
 
         $gainMoisCourant = $sortieTotalMonth - $entreetotal;
 
+        //Alerte
         $sortieAnnuelle = 0;
         $firstDayOfYear = new \DateTime('first day of January ' . $anneeCourante);
         $lastDayOfYear = new \DateTime('last day of December ' . $anneeCourante);
         $remainingDaysOfYear = $lastDayOfYear->diff($today)->days;
         $messageAnnee = ($remainingDaysOfYear <= 2) ? "Attention : Il ne reste que 2 jours avant la fin de l'année en cours !" : "";
 
+        //Récupérer la somme totale pour le mois des facture
         $sumTotalYear = $charge->createQueryBuilder('c')
             ->select('SUM(c.total)')
             ->where('c.date BETWEEN :startOfYear AND :endOfYear')
@@ -128,6 +130,7 @@ class AccueilController extends AbstractController
             ->getSingleScalarResult();
         $sumTotalYear = is_null($sumTotalYear) ? 0 : $sumTotalYear;
 
+        // le calcul du total des sorties effectuées dans l'année courant
         foreach ($sortie as $s) {
             $date = $s->getDateSortie();
             if ($date >= $firstDayOfYear && $date <= $lastDayOfYear) {
@@ -150,10 +153,6 @@ class AccueilController extends AbstractController
             }
         }
 
-
-
-        /*$sortieAnnuelle = $sortieTotalMonth;*/
-        /*$entreeAnnuelle = $entreetotal;*/
         $anneePrecedente = $anneeCourante - 1;
 
         $gainAnnuel = $sortieAnnuelle - $entreeAnnuelle;
