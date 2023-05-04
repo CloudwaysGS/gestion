@@ -4,11 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Chargement;
 use App\Entity\Facture;
+use App\Entity\Facture2;
 use App\Entity\Produit;
-use App\Form\FactureType;
+use App\Form\Facture2Type;
+use App\Repository\Facture2Repository;
 use App\Repository\FactureRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,34 +18,33 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 
-class FactureController extends AbstractController
+class Facture2Controller extends AbstractController
 {
     private $enregistrerClicked = false;
-    #[Route('/facture', name: 'facture_liste')]
-    public function index(FactureRepository $fac, Request $request, SessionInterface $session): Response
+    #[Route('/facture2', name: 'facture2_liste')]
+    public function index(Facture2Repository $fac, Request $request, SessionInterface $session): Response
     {
         // Récupération de toutes les factures
         $factures = $fac->findAllOrderedByDate();
-
         // Stockage des factures dans la session
         $session->set('factures', $factures);
 
         // Création du formulaire et suppression du champ 'prixUnit'
-        $facture = new Facture();
-        $form = $this->createForm(FactureType::class, $facture, array(
-            'action' => $this->generateUrl('facture_add'),
+        $facture = new Facture2();
+        $form = $this->createForm(Facture2Type::class, $facture, array(
+            'action' => $this->generateUrl('facture2_add'),
         ));
         $form->remove('prixUnit');
 
         // Affichage de la vue avec les variables à transmettre
-        return $this->render('facture/index.html.twig', [
+        return $this->render('facture2/index.html.twig', [
             'controller_name' => 'FactureController',
             'facture' => $factures,
             'form' => $form->createView()
         ]);
     }
 
-    #[Route('/facture/add', name: 'facture_add')]
+    #[Route('/facture2/add', name: 'facture2_add')]
     public function add(EntityManagerInterface $manager,FactureRepository $factureRepository, Request $request, Security $security,SessionInterface $session): Response
     {
         $user = $security->getUser();
@@ -53,8 +53,8 @@ class FactureController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $facture = new Facture();
-        $form = $this->createForm(FactureType::class, $facture);
+        $facture = new Facture2();
+        $form = $this->createForm(Facture2Type::class, $facture);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $sessionKey = 'factures_' . $user->getId();
@@ -90,7 +90,7 @@ class FactureController extends AbstractController
                                 'message' => $produit->getLibelle().' a déjà été ajouté précédemment.',
                             ]);
                             return $response;
-                            return $this->redirectToRoute('facture_liste');
+                            return $this->redirectToRoute('facture2_liste');
                         }
                     }
                 }
@@ -105,7 +105,7 @@ class FactureController extends AbstractController
 
         $total = $manager->createQueryBuilder()
             ->select('SUM(f.montant)')
-            ->from(Facture::class, 'f')
+            ->from(Facture2::class, 'f')
             ->where('f.etat = :etat')
             ->setParameter('etat', 1)
             ->getQuery()
@@ -115,14 +115,14 @@ class FactureController extends AbstractController
         $facture->setTotal($total);
 
         $manager->flush();
-        return $this->redirectToRoute('facture_liste', ['total' => $total]);
+        return $this->redirectToRoute('facture2_liste', ['total' => $total]);
     }
 
-    #[Route('/produit/modifier/{id}', name: 'modifier')]
-    public function modifier($id, FactureRepository $repo, Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/produit/modifier2/{id}', name: 'modifier2')]
+    public function modifier($id, Facture2Repository $repo, Request $request, EntityManagerInterface $entityManager): Response
     {
         $facture = $repo->find($id);
-        $form = $this->createForm(FactureType::class, $facture);
+        $form = $this->createForm(Facture2Type::class, $facture);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $facture->setPrixUnit($facture->getPrixUnit());
@@ -131,14 +131,14 @@ class FactureController extends AbstractController
             $entityManager->flush();
             return $this->redirectToRoute("facture_liste");
         }
-        return $this->render('facture/index.html.twig', [
+        return $this->render('facture2/index.html.twig', [
             'facture' => $facture,
             'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/facture/delete/{id}', name: 'facture_delete')]
-    public function delete(Facture $facture,EntityManagerInterface $entityManager, FactureRepository $repository)
+    #[Route('/facture2/delete/{id}', name: 'facture2_delete')]
+    public function delete(Facture2 $facture,EntityManagerInterface $entityManager, Facture2Repository $repository)
     {
         $produit = $facture->getProduit()->first();
         $p = $entityManager->getRepository(Produit::class)->find($produit);
@@ -151,14 +151,14 @@ class FactureController extends AbstractController
         $entityManager->flush();
 
         $this->addFlash('success', 'La facture a été supprimée avec succès.');
-        return $this->redirectToRoute('facture_liste');
+        return $this->redirectToRoute('facture2_liste');
     }
 
-    #[Route('/facture/delete_all', name: 'facture_delete_all')]
+    #[Route('/facture2/delete_all', name: 'facture2_delete_all')]
     public function deleteAll(EntityManagerInterface $entityManager, FactureRepository $fac)
     {
         if (!$this->enregistrerClicked) {
-            $repository = $entityManager->getRepository(Facture::class);
+            $repository = $entityManager->getRepository(Facture2::class);
             $factures = $repository->findBy(['etat' => 1]);
             $client = null;
             $adresse = null;
@@ -175,7 +175,7 @@ class FactureController extends AbstractController
             $chargement->setTelephone($telephone);
             $chargement->setNombre(count($factures));
             if ($chargement->getNombre() == 0) {
-                return $this->redirectToRoute('facture_liste');
+                return $this->redirectToRoute('facture2_liste');
             }
             $date = new \DateTime();
             $chargement->setDate($date);
@@ -184,18 +184,18 @@ class FactureController extends AbstractController
                 $total = $facture->getTotal();
                 $facture->setEtat(0);
                 $facture->setChargement($chargement);
-                $chargement->addFacture($facture);
+                $chargement->addFacture2($facture);
                 $entityManager->persist($facture);
             }
             $chargement->setTotal($total);
             $entityManager->persist($chargement);
             $entityManager->flush();
-            return $this->redirectToRoute('facture_liste');
+            return $this->redirectToRoute('facture2_liste');
         }
     }
 
-    #[Route('/facture/export', name: 'facture_export')]
-    public function export(FactureRepository $fac): Response
+    #[Route('/facture2/export', name: 'facture2_export')]
+    public function export(Facture2Repository $fac): Response
     {
         // Récupérer toutes les factures triées par date
         $facture = $fac->findAllOrderedByDate();
@@ -208,7 +208,7 @@ class FactureController extends AbstractController
         } else {
             // Rediriger vers la liste des factures avec un message d'erreur si aucune facture n'a été trouvée
             $this->addFlash('danger', 'Pas de facture trouvée. Veuillez ajouter une facture');
-            return $this->redirectToRoute('facture_liste');
+            return $this->redirectToRoute('facture2_liste');
         }
 
         $data = [];
@@ -246,7 +246,7 @@ class FactureController extends AbstractController
         $pdf->SetFont('Arial','BI',12);
         $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
-        $pdf->Cell(0, 10, 'Facture', 0, 1, 'C', true);
+        $pdf->Cell(0, 10, 'Facture', 1, 1, 'C', true);
         $pdf->Ln(1);
 
         $prenomNom = $this->getUser() ? $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom() : 'Anonyme';
@@ -274,7 +274,7 @@ class FactureController extends AbstractController
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
         foreach ($headers as $header) {
             $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(47.5, 10, utf8_decode($header), 0, 0, 'C', true); // true pour la couleur de fond
+            $pdf->Cell(47.5, 10, utf8_decode($header), 1, 0, 'C', true); // true pour la couleur de fond
         }
         $pdf->Ln();
 
@@ -282,7 +282,7 @@ class FactureController extends AbstractController
         foreach ($data as $row) {
             foreach ($row as $key => $value) {
                 $pdf->SetFont('Arial', '', 12);
-                $pdf->Cell(47.5, 10, utf8_decode($value), 0, 0, 'C');
+                $pdf->Cell(47.5, 10, utf8_decode($value), 1, 0, 'C');
             }
             $pdf->Ln();
         }
@@ -293,7 +293,7 @@ class FactureController extends AbstractController
         // Affichage du total de la facture
         $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
-        $pdf->Cell(142.5, -10, 'Total', 0, 0, 'L', true); // true pour la couleur de fond
+        $pdf->Cell(142.5, -10, 'Total', 1, 0, 'L', true); // true pour la couleur de fond
         $pdf->Cell(47.5, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C',true);
 
         // Téléchargement du fichier PDF

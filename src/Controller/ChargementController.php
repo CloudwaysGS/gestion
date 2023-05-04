@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Chargement;
 use App\Entity\Client;
 use App\Entity\Facture;
+use App\Entity\Facture2;
 use App\Repository\ChargementRepository;
 use App\Repository\FactureRepository;
 use DateTimeImmutable;
@@ -52,8 +53,32 @@ class ChargementController extends AbstractController
     {
         $facture = new Facture();
         $factures = $chargement->addFacture($facture);
+        if($factures->getFacture()->next() == false){
+            $this->addFlash('danger', 'Click sur icone facture 2');
+            return $this->redirectToRoute('liste_chargement');
+        }
         foreach ($factures->getFacture() as $facture) {
             $f = $facture->getChargement()->getFacture()->toArray();
+            array_pop($f);
+        }
+        return $this->render('chargement/extraire.html.twig', [
+            'controller_name' => 'ChargementController',
+            'f' => $f
+        ]);
+    }
+
+    #[Route('/chargement/extraire2/{id}', name: 'extraire2')]
+    public function extraireFacture2(Chargement $chargement)
+    {
+        $facture = new Facture2();
+        $factures = $chargement->addFacture2($facture);
+        if($factures->getFacture2s()->next() == false){
+            $this->addFlash('danger', 'Click sur icone facture 1');
+            return $this->redirectToRoute('liste_chargement');
+        }
+        foreach ($factures->getFacture2s() as $facture) {
+            $f = $facture->getChargement()->getFacture2s()->toArray();
+            array_pop($f);
         }
         return $this->render('chargement/extraire.html.twig', [
             'controller_name' => 'ChargementController',
@@ -70,6 +95,10 @@ class ChargementController extends AbstractController
         }
 
         $factures = $chargements->getFacture(); // récupérer toutes les factures associées
+        foreach ($factures as $facture) {
+            $entityManager->remove($facture); // supprimer chaque facture
+        }
+        $factures = $chargements->getFacture2s(); // récupérer toutes les factures associées
         foreach ($factures as $facture) {
             $entityManager->remove($facture); // supprimer chaque facture
         }

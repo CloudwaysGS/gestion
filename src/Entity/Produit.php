@@ -43,11 +43,15 @@ class Produit
     #[ORM\ManyToMany(targetEntity: Facture::class, mappedBy: 'produit')]
     private Collection $factures;
 
+    #[ORM\ManyToMany(targetEntity: Facture2::class, mappedBy: 'produit')]
+    private Collection $facture2s;
+
     public function __construct()
     {
         $this->entrees = new ArrayCollection();
         $this->sorties = new ArrayCollection();
         $this->factures = new ArrayCollection();
+        $this->facture2s = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -231,6 +235,33 @@ class Produit
     {
         if ($this->factures->removeElement($facture)) {
             $facture->removeProduit($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Facture2>
+     */
+    public function getFacture2s(): Collection
+    {
+        return $this->facture2s;
+    }
+
+    public function addFacture2(Facture2 $facture2): self
+    {
+        if (!$this->facture2s->contains($facture2)) {
+            $this->facture2s->add($facture2);
+            $facture2->addProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFacture2(Facture2 $facture2): self
+    {
+        if ($this->facture2s->removeElement($facture2)) {
+            $facture2->removeProduit($this);
         }
 
         return $this;

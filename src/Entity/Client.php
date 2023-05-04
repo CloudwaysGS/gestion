@@ -40,6 +40,9 @@ class Client
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Paiement::class)]
     private Collection $paiements;
 
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Facture2::class)]
+    private Collection $facture2s;
+
 
     public function __construct()
     {
@@ -47,6 +50,7 @@ class Client
         $this->dette = new ArrayCollection();
         $this->factures = new ArrayCollection();
         $this->paiements = new ArrayCollection();
+        $this->facture2s = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -218,6 +222,36 @@ class Client
             // set the owning side to null (unless already changed)
             if ($paiement->getClient() === $this) {
                 $paiement->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Facture2>
+     */
+    public function getFacture2s(): Collection
+    {
+        return $this->facture2s;
+    }
+
+    public function addFacture2(Facture2 $facture2): self
+    {
+        if (!$this->facture2s->contains($facture2)) {
+            $this->facture2s->add($facture2);
+            $facture2->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFacture2(Facture2 $facture2): self
+    {
+        if ($this->facture2s->removeElement($facture2)) {
+            // set the owning side to null (unless already changed)
+            if ($facture2->getClient() === $this) {
+                $facture2->setClient(null);
             }
         }
 
