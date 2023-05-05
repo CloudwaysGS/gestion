@@ -281,7 +281,7 @@ class FactureController extends AbstractController
         // Affichage des données de la facture
         foreach ($data as $row) {
             foreach ($row as $key => $value) {
-                $pdf->SetFont('Arial', '', 12);
+                $pdf->SetFont('Arial', '', 10);
                 $pdf->Cell(47.5, 10, utf8_decode($value), 0, 0, 'C');
             }
             $pdf->Ln();

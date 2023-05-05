@@ -45,7 +45,7 @@ class Facture2Controller extends AbstractController
     }
 
     #[Route('/facture2/add', name: 'facture2_add')]
-    public function add(EntityManagerInterface $manager,FactureRepository $factureRepository, Request $request, Security $security,SessionInterface $session): Response
+    public function add(EntityManagerInterface $manager,Facture2Repository $factureRepository, Request $request, Security $security,SessionInterface $session): Response
     {
         $user = $security->getUser();
         if (!$user) {
@@ -119,13 +119,22 @@ class Facture2Controller extends AbstractController
     {
         $facture = $repo->find($id);
         $form = $this->createForm(Facture2Type::class, $facture);
+        $before = $facture->getQuantite();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $p = $entityManager->getRepository(Produit::class)->find($facture->getProduit()->first());
+            $reste = $before - $facture->getQuantite();
+            $stock = $p->getQtStock() + $reste;
+            $p->setQtStock($stock > 0 ? $stock : 0);
+
+            $p->setQtStock($stock);
             $facture->setPrixUnit($facture->getPrixUnit());
             $facture->setMontant($facture->getQuantite() * $facture->getPrixUnit());
+
             $entityManager->persist($form->getData());
             $entityManager->flush();
-            return $this->redirectToRoute("facture_liste");
+            return $this->redirectToRoute("facture2_liste");
         }
         return $this->render('facture2/index.html.twig', [
             'facture' => $facture,
