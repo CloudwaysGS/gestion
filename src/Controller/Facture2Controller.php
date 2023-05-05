@@ -57,10 +57,6 @@ class Facture2Controller extends AbstractController
         $form = $this->createForm(Facture2Type::class, $facture);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $sessionKey = 'factures_' . $user->getId();
-            $userFactures = $session->get($sessionKey, []);
-            $userFactures[] = $facture;
-            $session->set($sessionKey, $userFactures);
             $produit = $facture->getProduit()->first();
             $p = $manager->getRepository(Produit::class)->find($produit);
             if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
