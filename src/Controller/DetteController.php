@@ -6,10 +6,12 @@ use App\Entity\Client;
 use App\Entity\Dette;
 use App\Form\DetteType;
 use App\Form\UpdateType;
+use App\Repository\ClientRepository;
 use App\Repository\DetteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -41,7 +43,7 @@ class DetteController extends AbstractController
     }
 
     #[Route('/dette/add', name: 'dette_add')]
-    public function add(EntityManagerInterface $manager, Request $request, FlashyNotifier $notifier): Response
+    public function add(EntityManagerInterface $manager, Request $request, FlashyNotifier $notifier, ClientRepository $repository, DetteRepository $dettes): Response
     {
         $dette = new Dette();
         $form = $this->createForm(DetteType::class, $dette);
@@ -53,8 +55,16 @@ class DetteController extends AbstractController
                 $dette->setClient($client)
                         ->setDateCreated(new \DateTime())
                         ->setReste($dette->getMontantDette())
-                        ->setStatut('non-payéé');
+                        ->setStatut('non-payée');
             }
+
+            $c = $dettes->findAllOrderedByDate();
+                foreach ( $c as $s) {
+                    if ($dette->getClient()->getNom() === $s->getClient()->getNom()) {
+                        $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette.');
+                        return $this->redirectToRoute('dette_liste');
+                    }
+                }
             $manager->persist($dette);
             $manager->flush();
             $notifier->success('L\'entrée a été enregistrée avec succès.');
