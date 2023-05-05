@@ -19,9 +19,9 @@
                 <div id="flash-message" class="alert alert-danger">{{ message }}</div>
             {% endfor %}
 
-            <a href="{{ path('facture_delete_all') }}" class="btn btn-primary" onclick="onEnregistrerClicked()">Enrégistrer</a>
+            <a href="{{ path('facture_delete_all') }}" class="btn btn-primary" onclick="onEnregistrerClicked()">Enregistrer</a>
             <a href="{{ path('liste_chargement') }}" class="btn btn-primary">Mes factures</a>
-            <a href="{{ path('client_add') }}" class="btn btn-primary">Créer le client</a>
+            <a href="{{ path('client_add') }}" class="btn btn-primary">Créer client</a>
             <a href="{{ path('facture_export') }}" class="btn btn-primary" onclick="onExportClicked()">Exporter en pdf</a>
             <a href="{{ path('facture2_liste') }}" class="btn btn-primary">Facture 2</a>
             {% for message in app.session.flashBag.get('danger') %}

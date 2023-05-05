@@ -38,6 +38,12 @@ security:
     - { path: ^/sortie/liste$, roles: [ROLE_VENDEUR,ROLE_USER] }
     - { path: ^/user/detail$, roles: ROLE_USER }
     - { path: ^/facture$, roles: [ROLE_VENDEUR,ROLE_USER] }
+    - { path: ^/facture2$, roles: [ROLE_VENDEUR,ROLE_USER] }
+    - { path: ^/chargement, roles: [ROLE_VENDEUR,ROLE_USER] }
+    - { path: ^/dette, roles: [ROLE_VENDEUR,ROLE_USER] }
+    - { path: ^/client, roles: [ROLE_VENDEUR,ROLE_USER] }
+    - { path: ^/fournisseur, roles: [ROLE_VENDEUR,ROLE_USER] }
+    - { path: ^/user, roles: [ROLE_VENDEUR,ROLE_USER] }
 
     #- { path: ^/login$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
