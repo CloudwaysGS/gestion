@@ -60,8 +60,8 @@ class DetteController extends AbstractController
 
             $c = $dettes->findAllOrderedByDate();
                 foreach ( $c as $s) {
-                    if ($dette->getClient()->getNom() === $s->getClient()->getNom()) {
-                        $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette.');
+                    if ( $dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "non-payée") {
+                        $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette non payée.');
                         return $this->redirectToRoute('dette_liste');
                     }
                 }

@@ -1,6 +1,6 @@
 {% extends 'accueil.html.twig' %}
 
-{% block title %}Hello ClientController!{% endblock %}
+{% block title %}Client{% endblock %}
 
 {% block body %}
     {% for message in app.session.flashBag.get('success') %}
@@ -21,7 +21,7 @@
         </div>
     </div>
     {{ form_end(form2) }}
-    <a href="{{ path('dette_add') }}" class="btn btn-primary m-2">liste dettes</a>
+    <a href="{{ path('dette_add') }}" class="btn btn-primary ml-3 m-1">liste dettes</a>
     <div class="row">
         <div class="container col-md-8">
             <div class="card ">
