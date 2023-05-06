@@ -80,12 +80,10 @@
             {% for message in app.session.flashBag.get('danger') %}
                 <div id="flash-message" class="alert alert-danger">{{ message }}</div>
             {% endfor %}
+
             <button class="glow-on-hover" onclick="window.location.href='{{ path('facture_delete_all') }}'">Enregistrer</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'">Mes factures</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">Créer client</button>
-            {#<button class="glow-on-hover" onclick="onEnregistrerClicked()">
-            <a href="{{ path('facture_export') }}" style="color: inherit; text-decoration: none;">Exporter</a>
-            </button>#}
             <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">Facture 2</button>
 
             {% for message in app.session.flashBag.get('danger') %}
@@ -172,27 +170,5 @@
             }
         }, 10000);
     </script>
-
-   {# <script>
-        let enregistrerClicked = false;
-        const enregistrerButton = document.querySelector('a[href="{{ path('facture_delete_all') }}"]');
-        const exportButton = document.querySelector('a[href="{{ path('facture_export') }}"]');
-
-        enregistrerButton.addEventListener('click', () => {
-            if (enregistrerClicked) {
-                // Execute the deleteAll function
-                window.location.href = enregistrerButton.getAttribute('href');
-            } else {
-                // Prevent the execution of the deleteAll function
-                event.preventDefault();
-                alert('Veuillez d\'abord cliquer sur "Exporter en pdf".');
-            }
-        });
-
-        exportButton.addEventListener('click', () => {
-            enregistrerClicked = true;
-        });
-    </script>#}
-
 
 {% endblock %}
