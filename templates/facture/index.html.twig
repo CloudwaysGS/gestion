@@ -3,6 +3,68 @@
 {% block title %}Facture{% endblock %}
 
 {% block body %}
+    <style>
+
+        .glow-on-hover {
+            width: 130px;
+            height: 35px;
+            border: none;
+            outline: none;
+            color: #fff;
+            background: #111;
+            cursor: pointer;
+            position: relative;
+            z-index: 0;
+            border-radius: 10px;
+        }
+
+        .glow-on-hover:before {
+            content: '';
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            position: absolute;
+            top: -2px;
+            left:-2px;
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(5px);
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            animation: glowing 20s linear infinite;
+            opacity: 0;
+            transition: opacity .3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        .glow-on-hover:active {
+            color: #000
+        }
+
+        .glow-on-hover:active:after {
+            background: transparent;
+        }
+
+        .glow-on-hover:hover:before {
+            opacity: 1;
+        }
+
+        .glow-on-hover:after {
+            z-index: -1;
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #4e73df;
+            left: 0;
+            top: 0;
+            border-radius: 10px;
+        }
+
+        @keyframes glowing {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+    </style>
     <div class="row">
         <div class="container col-md-4">
             <div class="card">
@@ -18,12 +80,14 @@
             {% for message in app.session.flashBag.get('danger') %}
                 <div id="flash-message" class="alert alert-danger">{{ message }}</div>
             {% endfor %}
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture_delete_all') }}'">Enregistrer</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'">Mes factures</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">Créer client</button>
+            {#<button class="glow-on-hover" onclick="onEnregistrerClicked()">
+            <a href="{{ path('facture_export') }}" style="color: inherit; text-decoration: none;">Exporter</a>
+            </button>#}
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">Facture 2</button>
 
-            <a href="{{ path('facture_delete_all') }}" class="btn btn-primary" onclick="onEnregistrerClicked()">Enregistrer</a>
-            <a href="{{ path('liste_chargement') }}" class="btn btn-primary">Mes factures</a>
-            <a href="{{ path('client_add') }}" class="btn btn-primary">Créer client</a>
-            <a href="{{ path('facture_export') }}" class="btn btn-primary" onclick="onExportClicked()">Exporter en pdf</a>
-            <a href="{{ path('facture2_liste') }}" class="btn btn-primary">Facture 2</a>
             {% for message in app.session.flashBag.get('danger') %}
                 <div class="alert alert-danger">{{ message }}</div>
             {% endfor %}
@@ -109,7 +173,7 @@
         }, 10000);
     </script>
 
-    <script>
+   {# <script>
         let enregistrerClicked = false;
         const enregistrerButton = document.querySelector('a[href="{{ path('facture_delete_all') }}"]');
         const exportButton = document.querySelector('a[href="{{ path('facture_export') }}"]');
@@ -128,7 +192,7 @@
         exportButton.addEventListener('click', () => {
             enregistrerClicked = true;
         });
-    </script>
+    </script>#}
 
 
 {% endblock %}

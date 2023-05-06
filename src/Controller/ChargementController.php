@@ -53,32 +53,25 @@ class ChargementController extends AbstractController
     {
         $facture = new Facture();
         $factures = $chargement->addFacture($facture);
-        if($factures->getFacture()->next() == false){
-            $this->addFlash('danger', 'Click sur icone facture 2');
-            return $this->redirectToRoute('liste_chargement');
-        }
         foreach ($factures->getFacture() as $facture) {
             $f = $facture->getChargement()->getFacture()->toArray();
             array_pop($f);
         }
-        return $this->render('chargement/extraire.html.twig', [
-            'controller_name' => 'ChargementController',
-            'f' => $f
-        ]);
-    }
-
-    #[Route('/chargement/extraire2/{id}', name: 'extraire2')]
-    public function extraireFacture2(Chargement $chargement)
-    {
-        $facture = new Facture2();
-        $factures = $chargement->addFacture2($facture);
-        if($factures->getFacture2s()->next() == false){
-            $this->addFlash('danger', 'Click sur icone facture 1');
-            return $this->redirectToRoute('liste_chargement');
-        }
-        foreach ($factures->getFacture2s() as $facture) {
-            $f = $facture->getChargement()->getFacture2s()->toArray();
-            array_pop($f);
+        if (!empty($f)) {
+            // Récupérer le client de la dernière facture si présent, sinon récupérer le client de la première facture
+            $lastFacture = end($f);
+            $firstFacture = reset($f);
+            $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
+        } else {
+            $facture = new Facture2();
+            $factures = $chargement->addFacture2($facture);
+            foreach ($factures->getFacture2s() as $facture) {
+                $f = $facture->getChargement()->getFacture2s()->toArray();
+                array_pop($f);
+            }
+            $lastFacture = end($f);
+            $firstFacture = reset($f);
+            $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
         }
         return $this->render('chargement/extraire.html.twig', [
             'controller_name' => 'ChargementController',
@@ -107,6 +100,124 @@ class ChargementController extends AbstractController
 
         $this->addFlash('success', 'Le chargement a été supprimé avec succès');
         return $this->redirectToRoute('liste_chargement');
+    }
+
+    #[Route('/chargement/pdf/{id}', name: 'pdf')]
+    public function pdf(Chargement $chargement)
+    {
+        $facture = new Facture();
+        $factures = $chargement->addFacture($facture);
+        foreach ($factures->getFacture() as $facture) {
+            $f = $facture->getChargement()->getFacture()->toArray();
+            array_pop($f);
+        }
+        if (!empty($f)) {
+            // Récupérer le client de la dernière facture si présent, sinon récupérer le client de la première facture
+            $lastFacture = end($f);
+            $firstFacture = reset($f);
+            $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
+        } else {
+            $facture = new Facture2();
+            $factures = $chargement->addFacture2($facture);
+            foreach ($factures->getFacture2s() as $facture) {
+                $f = $facture->getChargement()->getFacture2s()->toArray();
+                array_pop($f);
+            }
+            $lastFacture = end($f);
+            $firstFacture = reset($f);
+            $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
+        }
+
+
+        $data = [];
+        $total = 0;
+        foreach ($f as $fac) {
+            $produit = $fac->getProduit()->first();
+            $data[] = [
+                'Quantité achetée' => $fac->getQuantite(),
+                'Produit' => $produit->getLibelle(),
+                'Prix unitaire' => $produit->getPrixUnit(),
+                'Montant' => $fac->getMontant(),
+            ];
+            $total += $fac->getMontant();
+        }
+        $data[] = [
+            'Quantité achetée' => '',
+            'Produit' => '',
+            'Prix unitaire' => '',
+            'Montant total' => '',
+        ];
+        $headers = array(
+            'Quantité',
+            'Désignation',
+            'Prix unitaire',
+            'Montant',
+        );
+        $filename = $client !== null ? $client->getNom() : '';
+        $filename .= date("Y-m-d_H-i", time()) . ".pdf";
+
+        // Initialisation du PDF
+        $pdf = new \FPDF();
+        $pdf->AddPage();
+
+        // Titre de la facture
+        $pdf->SetFont('Arial','BI',12);
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
+        $pdf->Cell(0, 10, 'Facture', 0, 1, 'C', true);
+        $pdf->Ln(1);
+
+        $prenomNom = $this->getUser() ? $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom() : 'Anonyme';
+        $adresse = $this->getUser() ? $this->getUser()->getAdresse() : 'Anonyme';
+        $phone = $this->getUser() ? $this->getUser()->getTelephone() : 'Anonyme';
+        // Informations sur le commerçant et client
+        $pdf->SetFont('Arial', 'I', 9);
+        $pdf->SetTextColor(51, 51, 51); // Couleur du texte des informations
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->Cell(70, 5, 'COMMERCANT : '.$prenomNom, 0, 0, 'L');
+        $pdf->Cell(120, 5, 'CLIENT : ' . ($client ? $client->getNom() : ''), 0, 1, 'R');
+
+        $pdf->Cell(70, 5, 'ADRESSE : '.$adresse.' / Kaolack', 0, 0, 'L');
+        $pdf->Cell(120, 5, 'ADRESSE : '. ($client ? $client->getAdresse() : ''), 0, 1, 'R');
+
+        $pdf->Cell(70, 5, 'TELEPHONE : '.$phone, 0, 0, 'L');
+        $pdf->Cell(120, 5, 'TELEPHONE : '. ($client ? $client->getTelephone() : ''), 0, 1, 'R');
+
+        $pdf->Cell(70, 5, 'NINEA : 0848942 - RC : 10028', 0, 1, 'L');
+        $pdf->Ln(2);
+
+
+        // Affichage des en-têtes du tableau
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
+        foreach ($headers as $header) {
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(47.5, 10, utf8_decode($header), 0, 0, 'C', true); // true pour la couleur de fond
+        }
+        $pdf->Ln();
+
+        // Affichage des données de la facture
+        foreach ($data as $row) {
+            foreach ($row as $key => $value) {
+                $pdf->SetFont('Arial', '', 10.5);
+                $pdf->Cell(47.5, 10, utf8_decode($value), 0, 0, 'C');
+            }
+            $pdf->Ln();
+        }
+
+        // Affichage du total de la facture
+        $pdf->SetFont('Arial', 'B', 12);
+
+        // Affichage du total de la facture
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
+        $pdf->Cell(142.5, -10, 'Total', 0, 0, 'L', true); // true pour la couleur de fond
+        $pdf->Cell(47.5, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C',true);
+
+        // Téléchargement du fichier PDF
+        $pdf->Output('D', $filename);
+        exit;
+
     }
 
 

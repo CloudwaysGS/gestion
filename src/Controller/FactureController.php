@@ -194,7 +194,7 @@ class FactureController extends AbstractController
         }
     }
 
-    #[Route('/facture/export', name: 'facture_export')]
+    /*#[Route('/facture/export', name: 'facture_export')]
     public function export(FactureRepository $fac): Response
     {
         // Récupérer toutes les factures triées par date
@@ -299,5 +299,5 @@ class FactureController extends AbstractController
         // Téléchargement du fichier PDF
         $pdf->Output('D', $filename);
         exit;
-    }
+    }*/
 }
