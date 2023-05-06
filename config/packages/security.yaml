@@ -32,7 +32,7 @@ security:
   # Easy way to control access for large sections of your site
   # Note: Only the *first* access control that matches will be used
   access_control:
-    - { path: ^/accueil$, roles: [ROLE_USER,ROLE_VENDEUR] }
+    - { path: ^/accueil$, roles: [ROLE_GESTION_STOCK] }
     - { path: ^/produit/liste$, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/entree/liste$, roles: [ROLE_GESTION_STOCK,ROLE_USER] }
     - { path: ^/sortie/liste$, roles: [ROLE_VENDEUR,ROLE_USER] }
