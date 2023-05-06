@@ -39,7 +39,9 @@ security:
     - { path: ^/user/detail$, roles: ROLE_USER }
     - { path: ^/facture$, roles: [ROLE_VENDEUR,ROLE_USER] }
     - { path: ^/facture2$, roles: [ROLE_VENDEUR,ROLE_USER] }
-    - { path: ^/chargement, roles: [ROLE_VENDEUR,ROLE_USER] }
+    - { path: ^/chargement$, roles: [ROLE_GESTION_STOCK] }
+    - { path: ^/chargement/extraire$, roles: [ROLE_GESTION_STOCK] }
+    - { path: ^/chargement/pdf$, roles: [ROLE_GESTION_STOCK] }
     - { path: ^/dette, roles: [ROLE_VENDEUR,ROLE_USER] }
     - { path: ^/client, roles: [ROLE_VENDEUR,ROLE_USER] }
     - { path: ^/fournisseur, roles: [ROLE_VENDEUR,ROLE_USER] }
