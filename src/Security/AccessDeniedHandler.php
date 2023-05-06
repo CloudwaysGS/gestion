@@ -13,6 +13,6 @@ class AccessDeniedHandler implements AccessDeniedHandlerInterface
     {
         // ...
 
-        return new Response("Accès refusé. Vous n'avait le droit d'accès", 403);
+        return new Response("Accès refusé. Vous n'avait pas le droit d'accès", 403);
     }
 }

@@ -16,4 +16,11 @@ class ErrorController extends AbstractController
         ]);
         /*throw new NotFoundHttpException('Cette page n\'existe pas.');*/
     }
+    public function error403()
+    {
+        return $this->render('bundles/TwigBundle/Exception/403.html.twig', [
+            'controller_name' => 'ErrorController',
+        ]);
+        /*throw new NotFoundHttpException('Cette page n\'existe pas.');*/
+    }
 }
