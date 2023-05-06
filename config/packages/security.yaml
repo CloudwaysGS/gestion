@@ -40,8 +40,6 @@ security:
     - { path: ^/facture$, roles: [ROLE_VENDEUR,ROLE_USER] }
     - { path: ^/facture2$, roles: [ROLE_VENDEUR,ROLE_USER] }
     - { path: ^/chargement, roles: [ROLE_VENDEUR,ROLE_USER] }
-    - { path: ^/chargement/extraire/{id}, roles: [ROLE_GESTION_STOCK] }
-    - { path: ^/chargement/pdf/{id}, roles: [ROLE_GESTION_STOCK] }
     - { path: ^/dette, roles: [ROLE_VENDEUR,ROLE_USER] }
     - { path: ^/client, roles: [ROLE_VENDEUR,ROLE_USER] }
     - { path: ^/fournisseur, roles: [ROLE_VENDEUR,ROLE_USER] }
