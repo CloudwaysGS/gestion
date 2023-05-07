@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Produit;
 use App\Entity\Sortie;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -18,11 +19,18 @@ class SortieType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $libelle = "";
         $builder
             ->add('produit',EntityType::class, array(
                 'class' => Produit::class,
                 'label' => 'Libelle du produit',
-                'attr' => array('class' => 'form-control form-group')
+                'attr' => array('class' => 'form-control form-group'),
+                'query_builder' => function(EntityRepository $er) use ($libelle) {
+                    return $er->createQueryBuilder('p')
+                        ->where('p.libelle LIKE :libelle')
+                        ->setParameter('libelle', '%'.$libelle.'%')
+                        ->orderBy('p.libelle', 'ASC');
+                },
             ))
             ->add('qtSortie', TextType::class, array(
                 'label' => 'Quantite vendue',

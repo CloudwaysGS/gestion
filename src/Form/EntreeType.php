@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\Entree;
 use App\Entity\Fournisseur;
 use App\Entity\Produit;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -17,6 +18,7 @@ class EntreeType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $libelle = "";
         $builder
             ->add('fournisseur',EntityType::class, array(
                 'class' => Fournisseur::class,
@@ -30,9 +32,16 @@ class EntreeType extends AbstractType
             ->add('produit',EntityType::class, array(
                 'class' => Produit::class,
                 'label' => false,
-                'attr' => array('class' => 'form-control form-group',
-                    'placeholder' => 'Libelle du produit'
-                    )
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                    ),
+                'placeholder' => 'Libelle du produit',
+                'query_builder' => function(EntityRepository $er) use ($libelle) {
+                    return $er->createQueryBuilder('p')
+                        ->where('p.libelle LIKE :libelle')
+                        ->setParameter('libelle', '%'.$libelle.'%')
+                        ->orderBy('p.libelle', 'ASC');
+                },
             ))
             ->add('qtEntree', TextType::class, array(
                 'label' => 'Quantite achetée',

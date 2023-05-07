@@ -46,7 +46,7 @@ class ProduitController extends AbstractController
         $form2->handleRequest($request);
         $nom = $search->getNom();
         $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
+        $limit = 15; // number of products to display per page
         $total = $nom ? count($prod->findByName($nom)) : $prod->countAll();
         $offset = ($page - 1) * $limit;
         $produits = $nom ? $prod->findByName($nom, $limit, $offset) : $prod->findAllOrderedByDate($limit, $offset);
