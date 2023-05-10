@@ -49,9 +49,13 @@ class Facture
     #[ORM\ManyToOne(inversedBy: 'factures')]
     private ?Client $client = null;
 
+    #[ORM\ManyToMany(targetEntity: Detail::class, inversedBy: 'factures')]
+    private Collection $detail;
+
     public function __construct()
     {
         $this->produit = new ArrayCollection();
+        $this->detail = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -205,6 +209,36 @@ class Facture
     public function setNomClient($nomClient): void
     {
         $this->nomClient = $nomClient;
+    }
+
+    /**
+     * @return Collection<int, Detail>
+     */
+    public function getDetail(): Collection
+    {
+        return $this->detail;
+    }
+
+    public function addDetail(Detail $detail): self
+    {
+        if (!$this->detail->contains($detail)) {
+            $this->detail->add($detail);
+            $detail->setFacture($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDetail(Detail $detail): self
+    {
+        if ($this->detail->removeElement($detail)) {
+            // set the owning side to null (unless already changed)
+            if ($detail->getFacture() === $this) {
+                $detail->setFacture(null);
+            }
+        }
+
+        return $this;
     }
 
 }

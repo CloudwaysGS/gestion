@@ -47,6 +47,36 @@ class ProduitType extends AbstractType
                     new Type('numeric')
                 )
             ))
+
+            ->add('NomProduitDetaille', TextType::class, array(
+                'label' => 'Veux-tu créer le détail ?',
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'libelle détail',
+                )
+            ))
+            ->add('nombreDetaille', TextType::class, array(
+                'label' => false,
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'nbre paquet ou sachet',
+                ),
+                'constraints' => array(
+                    new NotBlank(),
+                    new Type('numeric')
+                )
+            ))
+            ->add('prixUnitDetaille', TextType::class, array(
+                'label' => false,
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'prix unitaire',
+                ),
+                'constraints' => array(
+                    new NotBlank(),
+                    new Type('numeric')
+                )
+            ))
             ->add('Valider', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')
             ))

@@ -68,12 +68,23 @@ class FactureType extends AbstractType
                 },
             ])
 
-
-
             ->add('Ajouter', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')
             ))
-
+            ->add('detail', null, [
+                'label' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'style' => 'height: 10rem;', // ajout de la hauteur personnalisée
+                ],
+                'required' => false,
+                'query_builder' => function(EntityRepository $er) use ($libelle) {
+                    return $er->createQueryBuilder('p')
+                        ->where('p.libelle LIKE :libelle')
+                        ->setParameter('libelle', '%'.$libelle.'%')
+                        ->orderBy('p.libelle', 'ASC');
+                },
+            ])
         ;
     }
 

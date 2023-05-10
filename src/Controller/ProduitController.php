@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Detail;
 use App\Entity\Produit;
 use App\Entity\Search;
 use App\Form\ProduitType;
@@ -88,9 +89,15 @@ class ProduitController extends AbstractController
                 throw new Exception("Aucun utilisateur n'est actuellement connecté");
             }
             $produits->setUser($user);
-            $manager->persist($produits);
+
             $montant = $produits->getQtStock() * $produits->getPrixUnit();
             $produits->setTotal($montant);
+            $details = new Detail();
+            $detailNoms = $produits->getNomProduitDetaille();
+            $detailPrix = $produits->getPrixUnitDetaille();
+            $produits->setNomProduitDetaille($detailNoms);
+            $produits->setPrixUnitDetaille($detailPrix);
+            $manager->persist($details);
             $manager->flush();
             $this->addFlash('success','Le produit a été ajouter avec succès.');
         }

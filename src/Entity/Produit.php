@@ -46,6 +46,12 @@ class Produit
     #[ORM\ManyToMany(targetEntity: Facture2::class, mappedBy: 'produit')]
     private Collection $facture2s;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $nombre = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $NomProduitDetaille = null;
+
     public function __construct()
     {
         $this->entrees = new ArrayCollection();
@@ -263,6 +269,30 @@ class Produit
         if ($this->facture2s->removeElement($facture2)) {
             $facture2->removeProduit($this);
         }
+
+        return $this;
+    }
+
+    public function getNombre(): ?float
+    {
+        return $this->nombre;
+    }
+
+    public function setNombre(?float $nombre): self
+    {
+        $this->nombre = $nombre;
+
+        return $this;
+    }
+
+    public function getNomProduitDetaille(): ?string
+    {
+        return $this->NomProduitDetaille;
+    }
+
+    public function setNomProduitDetaille(string $NomProduitDetaille): self
+    {
+        $this->NomProduitDetaille = $NomProduitDetaille;
 
         return $this;
     }
