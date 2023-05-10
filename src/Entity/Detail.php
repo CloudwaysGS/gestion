@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\DetailRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DetailRepository::class)]
@@ -29,6 +30,9 @@ class Detail
 
     #[ORM\ManyToMany(targetEntity: Facture::class, mappedBy: 'detail')]
     private Collection $factures;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $releaseDate = null;
 
     public function __construct()
     {
@@ -191,5 +195,17 @@ class Detail
     public function setQtStock(?float $qtStock): void
     {
         $this->qtStock = $qtStock;
+    }
+
+    public function getReleaseDate(): ?\DateTimeInterface
+    {
+        return $this->releaseDate;
+    }
+
+    public function setReleaseDate(?\DateTimeInterface $releaseDate): self
+    {
+        $this->releaseDate = $releaseDate;
+
+        return $this;
     }
 }

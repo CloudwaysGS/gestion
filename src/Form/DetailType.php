@@ -2,16 +2,15 @@
 
 namespace App\Form;
 
-use App\Entity\Produit;
+use App\Entity\Detail;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Type;
 
-class ProduitType extends AbstractType
+class DetailType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -47,46 +46,13 @@ class ProduitType extends AbstractType
                     new Type('numeric')
                 )
             ))
-
-            /*->add('NomProduitDetaille', TextType::class, array(
-                'label' => 'Veux-tu créer le détail ?',
-                'attr' => array(
-                    'class' => 'form-control form-group',
-                    'placeholder' => 'libelle détail',
-                )
-            ))
-            ->add('nombreDetaille', TextType::class, array(
-                'label' => false,
-                'attr' => array(
-                    'class' => 'form-control form-group',
-                    'placeholder' => 'nbre paquet ou sachet',
-                ),
-                'constraints' => array(
-                    new NotBlank(),
-                    new Type('numeric')
-                )
-            ))
-            ->add('prixUnitDetaille', TextType::class, array(
-                'label' => false,
-                'attr' => array(
-                    'class' => 'form-control form-group',
-                    'placeholder' => 'prix unitaire',
-                ),
-                'constraints' => array(
-                    new NotBlank(),
-                    new Type('numeric')
-                )
-            ))*/
-            ->add('Valider', SubmitType::class, array(
-                'attr' =>array('class' => 'btn btn-primary form-group')
-            ))
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Produit::class,
+            'data_class' => Detail::class,
         ]);
     }
 }

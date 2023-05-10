@@ -39,7 +39,7 @@ class DetailRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllOrderedByDate($limit, $offset)
+    public function findAllOrderedByDate($limit = 10, $offset = 0)
     {
         return $this->createQueryBuilder('p')
             ->orderBy('p.releaseDate', 'DESC')
@@ -48,6 +48,7 @@ class DetailRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
     // src/Repository/ProduitRepository.php
 
     public function findByName($nom)

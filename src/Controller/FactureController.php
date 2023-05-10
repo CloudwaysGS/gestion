@@ -26,6 +26,7 @@ class FactureController extends AbstractController
     {
         // Récupération de toutes les factures
         $factures = $fac->findAllOrderedByDate();
+
         // Création du formulaire et suppression du champ 'prixUnit'
         $facture = new Facture();
         $form = $this->createForm(FactureType::class, $facture, array(

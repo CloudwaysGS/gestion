@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230510162328 extends AbstractMigration
+final class Version20230510183503 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,12 +20,12 @@ final class Version20230510162328 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE detail CHANGE stock qt_stock DOUBLE PRECISION DEFAULT NULL');
+        $this->addSql('ALTER TABLE detail ADD release_date DATETIME DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE detail CHANGE qt_stock stock DOUBLE PRECISION DEFAULT NULL');
+        $this->addSql('ALTER TABLE detail DROP release_date');
     }
 }
