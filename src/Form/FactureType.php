@@ -57,7 +57,7 @@ class FactureType extends AbstractType
                 'label' => false,
                 'attr' => [
                     'class' => 'form-control',
-                    'style' => 'height: 20rem;', // ajout de la hauteur personnalisée
+                    'style' => 'height: 15rem;', // ajout de la hauteur personnalisée
                 ],
                 'required' => false,
                 'query_builder' => function(EntityRepository $er) use ($libelle) {

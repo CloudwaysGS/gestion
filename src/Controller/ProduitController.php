@@ -67,53 +67,56 @@ class ProduitController extends AbstractController
     #[Route('/produit/add', name: 'produit_add')]
     public function add(EntityManagerInterface $manager, Request $request): Response
     {
-        // fonction pour comparer les chaînes de caractères
-        function compareStrings($str1, $str2) {
-            return str_replace(' ', '', strtolower($str1)) === str_replace(' ', '', strtolower($str2));
-        }
-        $produits = new Produit();
+        $produit = new Produit();
         $date = new \DateTime();
-        $produits->setReleaseDate($date);
-        $produits->setQtStock(0);
-        $form = $this->createForm(ProduitType::class, $produits);
+        $produit->setReleaseDate($date);
+        $produit->setQtStock(0);
+
+        $form = $this->createForm(ProduitType::class, $produit);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $libelleProduit = $produit->getLibelle();
             $existingProduit = $manager->getRepository(Produit::class)
-                ->findOneBy(['libelle' => $produits->getLibelle()]);
-            if ($existingProduit && compareStrings($existingProduit->getLibelle(), $produits->getLibelle())) {
+                ->findOneBy(['libelle' => $libelleProduit]);
+            if ($existingProduit && $this->compareStrings($existingProduit->getLibelle(), $libelleProduit)) {
                 $this->addFlash('danger', 'Un produit avec ce nom existe déjà.');
                 return $this->redirectToRoute('produit_liste');
             }
-            $user = $this->getUser();
-            if (!$user){
-                throw new Exception("Aucun utilisateur n'est actuellement connecté");
-            }
-            $produits->setUser($user);
-            $manager->persist($produits);
-            $montant = $produits->getQtStock() * $produits->getPrixUnit();
-            $produits->setTotal($montant);
-            //////////////////////details////////////////////
-            $details = new Detail();
-            $detailNoms = $produits->getNomProduitDetail();
-            $detailPrix = $produits->getPrixDetail();
-            $stockDetail = $produits->getNombre() * $produits->getQtStock();
-            $montantDetail = $detailPrix * $stockDetail;
-            $details->setLibelle($detailNoms);
-            $details->setPrixUnit($detailPrix);
-            $details->setQtStock($stockDetail);
-            $details->setTotal($montantDetail);
-            $details->setReleaseDate($date);
-            $nomProduit = $produits->getLibelle();
-            $qteProduit = $produits->getQtStock();
-            $details->setNomProduit($nomProduit);
-            $details->setStockProduit($qteProduit);
-            $details->setNombre($produits->getNombre());
 
-            $manager->persist($details);
+            $user = $this->getUser() ?? throw new \Exception("Aucun utilisateur n'est actuellement connecté");
+            $produit->setUser($user);
+
+            $montant = $produit->getQtStock() * $produit->getPrixUnit();
+            $produit->setTotal($montant);
+            $manager->persist($produit);
             $manager->flush();
-            $this->addFlash('success','Le produit a été ajouter avec succès.');
+
+            $detail = new Detail();
+            $nomProduitDetail = $produit->getNomProduitDetail();
+            $nomProduitDetail !== null ? $detail->setLibelle($nomProduitDetail) : null;
+
+            $detail->setPrixUnit($produit->getPrixDetail());
+            $detail->setQtStock($produit->getNombre() * $produit->getQtStock());
+            $detail->setTotal($detail->getPrixUnit() * $detail->getQtStock());
+            $detail->setReleaseDate($date);
+            $detail->setNomProduit($libelleProduit);
+            $detail->setStockProduit($produit->getQtStock());
+            $detail->setNombre($produit->getNombre());
+            if ($detail->getLibelle() != null){
+                $manager->persist($detail);
+                $manager->flush();
+            }
+            $this->addFlash('success', 'Le produit a été ajouté avec succès.');
         }
+
         return $this->redirectToRoute('produit_liste');
+    }
+
+    private function compareStrings(string $str1, string $str2): bool
+    {
+        $str1 = str_replace(' ', '', strtolower($str1));
+        $str2 = str_replace(' ', '', strtolower($str2));
+        return $str1 === $str2;
     }
 
 
