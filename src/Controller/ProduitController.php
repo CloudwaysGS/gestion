@@ -89,14 +89,26 @@ class ProduitController extends AbstractController
                 throw new Exception("Aucun utilisateur n'est actuellement connecté");
             }
             $produits->setUser($user);
-
+            $manager->persist($produits);
             $montant = $produits->getQtStock() * $produits->getPrixUnit();
             $produits->setTotal($montant);
+            //////////////////////details////////////////////
             $details = new Detail();
-            $detailNoms = $produits->getNomProduitDetaille();
-            $detailPrix = $produits->getPrixUnitDetaille();
-            $produits->setNomProduitDetaille($detailNoms);
-            $produits->setPrixUnitDetaille($detailPrix);
+            $detailNoms = $produits->getNomProduitDetail();
+            $detailPrix = $produits->getPrixDetail();
+            $stockDetail = $produits->getNombre() * $produits->getQtStock();
+            $montantDetail = $detailPrix * $stockDetail;
+            $details->setLibelle($detailNoms);
+            $details->setPrixUnit($detailPrix);
+            $details->setQtStock($stockDetail);
+            $details->setTotal($montantDetail);
+            $details->setReleaseDate($date);
+            $nomProduit = $produits->getLibelle();
+            $qteProduit = $produits->getQtStock();
+            $details->setNomProduit($nomProduit);
+            $details->setStockProduit($qteProduit);
+            $details->setNombre($produits->getNombre());
+
             $manager->persist($details);
             $manager->flush();
             $this->addFlash('success','Le produit a été ajouter avec succès.');

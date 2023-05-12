@@ -34,9 +34,22 @@ class Detail
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $releaseDate = null;
 
+    #[ORM\ManyToMany(targetEntity: Produit::class, mappedBy: 'detail')]
+    private Collection $produits;
+
+    #[ORM\Column(length: 255)]
+    private ?string $nomProduit = null;
+
+    #[ORM\Column]
+    private ?float $stockProduit = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $nombre = null;
+
     public function __construct()
     {
         $this->factures = new ArrayCollection();
+        $this->produits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -205,6 +218,69 @@ class Detail
     public function setReleaseDate(?\DateTimeInterface $releaseDate): self
     {
         $this->releaseDate = $releaseDate;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Produit>
+     */
+    public function getProduits(): Collection
+    {
+        return $this->produits;
+    }
+
+    public function addProduit(Produit $produit): self
+    {
+        if (!$this->produits->contains($produit)) {
+            $this->produits->add($produit);
+            $produit->addDetail($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduit(Produit $produit): self
+    {
+        if ($this->produits->removeElement($produit)) {
+            $produit->removeDetail($this);
+        }
+
+        return $this;
+    }
+
+    public function getNomProduit(): ?string
+    {
+        return $this->nomProduit;
+    }
+
+    public function setNomProduit(string $nomProduit): self
+    {
+        $this->nomProduit = $nomProduit;
+
+        return $this;
+    }
+
+    public function getStockProduit(): ?float
+    {
+        return $this->stockProduit;
+    }
+
+    public function setStockProduit(float $stockProduit): self
+    {
+        $this->stockProduit = $stockProduit;
+
+        return $this;
+    }
+
+    public function getNombre(): ?float
+    {
+        return $this->nombre;
+    }
+
+    public function setNombre(?float $nombre): self
+    {
+        $this->nombre = $nombre;
 
         return $this;
     }

@@ -49,8 +49,18 @@ class Produit
     #[ORM\Column(nullable: true)]
     private ?float $nombre = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $NomProduitDetaille = null;
+
+    #[ORM\Column(length: 255,nullable: true)]
+    private ?string $nomProduitDetail = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $prixDetail = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $unite = null;
+
+    #[ORM\ManyToMany(targetEntity: Detail::class, inversedBy: 'produits')]
+    private Collection $detail;
 
     public function __construct()
     {
@@ -58,6 +68,7 @@ class Produit
         $this->sorties = new ArrayCollection();
         $this->factures = new ArrayCollection();
         $this->facture2s = new ArrayCollection();
+        $this->detail = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -285,14 +296,63 @@ class Produit
         return $this;
     }
 
-    public function getNomProduitDetaille(): ?string
+
+    public function getNomProduitDetail(): ?string
     {
-        return $this->NomProduitDetaille;
+        return $this->nomProduitDetail;
     }
 
-    public function setNomProduitDetaille(string $NomProduitDetaille): self
+    public function setNomProduitDetail(string $nomProduitDetail): self
     {
-        $this->NomProduitDetaille = $NomProduitDetaille;
+        $this->nomProduitDetail = $nomProduitDetail;
+
+        return $this;
+    }
+
+    public function getPrixDetail(): ?float
+    {
+        return $this->prixDetail;
+    }
+
+    public function setPrixDetail(?float $prixDetail): self
+    {
+        $this->prixDetail = $prixDetail;
+
+        return $this;
+    }
+
+    public function getUnite(): ?float
+    {
+        return $this->unite;
+    }
+
+    public function setUnite(?float $unite): self
+    {
+        $this->unite = $unite;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Detail>
+     */
+    public function getDetail(): Collection
+    {
+        return $this->detail;
+    }
+
+    public function addDetail(Detail $detail): self
+    {
+        if (!$this->detail->contains($detail)) {
+            $this->detail->add($detail);
+        }
+
+        return $this;
+    }
+
+    public function removeDetail(Detail $detail): self
+    {
+        $this->detail->removeElement($detail);
 
         return $this;
     }

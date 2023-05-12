@@ -28,12 +28,19 @@
                     {% for f in f %}
                         <tr>
                             <td>{{ f.quantite }}</td>
-                            <td>{% if f.produit.count() > 0 %}
+                            <td>
+                                {% if f.produit.count() > 0 %}
                                     {{ f.produit[0].libelle }}
+                                {% endif %}
+                                {% if f.detail.count() > 0 %}
+                                    {{ f.detail[0].libelle }}
                                 {% endif %}
                             </td>
                             <td>
                                 {% if f.produit.count() > 0 %}
+                                    {{ f.prixUnit|number_format(0, ',', ' ') }}
+                                {% endif %}
+                                {% if f.detail.count() > 0 %}
                                     {{ f.prixUnit|number_format(0, ',', ' ') }}
                                 {% endif %}
                             </td>

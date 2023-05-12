@@ -53,10 +53,6 @@
                                 <th>{{ produit.prixUnit | number_format(0, ',', ' ') }}</th>
                                 <th>{{ produit.total | number_format(0, ',', ' ') }}</th>
                                 <th>{{ produit.releaseDate|date('d-m-Y') }}</th>
-                                <td>
-
-                                        {{ produit.NomProduitDetaille }}<br>
-                                </td>
                                 <th class="text-center">
                                     <a title="Modifier" href="{{ path('produit_edit',{'id':produit.id}) }}"><i class="fa fa-edit"></i></a>
                                     <a title="supprimer" href="{{ path('produit_delete', {'id':produit.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
@@ -103,7 +99,7 @@
                 flashMessage.remove();
                 flashMessage = document.getElementById('flash-message');
             }
-        }, 10000);
+        }, 5000);
     </script>
 
 

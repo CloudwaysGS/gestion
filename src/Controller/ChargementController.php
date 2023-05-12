@@ -128,18 +128,27 @@ class ChargementController extends AbstractController
             $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
         }
 
-
-        $data = [];
+        $data = array();
         $total = 0;
-        foreach ($f as $fac) {
-            $produit = $fac->getProduit()->first();
-            $data[] = [
-                'Quantité achetée' => $fac->getQuantite(),
-                'Produit' => $produit->getLibelle(),
-                'Prix unitaire' => $produit->getPrixUnit(),
-                'Montant' => $fac->getMontant(),
-            ];
-            $total += $fac->getMontant();
+        foreach ($f as $facture) {
+            $produit = $facture->getProduit()->first();
+            $detail = $facture->getDetail()->first();
+            if ($produit){
+                $data[] = array(
+                    'Quantité achetée' => $facture->getQuantite(),
+                    'Produit' => $facture->getProduit()->first()->getLibelle(),
+                    'Prix unitaire' => $facture->getProduit()->first()->getPrixUnit(),
+                    'Montant' => $facture->getMontant(),
+                );
+            } elseif ($detail){
+                $data[] = array(
+                    'Quantité achetée' => $facture->getQuantite(),
+                    'Produit' => $facture->getDetail()->first()->getLibelle(),
+                    'Prix unitaire' => $facture->getDetail()->first()->getPrixUnit(),
+                    'Montant' => $facture->getMontant(),
+                );
+            }
+            $total += $facture->getMontant();
         }
         $data[] = [
             'Quantité achetée' => '',
