@@ -258,5 +258,117 @@ class FactureController extends AbstractController
         }
     }
 
+    /*#[Route('/facture/export', name: 'facture_export')]
+    public function export(FactureRepository $fac): Response
+    {
+        $facture = $fac->findAllOrderedByDate();
+        if (empty($facture)) {
+            $this->addFlash('danger', 'Pas de facture trouver. Veuillez ajouter une facture');
+            return $this->redirectToRoute('facture_liste');
+        }
+        $client = $facture[0]->getClient();
+        $clientData = array(
+            'Nom du client' => $client ? $client->getNom() : '',
+            'Adresse du client' => $client ? $client->getAdresse() : '',
+            'Téléphone du client' => $client ? $client->getTelephone() : '',
+        );
+        $data = array();
+        $total = 0;
+        foreach ($facture as $f) {
+            $produit = $f->getProduit()->first();
+            $detail = $f->getDetail()->first();
+            if ($produit){
+                $data[] = array(
+                    'Quantité achetée' => $f->getQuantite(),
+                    'Produit' => $f->getProduit()->first()->getLibelle(),
+                    'Prix unitaire' => $f->getProduit()->first()->getPrixUnit(),
+                    'Montant' => $f->getMontant(),
+                );
+            } elseif ($detail){
+                $data[] = array(
+                    'Quantité achetée' => $f->getQuantite(),
+                    'Produit' => $f->getDetail()->first()->getLibelle(),
+                    'Prix unitaire' => $f->getDetail()->first()->getPrixUnit(),
+                    'Montant' => $f->getMontant(),
+                );
+            }
+            $total += $f->getMontant();
+        }
+        $data[] = array(
+            'Quantité achetée' => '',
+            'Produit' => '',
+            'Prix unitaire' => '',
+            'Montant total' => '',
+        );
+        $headers = array(
+            'Quantité',
+            'Produit',
+            'Prix unitaire',
+            'Montant',
+        );
+        $filename = '';
+        if ($client !== null) {
+            $filename = $client->getNom();
+        }
+        $filename .= date("Y-m-d_H-i", time()) . ".pdf";
+
+        // Initialisation du PDF
+        $pdf = new \FPDF();
+        $pdf->AddPage();
+
+        // Titre de la facture
+        $pdf->SetFont('Arial', 'B', 20);
+        $pdf->Cell(0, 20, 'Facture', 0, 1, 'C');
+        $pdf->Ln(0);
+        $securityContext = $this->container->get('security.authorization_checker');
+        $prenomNom = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom() : 'Anonyme';
+        $adresse = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getAdresse() : 'Anonyme';
+        $phone = $securityContext->isGranted('IS_AUTHENTICATED_FULLY') ? $this->getUser()->getTelephone() : 'Anonyme';
+        // Informations sur le commerçant
+        $pdf->SetFont('Arial', 'B', 15);
+        $pdf->Cell(0, 10, 'COMMERCANT : '.$prenomNom, 0, 1, 'C');
+        $pdf->Cell(0, 10, 'ADRESSE : '.$adresse, 0, 1,'C');
+        $pdf->Cell(0, 10, 'TELEPHONE : '.$phone, 0, 1,'C');
+        $pdf->Ln(0);
+
+        // Informations sur le client
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 10, 'Informations sur le client', 0, 1,'C');
+        $pdf->Ln(0);
+        foreach ($clientData as $key => $value) {
+            $pdf->SetFont('Arial', '', 12);
+            $pdf->Cell(0, 5, utf8_decode($key) . ' :', 0, 1, 'C');
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->Cell(0, 5, utf8_decode($value), 0, 1, 'C');
+        }
+        $pdf->Ln(2);
+
+        // Affichage des en-têtes du tableau
+        foreach ($headers as $header) {
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(45, 10, utf8_decode($header), 1, 0, 'C');
+        }
+        $pdf->Ln();
+
+// Affichage des données de la facture
+        foreach ($data as $row) {
+            foreach ($row as $key => $value) {
+                $pdf->SetFont('Arial', '', 12);
+                $pdf->Cell(45, 10, utf8_decode($value), 1, 0, 'C');
+            }
+            $pdf->Ln();
+        }
+
+// Affichage du total de la facture
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(135, -10, '              Total', 1, 0, 'L');
+        $pdf->Cell(45, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C');
+
+// Téléchargement du fichier PDF
+        $pdf->Output('D', $filename);
+        exit;
+
+
+    }*/
 
 }
