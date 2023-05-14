@@ -58,6 +58,7 @@ class FactureController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $produit = $facture->getProduit()->first();
             $details = $facture->getDetail()->first();
+
             if ($produit){
                 $p = $manager->getRepository(Produit::class)->find($produit);
                 if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {

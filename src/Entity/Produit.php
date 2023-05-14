@@ -56,12 +56,6 @@ class Produit
     #[ORM\Column(nullable: true)]
     private ?float $prixDetail = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?float $unite = null;
-
-    #[ORM\ManyToMany(targetEntity: Detail::class, inversedBy: 'produits')]
-    private Collection $detail;
-
     public function __construct()
     {
         $this->entrees = new ArrayCollection();
@@ -317,42 +311,6 @@ class Produit
     public function setPrixDetail(?float $prixDetail): self
     {
         $this->prixDetail = $prixDetail;
-
-        return $this;
-    }
-
-    public function getUnite(): ?float
-    {
-        return $this->unite;
-    }
-
-    public function setUnite(?float $unite): self
-    {
-        $this->unite = $unite;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Detail>
-     */
-    public function getDetail(): Collection
-    {
-        return $this->detail;
-    }
-
-    public function addDetail(Detail $detail): self
-    {
-        if (!$this->detail->contains($detail)) {
-            $this->detail->add($detail);
-        }
-
-        return $this;
-    }
-
-    public function removeDetail(Detail $detail): self
-    {
-        $this->detail->removeElement($detail);
 
         return $this;
     }

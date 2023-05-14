@@ -21,7 +21,7 @@ class ProduitController extends AbstractController
 
 
     #[Route('/produit/liste', name: 'produit_liste')]
-    public function index(ProduitRepository $prod, Request $request, FlashyNotifier $flashy): Response
+    public function index(EntityManagerInterface $manager ,ProduitRepository $prod, Request $request, FlashyNotifier $flashy): Response
     {
         $lastDayOfMonth = new \DateTime('last day of this month');
         $today = new \DateTime();
@@ -130,6 +130,11 @@ class ProduitController extends AbstractController
     #[Route('/produit/edit/{id}', name: 'produit_edit')]
     public function edit($id,ProduitRepository $repo,Request $request,EntityManagerInterface $entityManager): Response
     {
+        $lastDayOfMonth = new \DateTime('last day of this month');
+        $today = new \DateTime();
+        $remainingDays = $lastDayOfMonth->diff($today)->days;
+        $message = ($remainingDays === 2) ? "Attention : Il ne reste que 2 jours avant la fin du mois en cours !" : (($remainingDays === 1) ? "Attention : Il ne reste plus que 1 jour avant la fin du mois en cours !" : "");
+
         $produits =$repo->find($id);
         $form = $this->createForm(ProduitType::class, $produits);
         $form->handleRequest($request);
@@ -146,7 +151,9 @@ class ProduitController extends AbstractController
         }
         $produits = array_slice($produits, $offset, $limit);
         if($form->isSubmitted() && $form->isValid()){
-           $entityManager->persist($form->getData());
+            $update = $form->getData()->getQtStock() * $form->getData()->getPrixUnit();
+            $form->getData()->setTotal($update);
+            $entityManager->persist($form->getData());
            $entityManager->flush();
             return $this->redirectToRoute("produit_liste");
         }
@@ -156,7 +163,8 @@ class ProduitController extends AbstractController
             'page' => $page,
             'limit' => $limit,
             'form' => $form->createView(),
-            'form2' => $form2->createView()
+            'form2' => $form2->createView(),
+            'message' => $message
         ]);
     }
 

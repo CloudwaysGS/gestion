@@ -59,18 +59,6 @@ class DetteFournisseur
         return $this;
     }
 
-    public function getMontantAvance(): ?string
-    {
-        return $this->montantAvance;
-    }
-
-    public function setMontantAvance(string $montantAvance): self
-    {
-        $this->montantAvance = $montantAvance;
-
-        return $this;
-    }
-
     public function getStatut(): ?string
     {
         return $this->statut;
@@ -119,33 +107,4 @@ class DetteFournisseur
         return $this;
     }
 
-    /**
-     * @return Collection<int, PayoffSupplier>
-     */
-    public function getPlayoffSupplier(): Collection
-    {
-        return $this->PlayoffSupplier;
-    }
-
-    public function addPlayoffSupplier(PayoffSupplier $playoffSupplier): self
-    {
-        if (!$this->PlayoffSupplier->contains($playoffSupplier)) {
-            $this->PlayoffSupplier->add($playoffSupplier);
-            $playoffSupplier->setDetteFournisseur($this);
-        }
-
-        return $this;
-    }
-
-    public function removePlayoffSupplier(PayoffSupplier $playoffSupplier): self
-    {
-        if ($this->PlayoffSupplier->removeElement($playoffSupplier)) {
-            // set the owning side to null (unless already changed)
-            if ($playoffSupplier->getDetteFournisseur() === $this) {
-                $playoffSupplier->setDetteFournisseur(null);
-            }
-        }
-
-        return $this;
-    }
 }

@@ -34,9 +34,6 @@ class Detail
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $releaseDate = null;
 
-    #[ORM\ManyToMany(targetEntity: Produit::class, mappedBy: 'detail')]
-    private Collection $produits;
-
     #[ORM\Column(length: 255)]
     private ?string $nomProduit = null;
 
@@ -69,35 +66,12 @@ class Detail
         return $this;
     }
 
-    public function getStock(): ?float
-    {
-        return $this->Stock;
-    }
-
     public function __toString(): string
     {
         // TODO: Implement __toString() method.
         return $this->libelle;
     }
 
-    public function setStock(?float $Stock): self
-    {
-        $this->Stock = $Stock;
-
-        return $this;
-    }
-
-    public function getPrix(): ?float
-    {
-        return $this->prix;
-    }
-
-    public function setPrix(?float $prix): self
-    {
-        $this->prix = $prix;
-
-        return $this;
-    }
 
     public function getMontant(): ?float
     {
@@ -111,18 +85,6 @@ class Detail
         return $this;
     }
 
-    public function getProduit(): ?Produit
-    {
-        return $this->produit;
-    }
-
-    public function setProduit(?Produit $produit): self
-    {
-        $this->produit = $produit;
-
-        return $this;
-    }
-
     public function getFacture(): ?Facture
     {
         return $this->facture;
@@ -131,33 +93,6 @@ class Detail
     public function setFacture(?Facture $facture): self
     {
         $this->facture = $facture;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Facture>
-     */
-    public function getFactures(): Collection
-    {
-        return $this->factures;
-    }
-
-    public function addFacture(Facture $facture): self
-    {
-        if (!$this->factures->contains($facture)) {
-            $this->factures->add($facture);
-            $facture->addDetail($this);
-        }
-
-        return $this;
-    }
-
-    public function removeFacture(Facture $facture): self
-    {
-        if ($this->factures->removeElement($facture)) {
-            $facture->removeDetail($this);
-        }
 
         return $this;
     }
@@ -222,32 +157,6 @@ class Detail
         return $this;
     }
 
-    /**
-     * @return Collection<int, Produit>
-     */
-    public function getProduits(): Collection
-    {
-        return $this->produits;
-    }
-
-    public function addProduit(Produit $produit): self
-    {
-        if (!$this->produits->contains($produit)) {
-            $this->produits->add($produit);
-            $produit->addDetail($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProduit(Produit $produit): self
-    {
-        if ($this->produits->removeElement($produit)) {
-            $produit->removeDetail($this);
-        }
-
-        return $this;
-    }
 
     public function getNomProduit(): ?string
     {

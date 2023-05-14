@@ -38,6 +38,7 @@
                                 <th>Stock</th>
                                 <th>prixUnit</th>
                                 <th>Montant</th>
+                                <th>Stock_produit</th>
                                 <th>Date</th>
                                 <th>Action</th>
                             </tr>
@@ -47,6 +48,7 @@
                                     <th>{{ produit.qtStock }}</th>
                                     <th>{{ produit.prixUnit | number_format(0, ',', ' ') }}</th>
                                     <th>{{ produit.total | number_format(0, ',', ' ') }}</th>
+                                    <th>{{ produit.stockProduit }}</th>
                                     <th>{{ produit.releaseDate|date('d-m-Y') }}</th>
                                     <th class="text-center">
                                         <a title="Modifier" href="{{ path('produit_edit',{'id':produit.id}) }}"><i class="fa fa-edit"></i></a>
