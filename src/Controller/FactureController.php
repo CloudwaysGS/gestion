@@ -44,7 +44,7 @@ class FactureController extends AbstractController
     }
 
     #[Route('/facture/add', name: 'facture_add')]
-    public function add(EntityManagerInterface $manager,FactureRepository $factureRepository, Request $request, Security $security,SessionInterface $session): Response
+    public function add(EntityManagerInterface $manager,FactureRepository $factureRepository, Request $request, Security $security): Response
     {
         $user = $security->getUser();
         if (!$user) {
@@ -56,23 +56,17 @@ class FactureController extends AbstractController
         $form = $this->createForm(FactureType::class, $facture);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+
             $produit = $facture->getProduit()->first();
             $details = $facture->getDetail()->first();
 
             if ($produit){
                 $p = $manager->getRepository(Produit::class)->find($produit);
                 if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
-                    $response = new JsonResponse([
-                        'status' => 'error',
-                        'message' => 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock(),
-                    ]);
-                    return $response;
+                    $this->addFlash('danger','La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
                 } else if ($facture->getQuantite() <= 0) {
-                    $response = new JsonResponse([
-                        'status' => 'error',
-                        'message' => 'Entrée une quantité positive svp!',
-                    ]);
-                    return $response;
+                    $this->addFlash('danger','Entrée une quantité positive svp!');
+
                 } else {
                     $date = new \DateTime();
                     $facture->setDate($date);
@@ -83,11 +77,7 @@ class FactureController extends AbstractController
                     foreach ($fp as $fact) {
                         foreach ($fact->getProduit() as $produit) {
                             if ($produit->getLibelle() === $produitLibelle) {
-                                $response = new JsonResponse([
-                                    'status' => 'error',
-                                    'message' => $produit->getLibelle().' a déjà été ajouté précédemment.',
-                                ]);
-                                return $response;
+                                $this->addFlash('danger',$produit->getLibelle().' a déjà été ajouté précédemment.');
                                 return $this->redirectToRoute('facture_liste');
                             }
                         }
@@ -102,17 +92,10 @@ class FactureController extends AbstractController
 
                 $p = $manager->getRepository(Detail::class)->find($details);
                 if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
-                    $response = new JsonResponse([
-                        'status' => 'error',
-                        'message' => 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock(),
-                    ]);
-                    return $response;
+                    $this->addFlash('danger','La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
+
                 } else if ($facture->getQuantite() <= 0) {
-                    $response = new JsonResponse([
-                        'status' => 'error',
-                        'message' => 'Entrée une quantité positive svp!',
-                    ]);
-                    return $response;
+                    $this->addFlash('danger','Entrée une quantité positive svp!');
                 } else {
                     $date = new \DateTime();
                     $facture->setDate($date);
@@ -124,11 +107,7 @@ class FactureController extends AbstractController
                     foreach ($fp as $fact) {
                         foreach ($fact->getDetail() as $produit) {
                             if ($produit->getLibelle() === $produitLibelle) {
-                                $response = new JsonResponse([
-                                    'status' => 'error',
-                                    'message' => $produit->getLibelle().' a déjà été ajouté précédemment.',
-                                ]);
-                                return $response;
+                                $this->addFlash('danger',$produit->getLibelle().' a déjà été ajouté précédemment.');
                                 return $this->redirectToRoute('facture_liste');
                             }
                         }
@@ -136,20 +115,19 @@ class FactureController extends AbstractController
                     $manager->persist($facture);
                     $manager->flush();
                     //Mise à jour du produit
-                    $p->setQtStock($p->getQtStock() - $facture->getQuantite());
-                    if(floatval($facture->getQuantite()) === $details->getNombre() /*|| floatval($facture->getQuantite()) === 2 * $produit->getNombre() || floatval($facture->getQuantite()) === 3 * $produit->getNombre() || floatval($facture->getQuantite()) === 4 * $produit->getNombre()*/) {
-                        $stock = $details->getStockProduit() - 1;
-                        $p->setStockProduit($stock);
-                    }elseif (floatval($facture->getQuantite()) === 2 * $details->getNombre() /*floatval($facture->getQuantite()) === 3 * $produit->getNombre() || floatval($facture->getQuantite()) === 4 * $produit->getNombre()*/) {
-                        $stock = $details->getStockProduit() - 2;
-                        $p->setStockProduit($stock);
-                    }elseif (floatval($facture->getQuantite()) === 3 * $details->getNombre() /*floatval($facture->getQuantite()) === 4 * $produit->getNombre()*/) {
-                        $stock = $details->getStockProduit() - 3;
-                        $p->setStockProduit($stock);
-                    }elseif (floatval($facture->getQuantite()) === 4 * $details->getNombre()) {
-                        $stock = $details->getStockProduit() - 4;
+                    $dstock = $p->getQtStock() - $facture->getQuantite();
+                    $p->setQtStock($dstock);
+                    $manager->flush();
+
+                    $quantite = floatval($facture->getQuantite());
+                    $nombre = $details->getNombre();
+                    $stock = $details->getStockProduit();
+
+                    if ($quantite >= $nombre && $quantite <= 4 * $nombre) {
+                        $stock -= $quantite / $nombre;
                         $p->setStockProduit($stock);
                     }
+
                     $manager->flush();
                 }
             }
@@ -209,6 +187,13 @@ class FactureController extends AbstractController
             $repository->remove($facture); // Mise à jour de l'état de la facture
 
             // Restaurer la quantité de stock du produit
+            $quantite = floatval($facture->getQuantite());
+            $nombre = $details->getNombre();
+            $stock = $details->getStockProduit();
+            if ($quantite >= $nombre && $quantite <= 4 * $nombre) {
+                $stock += $quantite / $nombre;
+                $p->setStockProduit($stock);
+            }
             $p->setQtStock($p->getQtStock() + $quantite);
         }
 

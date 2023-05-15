@@ -44,6 +44,7 @@ class Chargement
     {
         $this->facture = new ArrayCollection();
         $this->facture2s = new ArrayCollection();
+        $this->produits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -182,4 +183,5 @@ class Chargement
 
         return $this;
     }
+
 }

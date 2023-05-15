@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DetailController extends AbstractController
 {
-    #[Route('/detail', name: 'detail')]
+    #[Route('/detail', name: 'detail_liste')]
     public function index(DetailRepository $charge, Request $request): Response
     {
         $details = $charge->findAllOrderedByDate();

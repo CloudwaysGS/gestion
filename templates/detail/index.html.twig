@@ -16,14 +16,14 @@
     </div>
     {{ form_end(form2) }}#}
     <div class="row">
-        <div class="container col-md-9">
+        <div class="container col-md-13">
             {% for message in app.session.flashBag.get('success') %}
                 <div id="flash-message" class="alert alert-success">{{ message }}</div>
             {% endfor %}
             {% for message in app.session.flashBag.get('danger') %}
                 <div id="flash-message" class="alert alert-danger">{{ message }}</div>
             {% endfor %}
-
+            <a href="{{ path('produit_liste') }}" class="btn btn-primary mb-1">+</a>
             <div class="card ">
                 <div class="card-header"><span class="page-link">Liste des produits<span class="sr-only">(current)</span></span>
                 </div>
@@ -31,24 +31,21 @@
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <tr>
-                                {#
-                                <th>Identifiant</th>
-                                #}
-                                <th>libelle</th>
+                                <th>Nom_produit</th>
                                 <th>Stock</th>
-                                <th>prixUnit</th>
-                                <th>Montant</th>
-                                <th>Stock_produit</th>
+                                <th>Prix Unit</th>
+                                <th>libellé détail</th>
+                                <th>Stock_detail</th>
                                 <th>Date</th>
                                 <th>Action</th>
                             </tr>
                             {% for produit in details %}
                                 <tr>
+                                    <th>{{ produit.nomProduit }}</th>
+                                    <th>{{ produit.stockProduit }}</th>
+                                    <th>{{ produit.prixUnitDetail }}</th>
                                     <th>{{ produit.libelle }}</th>
                                     <th>{{ produit.qtStock }}</th>
-                                    <th>{{ produit.prixUnit | number_format(0, ',', ' ') }}</th>
-                                    <th>{{ produit.total | number_format(0, ',', ' ') }}</th>
-                                    <th>{{ produit.stockProduit }}</th>
                                     <th>{{ produit.releaseDate|date('d-m-Y') }}</th>
                                     <th class="text-center">
                                         <a title="Modifier" href="{{ path('produit_edit',{'id':produit.id}) }}"><i class="fa fa-edit"></i></a>
@@ -68,7 +65,7 @@
                                             <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
                                         </li>
                                     {% else %}
-                                        <li class="page-item"><a class="page-link" href="{{ path('produit_liste', {'page': i}) }}">{{ i }}</a></li>
+                                        <li class="page-item"><a class="page-link" href="{{ path('detail_liste', {'page': i}) }}">{{ i }}</a></li>
                                     {% endif %}
                                 {% endfor %}
                             {% endif %}

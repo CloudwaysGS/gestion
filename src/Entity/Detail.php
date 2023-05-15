@@ -43,6 +43,9 @@ class Detail
     #[ORM\Column(nullable: true)]
     private ?float $nombre = null;
 
+    #[ORM\Column]
+    private ?float $prixUnitDetail = null;
+
     public function __construct()
     {
         $this->factures = new ArrayCollection();
@@ -190,6 +193,18 @@ class Detail
     public function setNombre(?float $nombre): self
     {
         $this->nombre = $nombre;
+
+        return $this;
+    }
+
+    public function getPrixUnitDetail(): ?float
+    {
+        return $this->prixUnitDetail;
+    }
+
+    public function setPrixUnitDetail(float $prixUnitDetail): self
+    {
+        $this->prixUnitDetail = $prixUnitDetail;
 
         return $this;
     }

@@ -52,6 +52,7 @@ class ProduitController extends AbstractController
         $offset = ($page - 1) * $limit;
         $produits = $nom ? $prod->findByName($nom, $limit, $offset) : $prod->findAllOrderedByDate($limit, $offset);
         $flashy->info('Vous avez '.$total.' produits pour l\'instant');
+
         return $this->render('produit/liste.html.twig', [
             'controller_name' => 'ProduitController',
             'produits' => $produits,
@@ -94,6 +95,7 @@ class ProduitController extends AbstractController
             $detail = new Detail();
             $nomProduitDetail = $produit->getNomProduitDetail();
             $nomProduitDetail !== null ? $detail->setLibelle($nomProduitDetail) : null;
+            $prixProd = $produit->getPrixUnit();
 
             $detail->setPrixUnit($produit->getPrixDetail());
             $detail->setQtStock($produit->getNombre() * $produit->getQtStock());
@@ -102,14 +104,17 @@ class ProduitController extends AbstractController
             $detail->setNomProduit($libelleProduit);
             $detail->setStockProduit($produit->getQtStock());
             $detail->setNombre($produit->getNombre());
-            if ($detail->getLibelle() != null){
+            $detail->setPrixUnitDetail($prixProd);
+            $manager->persist($detail);
+            $manager->flush();
+            /*if ($detail->getLibelle() != null){
                 $manager->persist($detail);
                 $manager->flush();
-            }
+            }*/
             $this->addFlash('success', 'Le produit a été ajouté avec succès.');
         }
 
-        return $this->redirectToRoute('produit_liste');
+        return $this->redirectToRoute('detail_liste');
     }
 
     private function compareStrings(string $str1, string $str2): bool
@@ -123,7 +128,7 @@ class ProduitController extends AbstractController
     #[Route('/produit/delete/{id}', name: 'produit_delete')]
     public function delete(Produit $produit, ProduitRepository $repository){
         $repository->remove($produit,true);
-        $this->addFlash('danger', 'Le produit a été supprimé avec succès');
+        $this->addFlash('success', 'Le produit a été supprimé avec succès');
         return $this->redirectToRoute('produit_liste');
     }
 

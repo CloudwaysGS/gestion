@@ -78,12 +78,7 @@ class FactureType extends AbstractType
                     'style' => 'height: 10rem;', // ajout de la hauteur personnalisée
                 ],
                 'required' => false,
-                'query_builder' => function(EntityRepository $er) use ($libelle) {
-                    return $er->createQueryBuilder('p')
-                        ->where('p.libelle LIKE :libelle')
-                        ->setParameter('libelle', '%'.$libelle.'%')
-                        ->orderBy('p.libelle', 'ASC');
-                },
+
             ])
         ;
     }

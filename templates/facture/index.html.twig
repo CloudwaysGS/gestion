@@ -81,7 +81,7 @@
                 <div id="flash-message" class="alert alert-danger">{{ message }}</div>
             {% endfor %}
 
-            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture_delete_all') }}'">Enregistrer</button>
+            <button class="glow-on-hover mb-1" onclick="window.location.href='{{ path('facture_delete_all') }}'">Enregistrer</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'">Mes factures</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">Créer client</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">Facture 2</button>
@@ -146,7 +146,7 @@
 
 {% block javascripts %}
 
-    <script>
+    {#<script>
         var form = $('#form');
         form.on('submit', function(event) {
             event.preventDefault();
@@ -168,7 +168,7 @@
                 }
             });
         });
-    </script>
+    </script>#}
     <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
     <script>
         setTimeout(function() {

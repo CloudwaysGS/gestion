@@ -16,7 +16,7 @@
     </div>
     {{ form_end(form2) }}
     <div class="row">
-     <div class="container col-md-9">
+     <div class="container col-md-8">
          {% for message in app.session.flashBag.get('success') %}
              <div id="flash-message" class="alert alert-success">{{ message }}</div>
          {% endfor %}
@@ -35,16 +35,12 @@
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <tr>
-{#
-                            <th>Identifiant</th>
-#}
                             <th>libelle</th>
                             <th>Stock</th>
                             <th>prixUnit</th>
                             <th>Montant</th>
                             <th>Date</th>
-                            <th>détaillant</th>
-                            <th>Action</th>
+                            <th>Actions</th>
                         </tr>
                         {% for produit in produits %}
                             <tr>
@@ -80,7 +76,7 @@
             </div>
      </div>
      </div>
-     <div class="container col-md-3">
+     <div class="container col-md-4">
          <div class="card">
              <div class="card-header">Formulaire d'ajout de produit</div>
              <div class="card-body">
