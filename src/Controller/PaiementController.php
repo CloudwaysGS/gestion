@@ -60,7 +60,7 @@ class PaiementController extends AbstractController
         }
 
         $client = $payment->getClient();
-        $currentDebt = $client->getDette()->first();
+        $currentDebt = $client->getDette()->last();
         $remainingDebt = (!$currentDebt || !method_exists($currentDebt, 'getReste')) ? null : $currentDebt->getReste();
         if (is_null($remainingDebt)) {
             $this->addFlash('danger','Aucune dette n\'a été trouvée pour ce client.');
@@ -68,14 +68,12 @@ class PaiementController extends AbstractController
         }
 
         $paymentAmount = $payment->getMontant();
-
         if ($currentDebt->getStatut() == 'payée') {
             $this->addFlash('success','La dette a déjà été réglée.');
             return $this->redirectToRoute('paiement_liste');
         }
 
         $remainingDebt -= $paymentAmount;
-
         if ($remainingDebt < 0) {
             $this->addFlash('danger',$client->getNom().' a payé plus que ce qu\'il devait et on doit lui  rembourser '.abs($remainingDebt).' F');
             $currentDebt->setStatut('payée');

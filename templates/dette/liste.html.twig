@@ -93,8 +93,9 @@
                                 {% if dette %}
                                     <th>{{ dette[0].reste < 0 ? 'A Remettre' : 'Reste' }}</th>
                                 {% endif %}
-                                <th>Date</th>
+                                <th>comment</th>
                                 <th>statut</th>
+                                <th>Date</th>
                                 <th>action</th>
                             </tr>
                             {% for d in dette %}
@@ -108,11 +109,9 @@
                                     {% else %}
                                         <th>{{ d.reste }}</th>
                                     {% endif %}
-
-
-
-                                    <th>{{ d.dateCreated | date('d/m/Y') }}</th>
+                                    <th>{{ d.commentaire }}</th>
                                     <th style="color: {% if d.statut == 'payée' %}#1cc88a{% else %}red{% endif %}">{{ d.statut }}</th>
+                                    <th>{{ d.dateCreated | date('d/m/Y') }}</th>
                                     <th>
                                         <a title="Avance" href="{{ path('paiement_add', {'id':d.id}) }}"><i class='far fa-address-card'></i></a>
                                         <a title="supprimer" href="{{ path('dette_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>

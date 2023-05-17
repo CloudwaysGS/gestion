@@ -40,6 +40,9 @@ class Dette
     #[ORM\Column(nullable: true)]
     private ?float $reste = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $commentaire = null;
+
     public function __construct()
     {
         $this->paiements = new ArrayCollection();
@@ -184,6 +187,18 @@ class Dette
     public function setReste(?float $reste): self
     {
         $this->reste = $reste;
+
+        return $this;
+    }
+
+    public function getCommentaire(): ?string
+    {
+        return $this->commentaire;
+    }
+
+    public function setCommentaire(?string $commentaire): self
+    {
+        $this->commentaire = $commentaire;
 
         return $this;
     }

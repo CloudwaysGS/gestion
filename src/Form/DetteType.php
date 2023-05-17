@@ -41,6 +41,7 @@ class DetteType extends AbstractType
                     ])
                 ]
             ))
+            ->add('commentaire')
 
             ->add('Valider', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')
