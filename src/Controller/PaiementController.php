@@ -63,7 +63,7 @@ class PaiementController extends AbstractController
         $currentDebt = $client->getDette()->last();
         $remainingDebt = (!$currentDebt || !method_exists($currentDebt, 'getReste')) ? null : $currentDebt->getReste();
         if (is_null($remainingDebt)) {
-            $this->addFlash('danger','Aucune dette n\'a été trouvée pour ce client.');
+            $this->addFlash('danger','Aucune dette n\'a été trouvée pour '.$client->getNom().'.');
             return $this->redirectToRoute('paiement_liste');
         }
 
