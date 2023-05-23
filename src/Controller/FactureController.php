@@ -88,7 +88,6 @@ class FactureController extends AbstractController
                     }
                     $detailsProduit = new Detail(); // Créez un nouvel objet Detail
                     $detailsProduit->addProduit($produit); // Ajoutez le produit au détail
-                    dd($detailsProduit);
                     $stockDetail = $detailsProduit->getProduits()->first()->getQtStock();
                     $detailsProduit->setStockProduit($stockDetail);
                     $manager->persist($facture);
@@ -100,7 +99,6 @@ class FactureController extends AbstractController
                     $manager->flush();
                 }
             } else if ($details){
-
                 $p = $manager->getRepository(Detail::class)->find($details);
                 if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
                     $this->addFlash('danger','La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
@@ -110,7 +108,6 @@ class FactureController extends AbstractController
                 } else {
                     $date = new \DateTime();
                     $facture->setDate($date);
-
                     $facture->setPrixUnit($p->getPrixUnit());
                     $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
                     $produitLibelle = $facture->getDetail()->first()->getLibelle();
@@ -123,12 +120,10 @@ class FactureController extends AbstractController
                             }
                         }
                     }
-                    $produit = new Produit(); // Créez un nouvel objet Produit
-                    $details->addProduit($produit); // Passez l'objet Produit en tant qu'argument
-                    dd($produit);
+                    /*$produit = new Produit(); // Créez un nouvel objet Produit
+                    $details->addProduit($produit); // Passez l'objet Produit en tant qu'argument*/
 
-
-                    /*$fAll = $factureRepository->findAll();
+                    $fAll = $factureRepository->findAll();
                     $lastFourFacts = array_slice($fAll, -4);
 
                     $productCount = 1;
@@ -142,7 +137,7 @@ class FactureController extends AbstractController
                         }
 
                     }
-                    dd($somme);*/
+
                     $manager->persist($facture);
                     $manager->flush();
                     //Mise à jour du produit
