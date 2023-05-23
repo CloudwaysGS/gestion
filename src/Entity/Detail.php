@@ -34,17 +34,20 @@ class Detail
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $releaseDate = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255,nullable: true)]
     private ?string $nomProduit = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $stockProduit = null;
 
     #[ORM\Column(nullable: true)]
     private ?float $nombre = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $prixUnitDetail = null;
+
+    #[ORM\ManyToMany(targetEntity: Produit::class, mappedBy: 'detail')]
+    private Collection $produits;
 
     public function __construct()
     {
@@ -71,9 +74,9 @@ class Detail
 
     public function __toString(): string
     {
-        // TODO: Implement __toString() method.
-        return $this->libelle;
+        return $this->libelle ?? '';
     }
+
 
 
     public function getMontant(): ?float
@@ -88,17 +91,6 @@ class Detail
         return $this;
     }
 
-    public function getFacture(): ?Facture
-    {
-        return $this->facture;
-    }
-
-    public function setFacture(?Facture $facture): self
-    {
-        $this->facture = $facture;
-
-        return $this;
-    }
 
     /**
      * @return float|null
@@ -208,4 +200,32 @@ class Detail
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Produit>
+     */
+    public function getProduits(): Collection
+    {
+        return $this->produits;
+    }
+
+    public function addProduit(Produit $produit): self
+    {
+        if (!$this->produits->contains($produit)) {
+            $this->produits->add($produit);
+            $produit->addDetail($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduit(Produit $produit): self
+    {
+        if ($this->produits->removeElement($produit)) {
+            $produit->removeDetail($this);
+        }
+
+        return $this;
+    }
+
 }

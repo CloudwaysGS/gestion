@@ -9,6 +9,7 @@ use App\Entity\Facture2;
 use App\Entity\Produit;
 use App\Form\FactureType;
 use App\Repository\FactureRepository;
+use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -44,7 +45,7 @@ class FactureController extends AbstractController
     }
 
     #[Route('/facture/add', name: 'facture_add')]
-    public function add(EntityManagerInterface $manager,FactureRepository $factureRepository, Request $request, Security $security): Response
+    public function add(EntityManagerInterface $manager,FactureRepository $factureRepository,ProduitRepository $prod, Request $request, Security $security): Response
     {
         $user = $security->getUser();
         if (!$user) {
@@ -59,8 +60,8 @@ class FactureController extends AbstractController
 
             $produit = $facture->getProduit()->first();
             $details = $facture->getDetail()->first();
-
             if ($produit){
+
                 $p = $manager->getRepository(Produit::class)->find($produit);
                 if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
                     $this->addFlash('danger','La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
@@ -68,24 +69,34 @@ class FactureController extends AbstractController
                     $this->addFlash('danger','Entrée une quantité positive svp!');
 
                 } else {
+
                     $date = new \DateTime();
                     $facture->setDate($date);
                     $facture->setPrixUnit($p->getPrixUnit());
                     $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
                     $produitLibelle = $facture->getProduit()->first()->getLibelle();
                     $fp = $factureRepository->findAllOrderedByDate();
+
                     foreach ($fp as $fact) {
                         foreach ($fact->getProduit() as $produit) {
                             if ($produit->getLibelle() === $produitLibelle) {
                                 $this->addFlash('danger',$produit->getLibelle().' a déjà été ajouté précédemment.');
                                 return $this->redirectToRoute('facture_liste');
                             }
+
                         }
                     }
+                    $detailsProduit = new Detail(); // Créez un nouvel objet Detail
+                    $detailsProduit->addProduit($produit); // Ajoutez le produit au détail
+                    dd($detailsProduit);
+                    $stockDetail = $detailsProduit->getProduits()->first()->getQtStock();
+                    $detailsProduit->setStockProduit($stockDetail);
                     $manager->persist($facture);
                     $manager->flush();
+
                     //Mise à jour du produit
                     $p->setQtStock($p->getQtStock() - $facture->getQuantite());
+                    $detailsProduit->setStockProduit($stockDetail);
                     $manager->flush();
                 }
             } else if ($details){
@@ -112,6 +123,26 @@ class FactureController extends AbstractController
                             }
                         }
                     }
+                    $produit = new Produit(); // Créez un nouvel objet Produit
+                    $details->addProduit($produit); // Passez l'objet Produit en tant qu'argument
+                    dd($produit);
+
+
+                    /*$fAll = $factureRepository->findAll();
+                    $lastFourFacts = array_slice($fAll, -4);
+
+                    $productCount = 1;
+                    $somme = 0;
+                    foreach ($lastFourFacts as $fact) {
+                        foreach ($fact->getDetail() as $produit) {
+                            if ($produit->getLibelle() === $produitLibelle) {
+                                $productCount++;
+                            }
+                            $somme += $fact->getQuantite();
+                        }
+
+                    }
+                    dd($somme);*/
                     $manager->persist($facture);
                     $manager->flush();
                     //Mise à jour du produit
@@ -122,9 +153,10 @@ class FactureController extends AbstractController
                     $quantite = floatval($facture->getQuantite());
                     $nombre = $details->getNombre();
                     $stock = $details->getStockProduit();
-
                     if ($quantite >= $nombre && $quantite <= 4 * $nombre) {
                         $stock -= $quantite / $nombre;
+                        $dstock = $details->getStockProduit() - $facture->getQuantite();
+                        $p->setStockProduit($dstock);
                         $p->setStockProduit($stock);
                     }
 
@@ -212,10 +244,14 @@ class FactureController extends AbstractController
             $client = null;
             $adresse = null;
             $telephone = null;
-            if (!empty($factures) && !empty($factures[0]->getClient())) {
-                $client = $factures[0]->getClient()->getNom();
-                $adresse = $factures[0]->getClient()->getAdresse();
-                $telephone = $factures[0]->getClient()->getTelephone();
+            if (!empty($factures)) {
+                $lastFacture = end($factures);
+                $firstFacture = reset($factures);
+                $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
+                if ($factures[0]->getClient() !== null) {
+                    $adresse = $factures[0]->getClient()->getAdresse();
+                    $telephone = $factures[0]->getClient()->getTelephone();
+                }
             }
             // Save invoices to the Chargement table
             $chargement = new Chargement();

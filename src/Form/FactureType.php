@@ -54,10 +54,12 @@ class FactureType extends AbstractType
             ))
 
             ->add('produit', null, [
-                'label' => false,
+                'label' => 'Liste grossistes',
                 'attr' => [
                     'class' => 'form-control',
-                    'style' => 'height: 15rem;', // ajout de la hauteur personnalisée
+                    'style' => 'height: 5rem;', // ajout de la hauteur personnalisée
+                    'onmouseover' => 'this.style.height = "20rem";', // hauteur augmentée lors du survol de la souris
+                    'onmouseout' => 'this.style.height = "5rem";', // hauteur rétablie lorsque la souris quitte le champ
                 ],
                 'required' => false,
                 'query_builder' => function(EntityRepository $er) use ($libelle) {
@@ -68,18 +70,25 @@ class FactureType extends AbstractType
                 },
             ])
 
+            ->add('detail', null, [
+                'label' => 'Liste détails',
+                'attr' => [
+                    'class' => 'form-control',
+                    'style' => 'height: 5rem;', // ajout de la hauteur personnalisée
+                    'onmouseover' => 'this.style.height = "20rem";', // hauteur augmentée lors du survol de la souris
+                    'onmouseout' => 'this.style.height = "5rem";', // hauteur rétablie lorsque la souris quitte le champ
+                ],
+                'required' => false,
+                'query_builder' => function(EntityRepository $er) use ($libelle) {
+                    return $er->createQueryBuilder('d')
+                        ->where('d.libelle LIKE :libelle')
+                        ->setParameter('libelle', '%'.$libelle.'%')
+                        ->orderBy('d.libelle', 'ASC');
+                },
+            ])
             ->add('Ajouter', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')
             ))
-            ->add('detail', null, [
-                'label' => false,
-                'attr' => [
-                    'class' => 'form-control',
-                    'style' => 'height: 10rem;', // ajout de la hauteur personnalisée
-                ],
-                'required' => false,
-
-            ])
         ;
     }
 

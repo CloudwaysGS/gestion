@@ -37,7 +37,7 @@ class Produit
     #[ORM\Column(type: ("float"))]
     private ?float $total = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0')]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0',nullable: true)]
     private ?string $prixUnit = null;
 
     #[ORM\ManyToMany(targetEntity: Facture::class, mappedBy: 'produit')]
@@ -56,6 +56,9 @@ class Produit
     #[ORM\Column(nullable: true)]
     private ?float $prixDetail = null;
 
+    #[ORM\ManyToMany(targetEntity: Detail::class, inversedBy: 'produits', cascade: ['persist'])]
+    private Collection $detail;
+
     public function __construct()
     {
         $this->entrees = new ArrayCollection();
@@ -63,6 +66,7 @@ class Produit
         $this->factures = new ArrayCollection();
         $this->facture2s = new ArrayCollection();
         $this->detail = new ArrayCollection();
+        $this->details = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -315,5 +319,28 @@ class Produit
         return $this;
     }
 
+    /**
+     * @return Collection<int, Detail>
+     */
+    public function getDetail(): Collection
+    {
+        return $this->detail;
+    }
+
+    public function addDetail(Detail $detail): self
+    {
+        if (!$this->detail->contains($detail)) {
+            $this->detail->add($detail);
+        }
+
+        return $this;
+    }
+
+    public function removeDetail(Detail $detail): self
+    {
+        $this->detail->removeElement($detail);
+
+        return $this;
+    }
 
 }

@@ -179,4 +179,20 @@
         }, 10000);
     </script>
 
+    {#<script>
+        // Récupérer l'élément du champ de produit
+        var produitInput = document.getElementById('facture_produit');
+
+        // Ajouter un écouteur d'événement pour le survol de la souris
+        produitInput.addEventListener('mouseover', function() {
+            this.style.height = '25rem'; // Modifier la hauteur du champ en pixels
+        });
+
+        // Réinitialiser la hauteur lorsque la souris quitte le champ
+        produitInput.addEventListener('mouseout', function() {
+            this.style.height = '10rem'; // Rétablir la hauteur par défaut
+        });
+    </script>#}
+
+
 {% endblock %}

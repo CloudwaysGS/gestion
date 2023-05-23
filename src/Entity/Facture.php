@@ -31,7 +31,7 @@ class Facture
     #[ORM\Column(type: ("float"))]
     private ?float $quantite = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0')]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0',nullable: true)]
     private ?string $prixUnit = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0',nullable: true)]

@@ -68,15 +68,13 @@ class ProduitController extends AbstractController
     #[Route('/produit/add', name: 'produit_add')]
     public function add(EntityManagerInterface $manager, Request $request): Response
     {
-        $produit = new Produit();
-        $date = new \DateTime();
-        $produit->setReleaseDate($date);
-        $produit->setQtStock(0);
-
-        $form = $this->createForm(ProduitType::class, $produit);
+        $form = $this->createForm(ProduitType::class);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $libelleProduit = $produit->getLibelle();
+            $data = $form->getData();
+
+            $libelleProduit = $data->getLibelle();
             $existingProduit = $manager->getRepository(Produit::class)
                 ->findOneBy(['libelle' => $libelleProduit]);
             if ($existingProduit && $this->compareStrings($existingProduit->getLibelle(), $libelleProduit)) {
@@ -85,37 +83,35 @@ class ProduitController extends AbstractController
             }
 
             $user = $this->getUser() ?? throw new \Exception("Aucun utilisateur n'est actuellement connecté");
-            $produit->setUser($user);
-
-            $montant = $produit->getQtStock() * $produit->getPrixUnit();
-            $produit->setTotal($montant);
-            $manager->persist($produit);
+            $data->setUser($user);
+            $data->setReleaseDate(new \DateTime());
+            $montant = $data->getQtStock() * $data->getPrixUnit();
+            $data->setTotal($montant);
+            $manager->persist($data);
             $manager->flush();
 
-            $detail = new Detail();
-            $nomProduitDetail = $produit->getNomProduitDetail();
-            $nomProduitDetail !== null ? $detail->setLibelle($nomProduitDetail) : null;
-            $prixProd = $produit->getPrixUnit();
+            if ($data->getNomProduitDetail() !== null) {
+                $detail = new Detail();
+                $detail->setLibelle($data->getNomProduitDetail());
+                $detail->setPrixUnit($data->getPrixDetail());
+                $detail->setQtStock($data->getNombre() * $data->getQtStock());
+                $detail->setTotal($detail->getPrixUnit() * $detail->getQtStock());
+                $detail->setReleaseDate(new \DateTime());
+                $detail->setNomProduit($libelleProduit);
+                $detail->setStockProduit($data->getQtStock());
+                $detail->setNombre($data->getNombre());
+                $detail->setPrixUnitDetail($data->getPrixUnit());
 
-            $detail->setPrixUnit($produit->getPrixDetail());
-            $detail->setQtStock($produit->getNombre() * $produit->getQtStock());
-            $detail->setTotal($detail->getPrixUnit() * $detail->getQtStock());
-            $detail->setReleaseDate($date);
-            $detail->setNomProduit($libelleProduit);
-            $detail->setStockProduit($produit->getQtStock());
-            $detail->setNombre($produit->getNombre());
-            $detail->setPrixUnitDetail($prixProd);
-            $manager->persist($detail);
-            $manager->flush();
-            /*if ($detail->getLibelle() != null){
                 $manager->persist($detail);
                 $manager->flush();
-            }*/
+            }
+
             $this->addFlash('success', 'Le produit a été ajouté avec succès.');
         }
 
         return $this->redirectToRoute('detail_liste');
     }
+
 
     private function compareStrings(string $str1, string $str2): bool
     {
