@@ -86,16 +86,22 @@ class FactureController extends AbstractController
 
                         }
                     }
-                    $detailsProduit = new Detail(); // Créez un nouvel objet Detail
-                    $detailsProduit->addProduit($produit); // Ajoutez le produit au détail
-                    $stockDetail = $detailsProduit->getProduits()->first()->getQtStock();
-                    $detailsProduit->setStockProduit($stockDetail);
+                    /*$detail = new Detail();
+                    $detail->addProduit($produit);
+
+                    $produits = $detail->getProduits();
+                    $premierProduit = $produits->first();
+                    $stockDetail = $premierProduit->getQtStock();
+                    $detail->setStockProduit($stockDetail);
+                    dd($premierProduit);*/
+
                     $manager->persist($facture);
                     $manager->flush();
 
+
                     //Mise à jour du produit
                     $p->setQtStock($p->getQtStock() - $facture->getQuantite());
-                    $detailsProduit->setStockProduit($stockDetail);
+                    /*$detail->setStockProduit($stockDetail);*/
                     $manager->flush();
                 }
             } else if ($details){
@@ -111,7 +117,7 @@ class FactureController extends AbstractController
                     $facture->setPrixUnit($p->getPrixUnit());
                     $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
                     $produitLibelle = $facture->getDetail()->first()->getLibelle();
-                    $fp = $factureRepository->findAllOrderedByDate();
+                    /*$fp = $factureRepository->findAllOrderedByDate();
                     foreach ($fp as $fact) {
                         foreach ($fact->getDetail() as $produit) {
                             if ($produit->getLibelle() === $produitLibelle) {
@@ -119,11 +125,11 @@ class FactureController extends AbstractController
                                 return $this->redirectToRoute('facture_liste');
                             }
                         }
-                    }
+                    }*/
                     /*$produit = new Produit(); // Créez un nouvel objet Produit
                     $details->addProduit($produit); // Passez l'objet Produit en tant qu'argument*/
 
-                    $fAll = $factureRepository->findAll();
+                    /*$fAll = $factureRepository->findAll();
                     $lastFourFacts = array_slice($fAll, -4);
 
                     $productCount = 1;
@@ -136,8 +142,7 @@ class FactureController extends AbstractController
                             $somme += $fact->getQuantite();
                         }
 
-                    }
-
+                    }*/
                     $manager->persist($facture);
                     $manager->flush();
                     //Mise à jour du produit
@@ -147,12 +152,15 @@ class FactureController extends AbstractController
 
                     $quantite = floatval($facture->getQuantite());
                     $nombre = $details->getNombre();
-                    $stock = $details->getStockProduit();
-                    if ($quantite >= $nombre && $quantite <= 4 * $nombre) {
-                        $stock -= $quantite / $nombre;
-                        $dstock = $details->getStockProduit() - $facture->getQuantite();
-                        $p->setStockProduit($dstock);
-                        $p->setStockProduit($stock);
+                    $vendus = $details->getNombreVendus();
+                    if ($quantite >= $nombre) {
+                        $multiplier = $quantite / $nombre;
+                        $vendus += $multiplier;
+                        $p->setNombreVendus($vendus);
+                    }else{
+                        $multiplier = $quantite / $nombre;
+                        $vendus += $multiplier;
+                        $p->setNombreVendus($vendus);
                     }
 
                     $manager->flush();

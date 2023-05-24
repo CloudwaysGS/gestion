@@ -61,7 +61,7 @@ class ProduitType extends AbstractType
                 'required' => false,
                 'attr' => array(
                     'class' => 'form-control form-group',
-                    'placeholder' => 'NOMBRE',
+                    'placeholder' => 'nombre de pièce dans le carton ou sac',
                 ),
                 'constraints' => array(
                     new Type('numeric')

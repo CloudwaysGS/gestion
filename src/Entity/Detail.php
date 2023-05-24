@@ -49,6 +49,9 @@ class Detail
     #[ORM\ManyToMany(targetEntity: Produit::class, mappedBy: 'detail')]
     private Collection $produits;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $NombreVendus = null;
+
     public function __construct()
     {
         $this->factures = new ArrayCollection();
@@ -224,6 +227,18 @@ class Detail
         if ($this->produits->removeElement($produit)) {
             $produit->removeDetail($this);
         }
+
+        return $this;
+    }
+
+    public function getNombreVendus(): ?float
+    {
+        return $this->NombreVendus;
+    }
+
+    public function setNombreVendus(?float $NombreVendus): self
+    {
+        $this->NombreVendus = $NombreVendus;
 
         return $this;
     }

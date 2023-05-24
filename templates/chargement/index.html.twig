@@ -36,7 +36,7 @@
                                 <th>
                                     <a title="facture détaillée" href="{{ path('extraire', {'id':c.id}) }}"><i class="fa fa-download"></i></a>
                                     <a title="extraire en pdf" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
-                                    <a title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    <a title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette facture ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
                                 </th>
                             </tr>
                         {% endfor %}

@@ -101,6 +101,7 @@ class ProduitController extends AbstractController
                 $detail->setStockProduit($data->getQtStock());
                 $detail->setNombre($data->getNombre());
                 $detail->setPrixUnitDetail($data->getPrixUnit());
+                $detail->setNombreVendus('0');
 
                 $manager->persist($detail);
                 $manager->flush();
