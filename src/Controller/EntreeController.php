@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Detail;
 use App\Entity\Entree;
 use App\Entity\Produit;
 use App\Entity\Sortie;
@@ -60,11 +61,15 @@ class EntreeController extends AbstractController
             $manager->flush();
             ///////////***************Mise à jour du produit******************/////////////////////////
             $p = $manager->getRepository(Produit::class)->find($entree->getProduit()->getId());
+            $d = $manager->getRepository(Detail::class)->find($entree->getDetail()->getId());
             $qteInitial = $p->getQtStock();
             $pInitial = $p->getPrixUnit();
             $qteAjout = $entree->getQtEntree();
             $pAjout = $entree->getPrixUnit();
             $stock = $qteInitial + $qteAjout;
+            $dStock = $d->getStockProduit() + $qteAjout;
+            $d->setStockProduit($dStock);
+            $d->setQtStock($dStock * $d->getNombre());
             if ($qteInitial != 0 && $pAjout > $pInitial){
                 $cout = ($qteInitial * $pInitial + $qteAjout * $pAjout)/$stock;
                 $montant = $stock * $cout;

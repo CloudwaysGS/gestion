@@ -110,7 +110,7 @@ class ProduitController extends AbstractController
             $this->addFlash('success', 'Le produit a été ajouté avec succès.');
         }
 
-        return $this->redirectToRoute('detail_liste');
+        return $this->redirectToRoute('produit_liste');
     }
 
 

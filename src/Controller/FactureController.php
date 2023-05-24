@@ -60,6 +60,10 @@ class FactureController extends AbstractController
 
             $produit = $facture->getProduit()->first();
             $details = $facture->getDetail()->first();
+            if ($produit && $details){
+                $this->addFlash('danger','Choisir un champ produit ou détail pas les deux à la fois');
+                return $this->redirectToRoute('facture_liste');
+            }
             if ($produit){
 
                 $p = $manager->getRepository(Produit::class)->find($produit);
@@ -86,14 +90,6 @@ class FactureController extends AbstractController
 
                         }
                     }
-                    /*$detail = new Detail();
-                    $detail->addProduit($produit);
-
-                    $produits = $detail->getProduits();
-                    $premierProduit = $produits->first();
-                    $stockDetail = $premierProduit->getQtStock();
-                    $detail->setStockProduit($stockDetail);
-                    dd($premierProduit);*/
 
                     $manager->persist($facture);
                     $manager->flush();
@@ -117,7 +113,7 @@ class FactureController extends AbstractController
                     $facture->setPrixUnit($p->getPrixUnit());
                     $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
                     $produitLibelle = $facture->getDetail()->first()->getLibelle();
-                    /*$fp = $factureRepository->findAllOrderedByDate();
+                    $fp = $factureRepository->findAllOrderedByDate();
                     foreach ($fp as $fact) {
                         foreach ($fact->getDetail() as $produit) {
                             if ($produit->getLibelle() === $produitLibelle) {
@@ -125,24 +121,8 @@ class FactureController extends AbstractController
                                 return $this->redirectToRoute('facture_liste');
                             }
                         }
-                    }*/
-                    /*$produit = new Produit(); // Créez un nouvel objet Produit
-                    $details->addProduit($produit); // Passez l'objet Produit en tant qu'argument*/
+                    }
 
-                    /*$fAll = $factureRepository->findAll();
-                    $lastFourFacts = array_slice($fAll, -4);
-
-                    $productCount = 1;
-                    $somme = 0;
-                    foreach ($lastFourFacts as $fact) {
-                        foreach ($fact->getDetail() as $produit) {
-                            if ($produit->getLibelle() === $produitLibelle) {
-                                $productCount++;
-                            }
-                            $somme += $fact->getQuantite();
-                        }
-
-                    }*/
                     $manager->persist($facture);
                     $manager->flush();
                     //Mise à jour du produit
@@ -166,6 +146,7 @@ class FactureController extends AbstractController
                     $manager->flush();
                 }
             }
+
         }
 
         $total = $manager->createQueryBuilder()

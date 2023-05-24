@@ -52,10 +52,18 @@ class Detail
     #[ORM\Column(nullable: true)]
     private ?float $NombreVendus = null;
 
+    #[ORM\OneToMany(mappedBy: 'detail', targetEntity: Sortie::class)]
+    private Collection $sortie;
+
+    #[ORM\OneToMany(mappedBy: 'detail', targetEntity: Entree::class)]
+    private Collection $entrees;
+
     public function __construct()
     {
         $this->factures = new ArrayCollection();
         $this->produits = new ArrayCollection();
+        $this->sortie = new ArrayCollection();
+        $this->entrees = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -239,6 +247,66 @@ class Detail
     public function setNombreVendus(?float $NombreVendus): self
     {
         $this->NombreVendus = $NombreVendus;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Sortie>
+     */
+    public function getSortie(): Collection
+    {
+        return $this->sortie;
+    }
+
+    public function addSortie(Sortie $sortie): self
+    {
+        if (!$this->sortie->contains($sortie)) {
+            $this->sortie->add($sortie);
+            $sortie->setDetail($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSortie(Sortie $sortie): self
+    {
+        if ($this->sortie->removeElement($sortie)) {
+            // set the owning side to null (unless already changed)
+            if ($sortie->getDetail() === $this) {
+                $sortie->setDetail(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Entree>
+     */
+    public function getEntrees(): Collection
+    {
+        return $this->entrees;
+    }
+
+    public function addEntree(Entree $entree): self
+    {
+        if (!$this->entrees->contains($entree)) {
+            $this->entrees->add($entree);
+            $entree->setDetail($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEntree(Entree $entree): self
+    {
+        if ($this->entrees->removeElement($entree)) {
+            // set the owning side to null (unless already changed)
+            if ($entree->getDetail() === $this) {
+                $entree->setDetail(null);
+            }
+        }
 
         return $this;
     }

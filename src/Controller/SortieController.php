@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Detail;
 use App\Entity\Dette;
 use App\Entity\Produit;
 use App\Entity\Sortie;
@@ -64,10 +65,13 @@ class SortieController extends AbstractController
                 $manager->flush();
                 //Mise à jour du produit
                 $p = $manager->getRepository(Produit::class)->find($sortie->getProduit()->getId());
+                $d = $manager->getRepository(Detail::class)->find($sortie->getDetail()->getId());
                 $stock = $p->getQtStock() - $sortie->getQtSortie();
                 $montant = $stock * $p->getPrixUnit();
                 $p->setTotal($montant);
                 $p->setQtStock($stock);
+                $d->setStockProduit($stock);
+                $d->setQtStock($stock * $d->getNombre());
                 $manager->flush();
                 $this->addFlash('success', 'La quantité en stock est suffisante pour satisfaire la demande.');
             }

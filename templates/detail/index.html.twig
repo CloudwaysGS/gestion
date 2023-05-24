@@ -34,6 +34,7 @@
                         <table class="table table-bordered text-center">
                             <tr>
                                 <th>libellé détail</th>
+                                <th>Stock</th>
                                 <th>Stock_detail</th>
                                 <th>Prix Unit</th>
                                 <th>Nbre Vendus en gros</th>
@@ -43,6 +44,7 @@
                             {% for produit in details %}
                                 <tr>
                                     <th>{{ produit.libelle }}</th>
+                                    <th>{{ produit.stockProduit }}</th>
                                     <th>{{ produit.qtStock }}</th>
                                     <th>{{ produit.prixUnit }}</th>
                                     <th>{{ produit.nombreVendus|round }}</th>

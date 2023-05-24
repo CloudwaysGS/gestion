@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Entity\Detail;
 use App\Entity\Entree;
 use App\Entity\Fournisseur;
 use App\Entity\Produit;
@@ -53,6 +54,20 @@ class EntreeType extends AbstractType
                 'attr' => array(
                     'class' => 'form-control form-group'
                 )
+            ))
+            ->add('detail',EntityType::class, array(
+                'class' => Detail::class,
+                'label' => false,
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                ),
+                'placeholder' => 'Libelle du produit',
+                'query_builder' => function(EntityRepository $er) use ($libelle) {
+                    return $er->createQueryBuilder('p')
+                        ->where('p.libelle LIKE :libelle')
+                        ->setParameter('libelle', '%'.$libelle.'%')
+                        ->orderBy('p.libelle', 'ASC');
+                },
             ))
             ->add('Valider', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')

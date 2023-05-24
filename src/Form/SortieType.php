@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Entity\Detail;
 use App\Entity\Produit;
 use App\Entity\Sortie;
 use Doctrine\ORM\EntityRepository;
@@ -32,6 +33,7 @@ class SortieType extends AbstractType
                         ->orderBy('p.libelle', 'ASC');
                 },
             ))
+
             ->add('qtSortie', TextType::class, array(
                 'label' => 'Quantite vendue',
                 'attr' => array(
@@ -51,6 +53,17 @@ class SortieType extends AbstractType
                     new NotBlank(),
                     new Type('numeric')
                 )
+            ))
+            ->add('detail',EntityType::class, array(
+                'class' => Detail::class,
+                'label' => 'Libelle du detail',
+                'attr' => array('class' => 'form-control form-group'),
+                'query_builder' => function(EntityRepository $er) use ($libelle) {
+                    return $er->createQueryBuilder('p')
+                        ->where('p.libelle LIKE :libelle')
+                        ->setParameter('libelle', '%'.$libelle.'%')
+                        ->orderBy('p.libelle', 'ASC');
+                },
             ))
             ->add('Valider', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')

@@ -36,6 +36,9 @@ class Entree
     #[ORM\ManyToOne(inversedBy: 'Entree')]
     private ?Fournisseur $fournisseur = null;
 
+    #[ORM\ManyToOne(inversedBy: 'entrees')]
+    private ?Detail $detail = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -121,6 +124,18 @@ class Entree
     public function setFournisseur(?Fournisseur $fournisseur): self
     {
         $this->fournisseur = $fournisseur;
+
+        return $this;
+    }
+
+    public function getDetail(): ?Detail
+    {
+        return $this->detail;
+    }
+
+    public function setDetail(?Detail $detail): self
+    {
+        $this->detail = $detail;
 
         return $this;
     }
