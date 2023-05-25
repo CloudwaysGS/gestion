@@ -22,7 +22,6 @@ class AccueilController extends AbstractController
                           EntreeRepository $entree,
                           FactureRepository $fac,
                           ChargementRepository $charge,
-                          FlashyNotifier $flashy
     ): Response
     {
         $prenomNom = $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom();
@@ -178,7 +177,6 @@ class AccueilController extends AbstractController
             $sortieVariation = ($sortieAnnuelle - $sortieAnneePrecedente) / $sortieAnneePrecedente * 100;
         }
         $entreeVariation = ($entreeAnneePrecedente != 0) ? (($entreeAnnuelle - $entreeAnneePrecedente) / $entreeAnneePrecedente * 100) : 0;
-        $flashy->success('Bonjour '.$prenomNom.' Bienvenue dans Approvisionnement Gestion Stock de Abs. Bonne journée !');
         return $this->render('accueil.html.twig', [
             'controller_name' => 'AccueilController',
             'total' => $total,
