@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Produit;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -31,17 +32,22 @@ class ProduitType extends AbstractType
                 ],
             ))
 
-            ->add('qtStock', TextType::class, array(
+            ->add('qtStock', NumberType::class, [
                 'label' => false,
-                'attr' => array(
+                'attr' => [
                     'class' => 'form-control form-group',
-                    'placeholder' => 'quantité',
-                ),
-                'constraints' => array(
-                    new NotBlank(),
-                    new Type('numeric')
-                )
-            ))
+                    'placeholder' => 'Quantité',
+                ],
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez spécifier une quantité.',
+                    ]),
+                    new Type([
+                        'type' => 'float',
+                        'message' => 'La quantité doit être un nombre.',
+                    ]),
+                ],
+            ])
 
             ->add('prixUnit', TextType::class, array(
                 'label' => false,

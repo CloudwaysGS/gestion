@@ -11,6 +11,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -35,8 +36,7 @@ class FactureType extends AbstractType
                 'required' => false,
             ])
 
-
-            ->add('quantite', TextType::class, [
+            ->add('quantite', NumberType::class, [
                 'label' => false,
                 'attr' => [
                     'class' => 'form-control form-group',
@@ -46,8 +46,8 @@ class FactureType extends AbstractType
                     new NotBlank([
                         'message' => 'Veuillez spécifier une quantité.',
                     ]),
-                    new Regex([
-                        'pattern' => '/^\d+(\.\d+)?$/',
+                    new Type([
+                        'type' => 'float',
                         'message' => 'La quantité doit être un nombre.',
                     ]),
                 ],

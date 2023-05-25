@@ -184,15 +184,8 @@ class Facture2Controller extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $p = $entityManager->getRepository(Produit::class)->find($facture->getProduit()->first());
-            $reste = $before - $facture->getQuantite();
-            $stock = $p->getQtStock() + $reste;
-            $p->setQtStock($stock > 0 ? $stock : 0);
-
-            $p->setQtStock($stock);
             $facture->setPrixUnit($facture->getPrixUnit());
             $facture->setMontant($facture->getQuantite() * $facture->getPrixUnit());
-
             $entityManager->persist($form->getData());
             $entityManager->flush();
             return $this->redirectToRoute("facture2_liste");
@@ -207,13 +200,32 @@ class Facture2Controller extends AbstractController
     public function delete(Facture2 $facture,EntityManagerInterface $entityManager, Facture2Repository $repository)
     {
         $produit = $facture->getProduit()->first();
-        $p = $entityManager->getRepository(Produit::class)->find($produit);
-        $quantite = $facture->getQuantite();
+        $details = $facture->getDetails()->getOwner();
+        if ($produit){
+            $p = $entityManager->getRepository(Produit::class)->find($produit);
+            $quantite = $facture->getQuantite();
+            $repository->remove($facture); // Mise à jour de l'état de la facture
 
-        $repository->remove($facture); // Mise à jour de l'état de la facture
+            // Restaurer la quantité de stock du produit
+            $p->setQtStock($p->getQtStock() + $quantite);
+            $entityManager->flush();
 
-        // Restaurer la quantité de stock du produit
-        $p->setQtStock($p->getQtStock() + $quantite);
+            $this->addFlash('success', 'La facture a été supprimée avec succès.');
+            return $this->redirectToRoute('facture2_liste');
+        } elseif ($details){
+            $p = $entityManager->getRepository(Detail::class)->find($details);
+            $repository->remove($facture); // Mise à jour de l'état de la facture
+
+            // Restaurer la quantité de stock du produit
+            $quantite = floatval($facture->getQuantite());
+            $nombre = $p->getNombre();
+            $stock = $p->getStockProduit();
+            if ($quantite >= $nombre && $quantite <= 4 * $nombre) {
+                $stock += $quantite / $nombre;
+                $p->setStockProduit($stock);
+            }
+            $p->setQtStock($p->getQtStock() + $quantite);
+        }
         $entityManager->flush();
 
         $this->addFlash('success', 'La facture a été supprimée avec succès.');

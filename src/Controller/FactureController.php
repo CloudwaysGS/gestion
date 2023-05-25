@@ -197,7 +197,6 @@ class FactureController extends AbstractController
     #[Route('/facture/delete/{id}', name: 'facture_delete')]
     public function delete(Facture $facture,EntityManagerInterface $entityManager, FactureRepository $repository)
     {
-
         $produit = $facture->getProduit()->first();
         $details = $facture->getDetail()->first();
         if ($produit){
@@ -208,7 +207,8 @@ class FactureController extends AbstractController
 
             // Restaurer la quantité de stock du produit
             $p->setQtStock($p->getQtStock() + $quantite);
-        } elseif ($details){
+        }
+        elseif ($details){
             $p = $entityManager->getRepository(Detail::class)->find($details);
             $quantite = $facture->getQuantite();
 

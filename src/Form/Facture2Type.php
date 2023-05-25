@@ -7,6 +7,7 @@ use App\Entity\Facture2;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -30,16 +31,22 @@ class Facture2Type extends AbstractType
                 'required' => false,
             ])
 
-            ->add('quantite', TextType::class, array(
+            ->add('quantite', NumberType::class, [
                 'label' => false,
-                'attr' => array(
+                'attr' => [
                     'class' => 'form-control form-group',
-                    'placeholder' => 'quantité'),
-                'constraints' => array(
-                    new NotBlank(),
-                    new Type('numeric')
-                )
-            ))
+                    'placeholder' => 'Quantité',
+                ],
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez spécifier une quantité.',
+                    ]),
+                    new Type([
+                        'type' => 'float',
+                        'message' => 'La quantité doit être un nombre.',
+                    ]),
+                ],
+            ])
 
             ->add('prixUnit',TextType::class,array(
                 'label' => false,
