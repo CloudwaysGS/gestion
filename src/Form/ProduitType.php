@@ -24,12 +24,7 @@ class ProduitType extends AbstractType
                     'class' => 'form-control form-group',
                     'placeholder' => 'Nom du produit',
                 ),
-                'constraints' => [
-                    new Regex([
-                        'pattern' => '/^[a-zA-Z0-9\s]+$/',
-                        'message' => 'Le nom du produit ne peut contenir que des lettres, des chiffres et des espaces.',
-                    ]),
-                ],
+
             ))
 
             ->add('qtStock', NumberType::class, [
