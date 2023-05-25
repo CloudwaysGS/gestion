@@ -84,17 +84,9 @@ class FactureController extends AbstractController
                         $nomClient = $client->getNom();
                         $facture->setNomClient($nomClient);
                     }
-                    $produitLibelle = $facture->getNomProduit();
-                    $fp = $factureRepository->findAllOrderedByDate();
-
-                    foreach ($fp as $fact) {
-                        foreach ($fact->getProduit() as $produit) {
-                            if ($produit->getLibelle() === $produitLibelle) {
-                                $this->addFlash('danger',$produit->getLibelle().' a déjà été ajouté précédemment.');
-                                return $this->redirectToRoute('facture_liste');
-                            }
-
-                        }
+                    if ($this->isProductAlreadyAdded($factureRepository, $facture->getNomProduit())) {
+                        $this->addFlash('danger', $facture->getNomProduit() . ' a déjà été ajouté précédemment.');
+                        return $this->redirectToRoute('facture_liste');
                     }
 
                     $manager->persist($facture);
@@ -103,7 +95,6 @@ class FactureController extends AbstractController
 
                     //Mise à jour du produit
                     $p->setQtStock($p->getQtStock() - $facture->getQuantite());
-                    /*$detail->setStockProduit($stockDetail);*/
                     $manager->flush();
                 }
             } else if ($details){
@@ -124,15 +115,9 @@ class FactureController extends AbstractController
                         $nomClient = $client->getNom();
                         $facture->setNomClient($nomClient);
                     }
-                    $produitLibelle = $facture->getNomProduit();
-                    $fp = $factureRepository->findAllOrderedByDate();
-                    foreach ($fp as $fact) {
-                        foreach ($fact->getDetail() as $produit) {
-                            if ($produit->getLibelle() === $produitLibelle) {
-                                $this->addFlash('danger',$produit->getLibelle().' a déjà été ajouté précédemment.');
-                                return $this->redirectToRoute('facture_liste');
-                            }
-                        }
+                    if ($this->isProductAlreadyAdded($factureRepository, $facture->getNomProduit())) {
+                        $this->addFlash('danger', $facture->getNomProduit() . ' a déjà été ajouté précédemment.');
+                        return $this->redirectToRoute('facture_liste');
                     }
 
                     $manager->persist($facture);
@@ -175,6 +160,25 @@ class FactureController extends AbstractController
         return $this->redirectToRoute('facture_liste', ['total' => $total]);
     }
 
+    private function isProductAlreadyAdded(FactureRepository $factureRepository, string $produitLibelle): bool
+    {
+        $factures = $factureRepository->findAllOrderedByDate();
+
+        foreach ($factures as $facture) {
+            foreach ($facture->getProduit() as $produit) {
+                if ($produit->getLibelle() === $produitLibelle) {
+                    return true;
+                }
+            }
+            foreach ($facture->getDetail() as $detail) {
+                if ($detail->getLibelle() === $produitLibelle) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
     #[Route('/produit/modifier/{id}', name: 'modifier')]
     public function modifier($id, FactureRepository $repo, Request $request, EntityManagerInterface $entityManager): Response
     {
