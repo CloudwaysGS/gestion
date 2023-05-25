@@ -85,6 +85,7 @@
             <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_delete_all') }}'">Enregistrer</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'">Mes factures</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">Créer client</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('produit_liste') }}'">Ajouter Produit</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('facture_liste') }}'">Facture</button>
 
             {% for message in app.session.flashBag.get('danger') %}
@@ -106,19 +107,21 @@
                             {% for f in facture %}
                                 <tr>
                                     <td>{{ f.quantite }}</td>
-                                    <td>{% if f.produit.count() > 0 %}
-                                            {{ f.produit[0].libelle }}
+                                    <td>
+                                        {% if f.nomProduit > 0 %}
+                                            {{ f.nomProduit }}
                                         {% endif %}
                                     </td>
+
                                     <td>
-                                        {% if f.produit.count() > 0 %}
+                                        {% if f.prixUnit > 0 %}
                                             {{ f.prixUnit|number_format(0, ',', ' ') }}
                                         {% endif %}
                                     </td>
                                     <td>{{ f.montant | number_format(0, ',', ' ') }}</td>
                                     <td>
-                                        <a title="Modifier" href="{{ path('modifier2',{'id':f.id}) }}"><i class="fa fa-edit"></i></a>
-                                        <a title="supprimer" href="{{ path('facture2_delete', {'id':f.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                        <a title="Modifier" href="{{ path('modifier',{'id':f.id}) }}"><i class="fa fa-edit"></i></a>
+                                        <a title="supprimer" href="{{ path('facture_delete', {'id':f.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
                                     </td>
                                 </tr>
                                 {% set total = total + f.montant %}
@@ -139,7 +142,7 @@
 
 {% block javascripts %}
 
-    <script>
+    {#<script>
         var form = $('#form');
         form.on('submit', function(event) {
             event.preventDefault();
@@ -161,7 +164,7 @@
                 }
             });
         });
-    </script>
+    </script>#}
     <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
     <script>
         setTimeout(function() {

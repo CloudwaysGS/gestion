@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Constraints\Type;
 
 class ProduitType extends AbstractType
@@ -21,7 +22,13 @@ class ProduitType extends AbstractType
                 'attr' => array(
                     'class' => 'form-control form-group',
                     'placeholder' => 'Nom du produit',
-                )
+                ),
+                'constraints' => [
+                    new Regex([
+                        'pattern' => '/^[a-zA-Z0-9\s]+$/',
+                        'message' => 'Le nom du produit ne peut contenir que des lettres, des chiffres et des espaces.',
+                    ]),
+                ],
             ))
 
             ->add('qtStock', TextType::class, array(

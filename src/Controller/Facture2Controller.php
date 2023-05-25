@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Chargement;
+use App\Entity\Detail;
 use App\Entity\Facture;
 use App\Entity\Facture2;
 use App\Entity\Produit;
@@ -57,48 +58,107 @@ class Facture2Controller extends AbstractController
         $form = $this->createForm(Facture2Type::class, $facture);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $details = $facture->getDetails()->first();
             $produit = $facture->getProduit()->first();
-            $p = $manager->getRepository(Produit::class)->find($produit);
-            if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
-                $response = new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock(),
-                ]);
-                return $response;
-            } else if ($facture->getQuantite() <= 0) {
-                $response = new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'Entrée une quantité positive svp!',
-                ]);
-                return $response;
-            } else {
-                $date = new \DateTime();
-                $facture->setDate($date);
-                $facture->setPrixUnit($p->getPrixUnit());
-                $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
-                $produitLibelle = $facture->getProduit()->first()->getLibelle();
-                $fp = $factureRepository->findAllOrderedByDate();
-                foreach ($fp as $fact) {
-                    foreach ($fact->getProduit() as $produit) {
-                        if ($produit->getLibelle() === $produitLibelle) {
-                            $response = new JsonResponse([
-                                'status' => 'error',
-                                'message' => $produit->getLibelle().' a déjà été ajouté précédemment.',
-                            ]);
-                            return $response;
-                            return $this->redirectToRoute('facture2_liste');
+
+            if ($produit && $details){
+                $this->addFlash('danger','Choisir un champ produit ou détail pas les deux à la fois');
+                return $this->redirectToRoute('facture_liste');
+            }
+
+            if ($details) {
+                $p = $manager->getRepository(Detail::class)->find($details);
+                if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
+                    $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
+                } else if ($facture->getQuantite() <= 0) {
+                    $this->addFlash('danger', 'Entrée une quantité positive svp!');
+                } else {
+                    $date = new \DateTime();
+                    $facture->setDate($date);
+                    $facture->setPrixUnit($p->getPrixUnit());
+                    $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
+                    $facture->setNomProduit($details->getLibelle());
+                    $client = $facture->getClient();
+                    if ($client != null) {
+                        $nomClient = $client->getNom();
+                        $facture->setNomClient($nomClient);
+                    }
+                    $produitLibelle = $facture->getNomProduit();
+                    $fp = $factureRepository->findAllOrderedByDate();
+                    foreach ($fp as $fact) {
+                        foreach ($fact->getDetails() as $produit) {
+                            if ($produit->getLibelle() === $produitLibelle) {
+                                $this->addFlash('danger', $produit->getLibelle() . ' a déjà été ajouté précédemment.');
+                                return $this->redirectToRoute('facture2_liste');
+                            }
+
                         }
                     }
+                    $manager->persist($facture);
+                    $manager->flush();
+                    //Mise à jour du produit
+                    $dstock = $p->getQtStock() - $facture->getQuantite();
+                    $p->setQtStock($dstock);
+                    $manager->flush();
+
+                    $quantite = floatval($facture->getQuantite());
+                    $nombre = $details->getNombre();
+                    $vendus = $details->getNombreVendus();
+                    if ($quantite >= $nombre) {
+                        $multiplier = $quantite / $nombre;
+                        $vendus += $multiplier;
+                        $p->setNombreVendus($vendus);
+                    } else {
+                        $multiplier = $quantite / $nombre;
+                        $vendus += $multiplier;
+                        $p->setNombreVendus($vendus);
+                    }
+                    $manager->flush();
                 }
+            }elseif ($produit) {
+                $p = $manager->getRepository(Produit::class)->find($produit);
+                if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
+                    $this->addFlash('danger','La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
+                } else if ($facture->getQuantite() <= 0) {
+                    $this->addFlash('danger','Entrée une quantité positive svp!');
 
-                $manager->persist($facture);
-                $manager->flush();
-                //Mise à jour du produit
-                $p->setQtStock($p->getQtStock() - $facture->getQuantite());
-                $manager->flush();
+                } else {
+                    $date = new \DateTime();
+                    $facture->setDate($date);
+                    $facture->setPrixUnit($p->getPrixUnit());
+                    $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
+                    $facture->setNomProduit($produit->getLibelle());
+                    $client = $facture->getClient();
+                    if ($client != null) {
+                        $nomClient = $client->getNom();
+                        $facture->setNomClent($nomClient);
+                    }
+
+                    $produitLibelle = $facture->getNomProduit();
+                    $fp = $factureRepository->findAllOrderedByDate();
+
+                    foreach ($fp as $fact) {
+                        foreach ($fact->getProduit() as $produit) {
+                            if ($produit->getLibelle() === $produitLibelle) {
+                                $this->addFlash('danger',$produit->getLibelle().' a déjà été ajouté précédemment.');
+                                return $this->redirectToRoute('facture_liste');
+                            }
+
+                        }
+                    }
+                    $manager->persist($facture);
+                    $manager->flush();
+
+
+                    //Mise à jour du produit
+                    $p->setQtStock($p->getQtStock() - $facture->getQuantite());
+                    /*$detail->setStockProduit($stockDetail);*/
+                    $manager->flush();
+                }
             }
-        }
 
+        }
         $total = $manager->createQueryBuilder()
             ->select('SUM(f.montant)')
             ->from(Facture2::class, 'f')
@@ -112,6 +172,7 @@ class Facture2Controller extends AbstractController
 
         $manager->flush();
         return $this->redirectToRoute('facture2_liste', ['total' => $total]);
+
     }
 
     #[Route('/produit/modifier2/{id}', name: 'modifier2')]

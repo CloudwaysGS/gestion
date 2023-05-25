@@ -16,6 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Constraints\Type;
 
 class FactureType extends AbstractType
@@ -34,16 +35,23 @@ class FactureType extends AbstractType
                 'required' => false,
             ])
 
-            ->add('quantite', TextType::class, array(
+
+            ->add('quantite', TextType::class, [
                 'label' => false,
-                'attr' => array(
+                'attr' => [
                     'class' => 'form-control form-group',
-                    'placeholder' => 'quantité'),
-                'constraints' => array(
-                    new NotBlank(),
-                    new Type('numeric')
-                )
-            ))
+                    'placeholder' => 'Quantité',
+                ],
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez spécifier une quantité.',
+                    ]),
+                    new Regex([
+                        'pattern' => '/^\d+(\.\d+)?$/',
+                        'message' => 'La quantité doit être un nombre.',
+                    ]),
+                ],
+            ])
 
             ->add('prixUnit',TextType::class,array(
                 'label' => false,
@@ -58,7 +66,7 @@ class FactureType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'style' => 'height: 5rem;', // ajout de la hauteur personnalisée
-                    'onmouseover' => 'this.style.height = "20rem";', // hauteur augmentée lors du survol de la souris
+                    'onmouseover' => 'this.style.height = "12rem";', // hauteur augmentée lors du survol de la souris
                     'onmouseout' => 'this.style.height = "5rem";', // hauteur rétablie lorsque la souris quitte le champ
                 ],
                 'required' => false,
@@ -75,7 +83,7 @@ class FactureType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'style' => 'height: 5rem;', // ajout de la hauteur personnalisée
-                    'onmouseover' => 'this.style.height = "20rem";', // hauteur augmentée lors du survol de la souris
+                    'onmouseover' => 'this.style.height = "12rem";', // hauteur augmentée lors du survol de la souris
                     'onmouseout' => 'this.style.height = "5rem";', // hauteur rétablie lorsque la souris quitte le champ
                 ],
                 'required' => false,

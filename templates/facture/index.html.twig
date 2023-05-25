@@ -84,6 +84,7 @@
             <button class="glow-on-hover mb-1" onclick="window.location.href='{{ path('facture_delete_all') }}'">Enregistrer</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'">Mes factures</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">Créer client</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('produit_liste') }}'">Ajouter Produit</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">Facture 2</button>
 
             {% for message in app.session.flashBag.get('danger') %}
@@ -106,19 +107,13 @@
                                 <tr>
                                     <td>{{ f.quantite }}</td>
                                     <td>
-                                        {% if f.produit.count() > 0 %}
-                                            {{ f.produit[0].libelle }}
-                                        {% endif %}
-                                        {% if f.detail.count() > 0 %}
-                                            {{ f.detail[0].libelle }}
+                                        {% if f.nomProduit > 0 %}
+                                            {{ f.nomProduit }}
                                         {% endif %}
                                     </td>
 
                                     <td>
-                                        {% if f.produit.count() > 0 %}
-                                            {{ f.prixUnit|number_format(0, ',', ' ') }}
-                                        {% endif %}
-                                        {% if f.detail.count() > 0 %}
+                                        {% if f.prixUnit > 0 %}
                                             {{ f.prixUnit|number_format(0, ',', ' ') }}
                                         {% endif %}
                                     </td>

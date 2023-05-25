@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Detail;
 use App\Repository\DetailRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,4 +30,35 @@ class DetailController extends AbstractController
             'limit' => $limit,
         ]);
     }
+
+    #[Route('/detail/delete/{id}', name: 'detail_delete')]
+    public function delete(Detail $detail, EntityManagerInterface $entityManager)
+    {
+        $sorties = $detail->getSortie();
+        // Vérifier s'il y a des sorties associées au détail
+        if (!$sorties->isEmpty()) {
+            foreach ($sorties as $sortie) {
+                // Dissocier la sortie du détail
+                $sortie->setDetail(null);
+                $entityManager->persist($sortie);
+            }
+        }
+        $entrees = $detail->getEntrees();
+        // Vérifier s'il y a des sorties associées au détail
+        if (!$entrees->isEmpty()) {
+            foreach ($entrees as $entree) {
+                // Dissocier la sortie du détail
+                $entree->setDetail(null);
+                $entityManager->persist($entree);
+            }
+        }
+
+        // Supprimer le détail
+        $entityManager->remove($detail);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le detail a été supprimé avec succès');
+        return $this->redirectToRoute('detail_liste');
+    }
+
 }

@@ -116,6 +116,28 @@ class ChargementController extends AbstractController
             $lastFacture = end($f);
             $firstFacture = reset($f);
             $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
+            $data = array();
+            $total = 0;
+            foreach ($f as $facture) {
+                $produit = $facture->getProduit()->first();
+                $detail = $facture->getDetail()->first();
+                if ($produit){
+                    $data[] = array(
+                        'Quantité achetée' => $facture->getQuantite(),
+                        'Produit' => $facture->getProduit()->first()->getLibelle(),
+                        'Prix unitaire' => $facture->getProduit()->first()->getPrixUnit(),
+                        'Montant' => $facture->getMontant(),
+                    );
+                } elseif ($detail){
+                    $data[] = array(
+                        'Quantité achetée' => $facture->getQuantite(),
+                        'Produit' => $facture->getDetail()->first()->getLibelle(),
+                        'Prix unitaire' => $facture->getDetail()->first()->getPrixUnit(),
+                        'Montant' => $facture->getMontant(),
+                    );
+                }
+                $total += $facture->getMontant();
+            }
         } else {
             $facture = new Facture2();
             $factures = $chargement->addFacture2($facture);
@@ -126,30 +148,29 @@ class ChargementController extends AbstractController
             $lastFacture = end($f);
             $firstFacture = reset($f);
             $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
+            $data = array();
+            $total = 0;
+            foreach ($f as $facture) {
+                $produit = $facture->getProduit()->first();
+                if ($produit){
+                    $data[] = array(
+                        'Quantité achetée' => $facture->getQuantite(),
+                        'Produit' => $facture->getProduit()->first()->getLibelle(),
+                        'Prix unitaire' => $facture->getProduit()->first()->getPrixUnit(),
+                        'Montant' => $facture->getMontant(),
+                    );
+                } else {
+                    $data[] = array(
+                        'Quantité achetée' => $facture->getQuantite(),
+                        'Produit' => $facture->getNomProduit(),
+                        'Prix unitaire' => $facture->getPrixUnit(),
+                        'Montant' => $facture->getMontant(),
+                    );
+                }
+                $total += $facture->getMontant();
+            }
         }
 
-        $data = array();
-        $total = 0;
-        foreach ($f as $facture) {
-            $produit = $facture->getProduit()->first();
-            $detail = $facture->getDetail()->first();
-            if ($produit){
-                $data[] = array(
-                    'Quantité achetée' => $facture->getQuantite(),
-                    'Produit' => $facture->getProduit()->first()->getLibelle(),
-                    'Prix unitaire' => $facture->getProduit()->first()->getPrixUnit(),
-                    'Montant' => $facture->getMontant(),
-                );
-            } elseif ($detail){
-                $data[] = array(
-                    'Quantité achetée' => $facture->getQuantite(),
-                    'Produit' => $facture->getDetail()->first()->getLibelle(),
-                    'Prix unitaire' => $facture->getDetail()->first()->getPrixUnit(),
-                    'Montant' => $facture->getMontant(),
-                );
-            }
-            $total += $facture->getMontant();
-        }
         $data[] = [
             'Quantité achetée' => '',
             'Produit' => '',

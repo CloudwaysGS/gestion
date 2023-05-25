@@ -78,7 +78,13 @@ class FactureController extends AbstractController
                     $facture->setDate($date);
                     $facture->setPrixUnit($p->getPrixUnit());
                     $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
-                    $produitLibelle = $facture->getProduit()->first()->getLibelle();
+                    $facture->setNomProduit($produit->getLibelle());
+                    $client = $facture->getClient();
+                    if ($client != null) {
+                        $nomClient = $client->getNom();
+                        $facture->setNomClient($nomClient);
+                    }
+                    $produitLibelle = $facture->getNomProduit();
                     $fp = $factureRepository->findAllOrderedByDate();
 
                     foreach ($fp as $fact) {
@@ -112,7 +118,13 @@ class FactureController extends AbstractController
                     $facture->setDate($date);
                     $facture->setPrixUnit($p->getPrixUnit());
                     $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
-                    $produitLibelle = $facture->getDetail()->first()->getLibelle();
+                    $facture->setNomProduit($details->getLibelle());
+                    $client = $facture->getClient();
+                    if ($client != null) {
+                        $nomClient = $client->getNom();
+                        $facture->setNomClient($nomClient);
+                    }
+                    $produitLibelle = $facture->getNomProduit();
                     $fp = $factureRepository->findAllOrderedByDate();
                     foreach ($fp as $fact) {
                         foreach ($fact->getDetail() as $produit) {

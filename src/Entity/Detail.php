@@ -58,12 +58,16 @@ class Detail
     #[ORM\OneToMany(mappedBy: 'detail', targetEntity: Entree::class)]
     private Collection $entrees;
 
+    #[ORM\ManyToMany(targetEntity: Facture2::class, inversedBy: 'detail')]
+    private Collection $facture2;
+
     public function __construct()
     {
         $this->factures = new ArrayCollection();
         $this->produits = new ArrayCollection();
         $this->sortie = new ArrayCollection();
         $this->entrees = new ArrayCollection();
+        $this->facture2 = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -310,5 +314,30 @@ class Detail
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Facture2>
+     */
+    public function getFacture2(): Collection
+    {
+        return $this->facture2;
+    }
+
+    public function addFacture2(Facture2 $facture2): self
+    {
+        if (!$this->facture2->contains($facture2)) {
+            $this->facture2->add($facture2);
+        }
+
+        return $this;
+    }
+
+    public function removeFacture2(Facture2 $facture2): self
+    {
+        $this->facture2->removeElement($facture2);
+
+        return $this;
+    }
+
 
 }

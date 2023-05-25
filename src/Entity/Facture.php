@@ -52,6 +52,9 @@ class Facture
     #[ORM\ManyToMany(targetEntity: Detail::class, inversedBy: 'factures')]
     private Collection $detail;
 
+    #[ORM\Column(length: 255)]
+    private ?string $nomProduit = null;
+
     public function __construct()
     {
         $this->produit = new ArrayCollection();
@@ -237,6 +240,18 @@ class Facture
                 $detail->setFacture(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNomProduit(): ?string
+    {
+        return $this->nomProduit;
+    }
+
+    public function setNomProduit(string $nomProduit): self
+    {
+        $this->nomProduit = $nomProduit;
 
         return $this;
     }
