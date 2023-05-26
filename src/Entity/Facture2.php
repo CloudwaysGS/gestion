@@ -55,6 +55,9 @@ class Facture2
     #[ORM\Column(length: 255)]
     private ?string $nomProduit = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $connect = null;
+
     public function __construct()
     {
         $this->produit = new ArrayCollection();
@@ -260,4 +263,17 @@ class Facture2
 
         return $this;
     }
+
+    public function getConnect(): ?string
+    {
+        return $this->connect;
+    }
+
+    public function setConnect(string $connect): self
+    {
+        $this->connect = $connect;
+
+        return $this;
+    }
+
 }

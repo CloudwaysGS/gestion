@@ -84,11 +84,11 @@ class FactureController extends AbstractController
                         $nomClient = $client->getNom();
                         $facture->setNomClient($nomClient);
                     }
+                    $facture->setConnect($this->getUser()->getPrenom().' '.$this->getUser()->getNom());
                     if ($this->isProductAlreadyAdded($factureRepository, $facture->getNomProduit())) {
                         $this->addFlash('danger', $facture->getNomProduit() . ' a déjà été ajouté précédemment.');
                         return $this->redirectToRoute('facture_liste');
                     }
-
                     $manager->persist($facture);
                     $manager->flush();
 
@@ -115,11 +115,11 @@ class FactureController extends AbstractController
                         $nomClient = $client->getNom();
                         $facture->setNomClient($nomClient);
                     }
+                    $facture->setConnect($this->getUser()->getPrenom().' '.$this->getUser()->getNom());
                     if ($this->isProductAlreadyAdded($factureRepository, $facture->getNomProduit())) {
                         $this->addFlash('danger', $facture->getNomProduit() . ' a déjà été ajouté précédemment.');
                         return $this->redirectToRoute('facture_liste');
                     }
-
                     $manager->persist($facture);
                     $manager->flush();
                     //Mise à jour du produit
@@ -179,6 +179,7 @@ class FactureController extends AbstractController
 
         return false;
     }
+
     #[Route('/produit/modifier/{id}', name: 'modifier')]
     public function modifier($id, FactureRepository $repo, Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -272,6 +273,7 @@ class FactureController extends AbstractController
                 $chargement->addFacture($facture);
                 $entityManager->persist($facture);
             }
+            $chargement->setConnect($facture->getConnect());
             $chargement->setTotal($total);
             $entityManager->persist($chargement);
             $entityManager->flush();

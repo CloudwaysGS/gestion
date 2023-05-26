@@ -12,6 +12,37 @@
 {#
     <a title="pdf" href="{{ path('facture_pdf') }}" class="btn btn-primary ml-5">Exporter en pdf</a>
 #}
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Détails de la facture</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-hover text-center">
+                        <tr>
+                            <th>Quantité achetée</th>
+                            <th>Produit</th>
+                            <th>PrixUnit</th>
+                            <th>Montant</th>
+                        </tr>
+                        {% for item in f %}
+                            <tr>
+                                <td>{{ item.quantite }}</td>
+                                <td>{{ item.nomProduit }}</td>
+                                <td>{{ item.prixUnit|number_format(0, ',', ' ') }}</td>
+                                <td>{{ item.montant|number_format(0, ',', ' ') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container col-md-13">
     <div class="card ">
         <div class="card-header">Facture</div>
@@ -57,6 +88,7 @@
     </div>
 </div>
 
+
 {% endblock %}
 
 {% block javascripts %}
@@ -68,6 +100,26 @@
                 flashMessage.remove();
             }
         }, 10000);
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#myModal').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget);
+                var fData = button.data('f');
+                var modal = $(this);
+                modal.find('.modal-body table').empty();
+                fData.forEach(function(item) {
+                    var row = '<tr>' +
+                        '<td>' + item.quantite + '</td>' +
+                        '<td>' + item.nomProduit + '</td>' +
+                        '<td>' + item.prixUnit + '</td>' +
+                        '<td>' + item.montant + '</td>' +
+                        '</tr>';
+                    modal.find('.modal-body table').append(row);
+                });
+            });
+        });
     </script>
 
 

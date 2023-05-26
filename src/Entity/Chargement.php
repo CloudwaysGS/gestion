@@ -40,6 +40,9 @@ class Chargement
     #[ORM\OneToMany(mappedBy: 'chargement', targetEntity: Facture2::class)]
     private Collection $facture2s;
 
+    #[ORM\Column(length: 255)]
+    private ?string $connect = null;
+
     public function __construct()
     {
         $this->facture = new ArrayCollection();
@@ -183,5 +186,18 @@ class Chargement
 
         return $this;
     }
+
+    public function getConnect(): ?string
+    {
+        return $this->connect;
+    }
+
+    public function setConnect(string $connect): self
+    {
+        $this->connect = $connect;
+
+        return $this;
+    }
+
 
 }

@@ -59,6 +59,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->produits = new ArrayCollection();
         $this->entrees = new ArrayCollection();
         $this->sorties = new ArrayCollection();
+        $this->chargement = new ArrayCollection();
+        $this->facture = new ArrayCollection();
+        $this->facture2 = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -288,4 +291,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
 }

@@ -12,6 +12,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Dompdf\Dompdf;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -38,6 +39,7 @@ class ChargementController extends AbstractController
         $total = count($chargement);
         $offset = ($page - 1) * $limit;
         $chargement = array_slice($chargement, $offset, $limit);
+        $f = null;
 
         return $this->render('chargement/index.html.twig', [
             'controller_name' => 'ChargementController',
@@ -45,6 +47,7 @@ class ChargementController extends AbstractController
             'total' => $total,
             'page' => $page,
             'limit' => $limit,
+            'f' => $f
         ]);
     }
 
@@ -102,6 +105,17 @@ class ChargementController extends AbstractController
         return $this->redirectToRoute('liste_chargement');
     }
 
+    #[Route('/chargement/user/{id}', name: 'chargement_user')]
+    public function user($id, EntityManagerInterface $entityManager)
+    {
+        $chargements = $entityManager->getRepository(Chargement::class)->find($id);
+        if (!$chargements) {
+            throw $this->createNotFoundException('Chargement non trouvé');
+        }
+        $user = $chargements->getConnect();
+        return new JsonResponse(['user' => $user]);
+    }
+
     #[Route('/chargement/pdf/{id}', name: 'pdf')]
     public function pdf(Chargement $chargement)
     {
@@ -116,29 +130,20 @@ class ChargementController extends AbstractController
             $lastFacture = end($f);
             $firstFacture = reset($f);
             $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
-            $data = array();
+            $data = [];
             $total = 0;
             foreach ($f as $facture) {
-                $produit = $facture->getProduit()->first();
-                $detail = $facture->getDetail()->first();
-                if ($produit){
                     $data[] = array(
                         'Quantité achetée' => $facture->getQuantite(),
-                        'Produit' => $facture->getProduit()->first()->getLibelle(),
-                        'Prix unitaire' => $facture->getProduit()->first()->getPrixUnit(),
+                        'Produit' => $facture->getNomProduit(),
+                        'Prix unitaire' => $facture->getPrixUnit(),
                         'Montant' => $facture->getMontant(),
                     );
-                } elseif ($detail){
-                    $data[] = array(
-                        'Quantité achetée' => $facture->getQuantite(),
-                        'Produit' => $facture->getDetail()->first()->getLibelle(),
-                        'Prix unitaire' => $facture->getDetail()->first()->getPrixUnit(),
-                        'Montant' => $facture->getMontant(),
-                    );
-                }
-                $total += $facture->getMontant();
+
+                    $total += $facture->getMontant();
             }
         } else {
+
             $facture = new Facture2();
             $factures = $chargement->addFacture2($facture);
             foreach ($factures->getFacture2s() as $facture) {
@@ -148,25 +153,17 @@ class ChargementController extends AbstractController
             $lastFacture = end($f);
             $firstFacture = reset($f);
             $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
-            $data = array();
+            $data = [];
             $total = 0;
+
             foreach ($f as $facture) {
-                $produit = $facture->getProduit()->first();
-                if ($produit){
-                    $data[] = array(
-                        'Quantité achetée' => $facture->getQuantite(),
-                        'Produit' => $facture->getProduit()->first()->getLibelle(),
-                        'Prix unitaire' => $facture->getProduit()->first()->getPrixUnit(),
-                        'Montant' => $facture->getMontant(),
-                    );
-                } else {
-                    $data[] = array(
-                        'Quantité achetée' => $facture->getQuantite(),
-                        'Produit' => $facture->getNomProduit(),
-                        'Prix unitaire' => $facture->getPrixUnit(),
-                        'Montant' => $facture->getMontant(),
-                    );
-                }
+                $data[] = array(
+                    'Quantité achetée' => $facture->getQuantite(),
+                    'Produit' => $facture->getNomProduit(),
+                    'Prix unitaire' => $facture->getPrixUnit(),
+                    'Montant' => $facture->getMontant(),
+                );
+
                 $total += $facture->getMontant();
             }
         }
