@@ -67,9 +67,8 @@ class EntreeController extends AbstractController
             $qteAjout = $entree->getQtEntree();
             $pAjout = $entree->getPrixUnit();
             $stock = $qteInitial + $qteAjout;
-            $dStock = $d->getStockProduit() + $qteAjout;
-            $d->setStockProduit($dStock);
-            $d->setQtStock($dStock * $d->getNombre());
+            $d->setStockProduit($stock);
+            $d->setQtStock($stock * $d->getNombre());
             if ($qteInitial != 0 && $pAjout > $pInitial){
                 $cout = ($qteInitial * $pInitial + $qteAjout * $pAjout)/$stock;
                 $montant = $stock * $cout;

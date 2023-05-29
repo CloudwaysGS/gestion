@@ -52,8 +52,10 @@
                                 <th>{{ produit.total | number_format(0, ',', ' ') }}</th>
                                 <th>{{ produit.releaseDate|date('d-m-Y') }}</th>
                                 <th class="text-center">
+                                    {% if is_granted('ROLE_GESTION_STOCK') %}
                                     <a title="Modifier" href="{{ path('produit_edit',{'id':produit.id}) }}"><i class="fa fa-edit"></i></a>
                                     <a title="supprimer" href="{{ path('produit_delete', {'id':produit.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    {% endif %}
                                 </th>
                             </tr>
                         {% endfor %}
@@ -78,14 +80,16 @@
             </div>
      </div>
      </div>
-     <div class="container col-md-4">
-         <div class="card">
-             <div class="card-header">Formulaire d'ajout de produit</div>
-             <div class="card-body">
-                 {{ form(form) }}
+        {% if is_granted('ROLE_GESTION_STOCK') %}
+             <div class="container col-md-4">
+                 <div class="card">
+                     <div class="card-header">Formulaire d'ajout de produit</div>
+                     <div class="card-body">
+                         {{ form(form) }}
+                     </div>
+                 </div>
              </div>
-         </div>
-     </div>
+        {% endif %}
  </div>
 {% endblock %}
 {% block javascripts %}

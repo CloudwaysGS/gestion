@@ -117,7 +117,7 @@ class AccueilController extends AbstractController
         $firstDayOfYear = new \DateTime('first day of January ' . $anneeCourante);
         $lastDayOfYear = new \DateTime('last day of December ' . $anneeCourante);
         $remainingDaysOfYear = $lastDayOfYear->diff($today)->days;
-        $messageAnnee = ($remainingDaysOfYear <= 2) ? "Attention : Il ne reste que 2 jours avant la fin de l'année en cours !" : "";
+        $messageAnnee = ($remainingDaysOfYear === 5) ? "Attention : Il ne reste que 5 jours avant la fin de l'année en cours !" : (($remainingDaysOfYear === 4) ? "Attention : Il ne reste plus que 4 jour avant la fin du mois en cours !" : "");
 
         //Récupérer la somme totale pour le mois des facture
         $sumTotalYear = $charge->createQueryBuilder('c')

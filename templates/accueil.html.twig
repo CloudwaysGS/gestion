@@ -39,13 +39,14 @@
 
         <!-- Divider -->
         <hr class="sidebar-divider my-0">
-
+        {% if is_granted('ROLE_GESTION_STOCK') %}
         <!-- Nav Item - Dashboard -->
         <li class="nav-item active">
             <a class="nav-link" href={{ path('accueil') }}>
                 <i class="fas fa-fw fa-tachometer-alt"></i>
                 <span>Tableau de bord</span></a>
         </li>
+        {% endif %}
 
         <!-- Divider -->
         <hr class="sidebar-divider">
@@ -65,16 +66,14 @@
             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">ADMINISTRATION</h6>
+                    <a class="collapse-item" href="{{ path('produit_liste') }}">Gestion des produits</a>
 
-                    {% if is_granted('ROLE_VENDEUR') %}
-                        <a class="collapse-item" href="{{ path('facture_liste') }}">Gestion des Facture</a>
+                    <a class="collapse-item" href="{{ path('facture_liste') }}">Gestion des Facture</a>
                         <a class="collapse-item" href="{{ path('sortie_liste') }}">Gestion des sorties</a>
-                    {% endif %}
-                    {% if is_granted('ROLE_GESTION_STOCK') %}
                         <a class="collapse-item" href="{{ path('entree_liste') }}">Gestion des entrées</a>
-                        <a class="collapse-item" href="{{ path('produit_liste') }}">Gestion des produits</a>
-                        <a class="collapse-item" href="{{ path('dette_liste') }}">Gestion des dettes</a>
                         <a class="collapse-item" href="{{ path('client_liste') }}">Gestion des clients</a>
+                    {% if is_granted('ROLE_GESTION_STOCK') %}
+                        <a class="collapse-item" href="{{ path('dette_liste') }}">Gestion des dettes</a>
                         <a class="collapse-item" href="{{ path('fournisseur_liste') }}">Gestion des Fournisseurs</a>
                         <a class="collapse-item" href="{{ path('user_liste') }}">Gestion des utilisateurs</a>
                     {% endif %}

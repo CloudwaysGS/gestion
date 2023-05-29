@@ -19,10 +19,10 @@ class SecurityController extends AbstractController
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils, FlashyNotifier $notifier): Response
     {
-         if ($this->getUser()) {
-         $notifier->success('Bonjour '.$this->getUser()->getPrenom().' '.$this->getUser()->getNom().' je vous souhaite une excellente journée!!!');
-             return $this->redirectToRoute('accueil');
-         }
+        if ($this->getUser()) {
+            $notifier->success('Bonjour '.$this->getUser()->getPrenom().' '.$this->getUser()->getNom().' je vous souhaite une excellente journée!!!');
+            return $this->redirectToRoute('accueil');
+        }
 
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
