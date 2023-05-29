@@ -47,6 +47,23 @@ class ChargementRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findByName($nom)
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.nomClient LIKE :nomClient')
+            ->setParameter('nomClient', '%'.$nom.'%')
+            ->orderBy('c.nomClient', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countAll(): int
+    {
+        $qb = $this->createQueryBuilder('c');
+        $qb->select('COUNT(c)');
+        $query = $qb->getQuery();
+        return $query->getSingleScalarResult();
+    }
 
 
 

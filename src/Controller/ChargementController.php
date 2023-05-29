@@ -6,6 +6,8 @@ use App\Entity\Chargement;
 use App\Entity\Client;
 use App\Entity\Facture;
 use App\Entity\Facture2;
+use App\Entity\Search;
+use App\Form\SearchType;
 use App\Repository\ChargementRepository;
 use App\Repository\FactureRepository;
 use DateTimeImmutable;
@@ -33,9 +35,15 @@ class ChargementController extends AbstractController
             ->getSingleScalarResult();
         $sumTotalMonth = is_null($sumTotalMonth) ? 0 : $sumTotalMonth;
         $today = new DateTimeImmutable();
-        $chargement = $charge->findAllOrderedByDate();
+        $search = new Search();
+        $form2 = $this->createForm(SearchType::class, $search);
+        $form2->handleRequest($request);
+        $nom = $search->getNom();
+
+        $chargement = $nom ? $charge->findByName($nom) : $charge->findAllOrderedByDate();
+
         $page = $request->query->getInt('page', 1);
-        $limit = 6; // number of products to display per page
+        $limit = 10; // number of products to display per page
         $total = count($chargement);
         $offset = ($page - 1) * $limit;
         $chargement = array_slice($chargement, $offset, $limit);
@@ -50,6 +58,7 @@ class ChargementController extends AbstractController
             'f' => $f
         ]);
     }
+
 
     #[Route('/chargement/extraire/{id}', name: 'extraire')]
     public function extraire(Chargement $chargement)

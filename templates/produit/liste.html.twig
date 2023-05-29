@@ -3,18 +3,6 @@
 {% block title %}Gestion des produits{% endblock %}
 
 {% block body %}
-    {{ form_start(form2) }}
-    <div class="form-row align-items-end m-2">
-        <div class="col">
-            {{ form_row(form2.nom) }}
-        </div>
-        <div class="col">
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Recherche</button>
-            </div>
-        </div>
-    </div>
-    {{ form_end(form2) }}
     <div class="row">
      <div class="container col-md-8">
          {% for message in app.session.flashBag.get('success') %}
