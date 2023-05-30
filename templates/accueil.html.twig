@@ -39,14 +39,16 @@
 
         <!-- Divider -->
         <hr class="sidebar-divider my-0">
-        {% if is_granted('ROLE_GESTION_STOCK') %}
-        <!-- Nav Item - Dashboard -->
-        <li class="nav-item active">
-            <a class="nav-link" href={{ path('accueil') }}>
-                <i class="fas fa-fw fa-tachometer-alt"></i>
-                <span>Tableau de bord</span></a>
-        </li>
+        {% if is_granted('ROLE_GESTION_STOCK') or is_granted('ROLE_USER') %}
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item active">
+                <a class="nav-link" href="{{ path('accueil') }}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
         {% endif %}
+
 
         <!-- Divider -->
         <hr class="sidebar-divider">
