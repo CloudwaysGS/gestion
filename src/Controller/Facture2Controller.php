@@ -84,6 +84,9 @@ class Facture2Controller extends AbstractController
                         $nomClient = $client->getNom();
                         $facture->setNomClient($nomClient);
                     }
+
+                    $facture->setConnect($this->getUser()->getPrenom().' '.$this->getUser()->getNom());
+
                     $produitLibelle = $facture->getNomProduit();
                     $fp = $factureRepository->findAllOrderedByDate();
                     foreach ($fp as $fact) {
@@ -134,6 +137,8 @@ class Facture2Controller extends AbstractController
                         $nomClient = $client->getNom();
                         $facture->setNomClent($nomClient);
                     }
+
+                    $facture->setConnect($this->getUser()->getPrenom().' '.$this->getUser()->getNom());
 
                     $produitLibelle = $facture->getNomProduit();
                     $fp = $factureRepository->findAllOrderedByDate();
@@ -265,6 +270,7 @@ class Facture2Controller extends AbstractController
                 $chargement->addFacture2($facture);
                 $entityManager->persist($facture);
             }
+            $chargement->setConnect($facture->getConnect());
             $chargement->setTotal($total);
             $entityManager->persist($chargement);
             $entityManager->flush();
