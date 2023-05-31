@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Entity\Client;
 use App\Entity\Detail;
 use App\Entity\Produit;
 use App\Entity\Sortie;
@@ -22,10 +23,22 @@ class SortieType extends AbstractType
     {
         $libelle = "";
         $builder
+            ->add('client', EntityType::class, [
+                'class' => Client::class,
+                'label' => false,
+                'attr' => [
+                    'class' => 'form-control form-group',
+                ],
+                'placeholder' => 'Nom du client',
+                'required' => false,
+            ])
             ->add('produit',EntityType::class, array(
                 'class' => Produit::class,
-                'label' => 'Libelle du produit',
-                'attr' => array('class' => 'form-control form-group'),
+                'label' => false,
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                ),
+                'placeholder' => 'Libelle du produit',
                 'query_builder' => function(EntityRepository $er) use ($libelle) {
                     return $er->createQueryBuilder('p')
                         ->where('p.libelle LIKE :libelle')
@@ -35,9 +48,11 @@ class SortieType extends AbstractType
             ))
 
             ->add('qtSortie', TextType::class, array(
-                'label' => 'Quantite vendue',
+                'label' => false,
                 'attr' => array(
-                    'class' => 'form-control form-group'),
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'Quantite vendue'
+                ),
                 'constraints' => array(
                     new NotBlank(),
                     new Type('numeric')
@@ -45,9 +60,10 @@ class SortieType extends AbstractType
             ))
 
             ->add('prixUnit', TextType::class, array(
-                'label' => 'prix unitaire',
+                'label' => false,
                 'attr' => array(
-                    'class' => 'form-control form-group'
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'prix unitaire'
                 ),
                 'constraints' => array(
                     new NotBlank(),
@@ -56,8 +72,12 @@ class SortieType extends AbstractType
             ))
             ->add('detail',EntityType::class, array(
                 'class' => Detail::class,
-                'label' => 'Libelle du detail',
-                'attr' => array('class' => 'form-control form-group'),
+                'label' => false,
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                    ),
+                'placeholder' => 'Libelle du detail',
+                'required' => false,
                 'query_builder' => function(EntityRepository $er) use ($libelle) {
                     return $er->createQueryBuilder('p')
                         ->where('p.libelle LIKE :libelle')

@@ -61,14 +61,17 @@ class EntreeController extends AbstractController
             $manager->flush();
             ///////////***************Mise à jour du produit******************/////////////////////////
             $p = $manager->getRepository(Produit::class)->find($entree->getProduit()->getId());
-            $d = $manager->getRepository(Detail::class)->find($entree->getDetail()->getId());
             $qteInitial = $p->getQtStock();
             $pInitial = $p->getPrixUnit();
             $qteAjout = $entree->getQtEntree();
             $pAjout = $entree->getPrixUnit();
             $stock = $qteInitial + $qteAjout;
-            $d->setStockProduit($stock);
-            $d->setQtStock($stock * $d->getNombre());
+            $details = $entree->getDetail();
+            if ($details != null){
+                $d = $manager->getRepository(Detail::class)->find($entree->getDetail()->getId());
+                $d->setStockProduit($stock);
+                $d->setQtStock($stock * $d->getNombre());
+            }
             if ($qteInitial != 0 && $pAjout > $pInitial){
                 $cout = ($qteInitial * $pInitial + $qteAjout * $pAjout)/$stock;
                 $montant = $stock * $cout;
@@ -121,4 +124,106 @@ class EntreeController extends AbstractController
         $this->addFlash('success', 'Le produit entrée a été supprimé avec succès');
         return $this->redirectToRoute('entree_liste');
     }
+
+    #[Route('/entree/pdf', name: 'entree_pdf')]
+    public function pdf(EntreeRepository $entre)
+    {
+        $entree = new Entree();
+        $entree = $entre->findAll();
+        if (!empty($entree)) {
+            $lastEntree = end($entree);
+            $firstEntree = reset($entree);
+            $client = ($lastEntree !== false) ? $lastEntree->getClient() ?? $firstEntree->getClient() : null;
+            $data = [];
+            $total = 0;
+            foreach ($entree as $e) {
+                $data[] = array(
+                    'Quantité achetée' => $e->getQtEntree(),
+                    'Produit' => $e->getProduit()->getLibelle(),
+                    'Prix unitaire' => $e->getPrixUnit(),
+                    'Montant' => $e->getTotal(),
+                );
+
+                $total += $e->getTotal();
+            }
+        }
+        $data[] = [
+            'Quantité achetée' => '',
+            'Produit' => '',
+            'Prix unitaire' => '',
+            'Montant total' => '',
+        ];
+        $headers = array(
+            'Quantité',
+            'Désignation',
+            'Prix unitaire',
+            'Montant',
+        );
+        $filename = $client !== null ? $client->getNom() : '';
+        $filename .= date("Y-m-d_H-i", time()) . ".pdf";
+
+        // Initialisation du PDF
+        $pdf = new \FPDF();
+        $pdf->AddPage();
+
+        // Titre de la facture
+        $pdf->SetFont('Arial','BI',12);
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
+        $pdf->Cell(0, 10, 'Facture', 0, 1, 'C', true);
+        $pdf->Ln(1);
+
+        $prenomNom = $this->getUser() ? $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom() : 'Anonyme';
+        $adresse = $this->getUser() ? $this->getUser()->getAdresse() : 'Anonyme';
+        $phone = $this->getUser() ? $this->getUser()->getTelephone() : 'Anonyme';
+        // Informations sur le commerçant et client
+        $pdf->SetFont('Arial', 'I', 9);
+        $pdf->SetTextColor(51, 51, 51); // Couleur du texte des informations
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->Cell(70, 5, 'COMMERCANT : '.$prenomNom, 0, 0, 'L');
+        $pdf->Cell(120, 5, 'CLIENT : ' . ($client ? $client->getNom() : ''), 0, 1, 'R');
+
+        $pdf->Cell(70, 5, 'ADRESSE : '.$adresse.' / Kaolack', 0, 0, 'L');
+        $pdf->Cell(120, 5, 'ADRESSE : '. ($client ? $client->getAdresse() : ''), 0, 1, 'R');
+
+        $pdf->Cell(70, 5, 'TELEPHONE : '.$phone, 0, 0, 'L');
+        $pdf->Cell(120, 5, 'TELEPHONE : '. ($client ? $client->getTelephone() : ''), 0, 1, 'R');
+
+        $pdf->Cell(70, 5, 'NINEA : 0848942 - RC : 10028', 0, 1, 'L');
+        $pdf->Ln(2);
+
+
+        // Affichage des en-têtes du tableau
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
+        foreach ($headers as $header) {
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(47.5, 10, utf8_decode($header), 0, 0, 'C', true); // true pour la couleur de fond
+        }
+        $pdf->Ln();
+
+        // Affichage des données de la facture
+        foreach ($data as $row) {
+            foreach ($row as $key => $value) {
+                $pdf->SetFont('Arial', '', 10.5);
+                $pdf->Cell(47.5, 10, utf8_decode($value), 0, 0, 'C');
+            }
+            $pdf->Ln();
+        }
+
+        // Affichage du total de la facture
+        $pdf->SetFont('Arial', 'B', 12);
+
+        // Affichage du total de la facture
+        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
+        $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
+        $pdf->Cell(142.5, -10, 'Total', 0, 0, 'L', true); // true pour la couleur de fond
+        $pdf->Cell(47.5, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C',true);
+
+        // Téléchargement du fichier PDF
+        $pdf->Output('D', $filename);
+        exit;
+
+    }
+
 }

@@ -39,6 +39,9 @@ class Entree
     #[ORM\ManyToOne(inversedBy: 'entrees')]
     private ?Detail $detail = null;
 
+    #[ORM\ManyToOne(inversedBy: 'entrees')]
+    private ?Client $client = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -136,6 +139,18 @@ class Entree
     public function setDetail(?Detail $detail): self
     {
         $this->detail = $detail;
+
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): self
+    {
+        $this->client = $client;
 
         return $this;
     }
