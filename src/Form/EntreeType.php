@@ -37,6 +37,7 @@ class EntreeType extends AbstractType
                     'class' => 'form-control form-group',
                     ),
                 'placeholder' => 'Libelle du produit',
+                'required' => false,
                 'query_builder' => function(EntityRepository $er) use ($libelle) {
                     return $er->createQueryBuilder('p')
                         ->where('p.libelle LIKE :libelle')

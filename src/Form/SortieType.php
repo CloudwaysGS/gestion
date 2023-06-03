@@ -38,6 +38,7 @@ class SortieType extends AbstractType
                 'attr' => array(
                     'class' => 'form-control form-group',
                 ),
+                'required' => false,
                 'placeholder' => 'Libelle du produit',
                 'query_builder' => function(EntityRepository $er) use ($libelle) {
                     return $er->createQueryBuilder('p')
