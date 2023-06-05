@@ -87,22 +87,21 @@ class EntreeController extends AbstractController
                 $manager->flush();
                 $this->addFlash('success', 'L\'entrée a été enregistrée avec succès.');
             }elseif ($detail){
+
                 $montant = $entree->getPrixUnit() * $entree->getQtEntree();
                 $entree->setTotal($montant);
                 $entree->setUser($user);
                 $manager->persist($entree);
                 $manager->flush();
+
                 ///////////***************Mise à jour du produit******************/////////////////////////
                 $p = $entree->getDetail();
                 $qteInitial = $p->getQtStock();
                 $qteAjout = $entree->getQtEntree();
                 $stock = $qteInitial + $qteAjout;
-                $p->setStockProduit($stock);
-                if ($p != null){
-                    $d = $manager->getRepository(Detail::class)->find($entree->getDetail()->getId());
-                    $d->setStockProduit($stock);
-                    $d->setQtStock($stock * $d->getNombre());
-                }
+                $p->setQtStock($stock);
+                $p->setStockProduit($stock * $p->getNombre());
+
 
                 $p->setTotal($montant);
                 $manager->flush();

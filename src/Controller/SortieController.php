@@ -169,10 +169,17 @@ class SortieController extends AbstractController
     }
 
     #[Route('/sortie/pdf', name: 'sortie_pdf')]
-    public function pdf(SortieRepository $sort)
+    public function pdf(SortieRepository $sort, Request $request)
     {
-        $sortie = new Sortie();
-        $sortie = $sort->findAll();
+        $selectedRows = $request->request->get('selected_rows');
+
+        // Retrieve the selected sortie entities from the repository
+        $sortie = $sort->findBy(['id' => $selectedRows]);
+
+        $client = null; // Initialize $client variable
+        $total = 0;
+
+
         if (!empty($sortie)) {
             $lastSortie = end($sortie);
             $firstSortie = reset($sortie);

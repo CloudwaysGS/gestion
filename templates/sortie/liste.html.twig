@@ -79,8 +79,9 @@
                 <div class="card-header">Liste des vendues</div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered text-center">
                             <tr>
+                                <th>Cocher</th>
                                 <th>Produit</th>
                                 <th>Quantite vendue</th>
                                 <th>PrixUnit</th>
@@ -90,6 +91,8 @@
                             </tr>
                             {% for s in sortie %}
                                 <tr>
+                                    <th><input type="checkbox" name="selected_rows[]" value="{{ s.id }}"></th>
+
                                     <th>
                                         {% if s.produit is not null %}
                                             {{ s.produit }}
@@ -153,6 +156,22 @@
                 flashMessage.remove();
             }
         }, 10000);
+    </script>
+
+    <script>
+        document.getElementById("btn-extract-pdf").addEventListener("click", function() {
+            var checkedRows = document.querySelectorAll('input[type="checkbox"]:checked');
+            var selectedIds = [];
+            checkedRows.forEach(function(row) {
+                selectedIds.push(row.id.replace("checkbox-", ""));
+            });
+            if (selectedIds.length > 0) {
+                window.location.href = '{{ path('sortie_pdf') }}?ids=' + selectedIds.join(',');
+            } else {
+                alert("Veuillez sélectionner au moins une sortie.");
+            }
+        });
+
     </script>
 
 

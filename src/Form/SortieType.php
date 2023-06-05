@@ -39,7 +39,23 @@ class SortieType extends AbstractType
                     'class' => 'form-control form-group',
                 ),
                 'required' => false,
-                'placeholder' => 'Libelle du produit',
+                'placeholder' => 'grossistes',
+                'query_builder' => function(EntityRepository $er) use ($libelle) {
+                    return $er->createQueryBuilder('p')
+                        ->where('p.libelle LIKE :libelle')
+                        ->setParameter('libelle', '%'.$libelle.'%')
+                        ->orderBy('p.libelle', 'ASC');
+                },
+            ))
+
+            ->add('detail',EntityType::class, array(
+                'class' => Detail::class,
+                'label' => false,
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                ),
+                'placeholder' => 'details',
+                'required' => false,
                 'query_builder' => function(EntityRepository $er) use ($libelle) {
                     return $er->createQueryBuilder('p')
                         ->where('p.libelle LIKE :libelle')
@@ -71,21 +87,7 @@ class SortieType extends AbstractType
                     new Type('numeric')
                 )
             ))
-            ->add('detail',EntityType::class, array(
-                'class' => Detail::class,
-                'label' => false,
-                'attr' => array(
-                    'class' => 'form-control form-group',
-                    ),
-                'placeholder' => 'Libelle du detail',
-                'required' => false,
-                'query_builder' => function(EntityRepository $er) use ($libelle) {
-                    return $er->createQueryBuilder('p')
-                        ->where('p.libelle LIKE :libelle')
-                        ->setParameter('libelle', '%'.$libelle.'%')
-                        ->orderBy('p.libelle', 'ASC');
-                },
-            ))
+
             ->add('Valider', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')
             ))

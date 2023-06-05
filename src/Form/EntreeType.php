@@ -36,7 +36,7 @@ class EntreeType extends AbstractType
                 'attr' => array(
                     'class' => 'form-control form-group',
                     ),
-                'placeholder' => 'Libelle du produit',
+                'placeholder' => 'grossistes',
                 'required' => false,
                 'query_builder' => function(EntityRepository $er) use ($libelle) {
                     return $er->createQueryBuilder('p')
@@ -45,24 +45,14 @@ class EntreeType extends AbstractType
                         ->orderBy('p.libelle', 'ASC');
                 },
             ))
-            ->add('qtEntree', TextType::class, array(
-                'label' => 'Quantite achetée',
-                'attr' => array(
-                'class' => 'form-control form-group')
-            ))
-            ->add('prixUnit', TextType::class, array(
-                'label' => 'prix unitaire',
-                'attr' => array(
-                    'class' => 'form-control form-group'
-                )
-            ))
+
             ->add('detail',EntityType::class, array(
                 'class' => Detail::class,
                 'label' => false,
                 'attr' => array(
                     'class' => 'form-control form-group',
                 ),
-                'placeholder' => 'Libelle du produit',
+                'placeholder' => 'détails',
                 'required' => false,
                 'query_builder' => function(EntityRepository $er) use ($libelle) {
                     return $er->createQueryBuilder('p')
@@ -71,6 +61,22 @@ class EntreeType extends AbstractType
                         ->orderBy('p.libelle', 'ASC');
                 },
             ))
+
+            ->add('qtEntree', TextType::class, array(
+                'label' => false,
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'Quantite achetée'
+                )
+            ))
+            ->add('prixUnit', TextType::class, array(
+                'label' => false,
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'prix unitaire'
+                )
+            ))
+
             ->add('Valider', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')
             ))
