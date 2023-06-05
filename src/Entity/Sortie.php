@@ -21,7 +21,7 @@ class Sortie
     private ?string $qtSortie = null;
 
     #[ORM\ManyToOne(inversedBy: 'sorties')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Produit $produit = null;
 
     #[ORM\ManyToOne(inversedBy: 'sorties')]

@@ -49,37 +49,80 @@ class SortieController extends AbstractController
         $form = $this->createForm(SortieType::class, $sortie);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $p = $manager->getRepository(Produit::class)->find($sortie->getProduit()->getId());
-            $k = $p->getQtStock();
-            if ($p->getQtStock() < $sortie->getQtSortie()){
-                $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : '.$k);
-            } else{
-                $user = $this->getUser();
-                if (!$user){
-                    throw new Exception("Aucun utilisateur n'est actuellement connecté");
-                }
-                $montant = $sortie->getPrixUnit() * $sortie->getQtSortie();
-                $sortie->setTotal($montant);
-                $sortie->setUser($user);
-                $manager->persist($sortie);
-                $manager->flush();
-                //Mise à jour du produit
-                $p = $manager->getRepository(Produit::class)->find($sortie->getProduit()->getId());
-                $stock = $p->getQtStock() - $sortie->getQtSortie();
-                $montant = $stock * $p->getPrixUnit();
-                $p->setTotal($montant);
-                $p->setQtStock($stock);
-                $detail = $sortie->getDetail();
-                if ($detail !== null) {
-                    $d = $manager->getRepository(Detail::class)->find($detail->getId());
+            $produit = $sortie->getProduit();
+            $detail = $sortie->getDetail();
+
+            if ($produit){
+                $p = $sortie->getProduit();
+                $k = $p->getQtStock();
+                if ($p->getQtStock() < $sortie->getQtSortie()){
+                    $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : '.$k);
+                } else{
+                    $user = $this->getUser();
+                    if (!$user){
+                        throw new Exception("Aucun utilisateur n'est actuellement connecté");
+                    }
+                    $montant = $sortie->getPrixUnit() * $sortie->getQtSortie();
+                    $sortie->setTotal($montant);
+                    $sortie->setUser($user);
+                    $manager->persist($sortie);
+                    $manager->flush();
+                    //Mise à jour du produit
+                    $p = $manager->getRepository(Produit::class)->find($sortie->getProduit()->getId());
+                    $stock = $p->getQtStock() - $sortie->getQtSortie();
+                    $montant = $stock * $p->getPrixUnit();
+                    $p->setTotal($montant);
+                    $p->setQtStock($stock);
+                    $detail = $sortie->getDetail();
+                    if ($detail !== null) {
+                        $d = $manager->getRepository(Detail::class)->find($detail->getId());
                         $d->setStockProduit($stock);
                         $d->setQtStock($stock * $d->getNombre());
+                    }
+
+
+                    $manager->flush();
+                    $this->addFlash('success', 'Le produit a été enrégistré avec succès.');
                 }
+            }elseif ($detail){
+                $p = $sortie->getDetail();
+                $k = $p->getQtStock();
+                if ($p->getQtStock() < $sortie->getQtSortie()){
+                    $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : '.$k);
+                } else{
+                    $user = $this->getUser();
+                    if (!$user){
+                        throw new Exception("Aucun utilisateur n'est actuellement connecté");
+                    }
+                    $montant = $sortie->getPrixUnit() * $sortie->getQtSortie();
+                    $sortie->setTotal($montant);
+                    $sortie->setUser($user);
+                    $manager->persist($sortie);
+                    $manager->flush();
 
-
-                $manager->flush();
-                $this->addFlash('success', 'La quantité en stock est suffisante pour satisfaire la demande.');
+                    //Mise à jour du produit
+                    $p = $manager->getRepository(Detail::class)->find($sortie->getDetail()->getId());
+                    $stock = $p->getQtStock() - $sortie->getQtSortie();
+                    $montant = $stock * $p->getPrixUnit();
+                    $p->setTotal($montant);
+                    $p->setQtStock($stock);
+                    $quantite = floatval($sortie->getQtSortie());
+                    $nombre = $p->getNombre();
+                    $vendus = $p->getNombreVendus();
+                    if ($quantite >= $nombre) {
+                        $multiplier = $quantite / $nombre;
+                        $vendus += $multiplier;
+                        $p->setNombreVendus($vendus);
+                    }else{
+                        $multiplier = $quantite / $nombre;
+                        $vendus += $multiplier;
+                        $p->setNombreVendus($vendus);
+                    }
+                    $manager->flush();
+                    $this->addFlash('success', 'Le produit a été enrégistré avec succès');
+                }
             }
+
         }
         return $this->redirectToRoute('sortie_liste');
     }
@@ -121,7 +164,7 @@ class SortieController extends AbstractController
     #[Route('/sortie/delete/{id}', name: 'sortie_delete')]
     public function delete(Sortie $sortie, SortieRepository $repository){
         $repository->remove($sortie,true);
-        $this->addFlash('danger', 'Le produit sorti a été supprimé avec succès');
+        $this->addFlash('success', 'Le produit sorti a été supprimé avec succès');
         return $this->redirectToRoute('sortie_liste');
     }
 

@@ -42,7 +42,7 @@ class SortieRepository extends ServiceEntityRepository
     public function findAllOrderedByDate($limit, $offset)
     {
         return $this->createQueryBuilder('p')
-            ->orderBy('p.dateSortie', 'DESC')
+            ->orderBy('p.dateSortie', 'ASC')
             ->setMaxResults($limit)
             ->setFirstResult($offset)
             ->getQuery()

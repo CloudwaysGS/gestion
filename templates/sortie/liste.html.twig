@@ -90,7 +90,16 @@
                             </tr>
                             {% for s in sortie %}
                                 <tr>
-                                    <th>{{ s.produit }}</th>
+                                    <th>
+                                        {% if s.produit is not null %}
+                                            {{ s.produit }}
+                                        {% elseif s.detail is not null %}
+                                            {{ s.detail }}
+                                        {% else %}
+                                            {{ s.produit }}
+                                        {% endif %}
+                                    </th>
+
                                     <th>{{ s.qtSortie }}</th>
                                     <th>{{ s.prixUnit | number_format(0, ',', ' ') }}</th>
                                     <th>{{ s.total | number_format(0, ',', ' ') }}</th>

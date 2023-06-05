@@ -54,37 +54,61 @@ class EntreeController extends AbstractController
             if (!$user){
                 throw $this->createNotFoundException("Aucun utilisateur n'est actuellement connecté");
             }
-            $montant = $entree->getPrixUnit() * $entree->getQtEntree();
-            $entree->setTotal($montant);
-            $entree->setUser($user);
-            $manager->persist($entree);
-            $manager->flush();
-            ///////////***************Mise à jour du produit******************/////////////////////////
-            $p = $manager->getRepository(Produit::class)->find($entree->getProduit()->getId());
-            $qteInitial = $p->getQtStock();
-            $pInitial = $p->getPrixUnit();
-            $qteAjout = $entree->getQtEntree();
-            $pAjout = $entree->getPrixUnit();
-            $stock = $qteInitial + $qteAjout;
-            $details = $entree->getDetail();
-            if ($details != null){
-                $d = $manager->getRepository(Detail::class)->find($entree->getDetail()->getId());
-                $d->setStockProduit($stock);
-                $d->setQtStock($stock * $d->getNombre());
+            $produit = $entree->getProduit();
+            $detail = $entree->getDetail();
+            if ($produit){
+                $montant = $entree->getPrixUnit() * $entree->getQtEntree();
+                $entree->setTotal($montant);
+                $entree->setUser($user);
+                $manager->persist($entree);
+                $manager->flush();
+                ///////////***************Mise à jour du produit******************/////////////////////////
+                $p = $manager->getRepository(Produit::class)->find($entree->getProduit()->getId());
+                $qteInitial = $p->getQtStock();
+                $pInitial = $p->getPrixUnit();
+                $qteAjout = $entree->getQtEntree();
+                $pAjout = $entree->getPrixUnit();
+                $stock = $qteInitial + $qteAjout;
+
+                if ($qteInitial != 0 && $pAjout > $pInitial){
+                    $cout = ($qteInitial * $pInitial + $qteAjout * $pAjout)/$stock;
+                    $montant = $stock * $cout;
+                    $p->setPrixUnit($cout);
+                }
+                $detail = $entree->getDetail();
+                if ($detail !== null) {
+                    $d = $manager->getRepository(Detail::class)->find($detail->getId());
+                    $d->setStockProduit($stock);
+                    $d->setQtStock($stock * $d->getNombre());
+                }
+
+                $p->setQtStock($stock);
+                $p->setTotal($montant);
+                $manager->flush();
+                $this->addFlash('success', 'L\'entrée a été enregistrée avec succès.');
+            }elseif ($detail){
+                $montant = $entree->getPrixUnit() * $entree->getQtEntree();
+                $entree->setTotal($montant);
+                $entree->setUser($user);
+                $manager->persist($entree);
+                $manager->flush();
+                ///////////***************Mise à jour du produit******************/////////////////////////
+                $p = $entree->getDetail();
+                $qteInitial = $p->getQtStock();
+                $qteAjout = $entree->getQtEntree();
+                $stock = $qteInitial + $qteAjout;
+                $p->setStockProduit($stock);
+                if ($p != null){
+                    $d = $manager->getRepository(Detail::class)->find($entree->getDetail()->getId());
+                    $d->setStockProduit($stock);
+                    $d->setQtStock($stock * $d->getNombre());
+                }
+
+                $p->setTotal($montant);
+                $manager->flush();
+                $this->addFlash('success', 'L\'entrée a été enregistrée avec succès.');
             }
-            if ($qteInitial != 0 && $pAjout > $pInitial){
-                $cout = ($qteInitial * $pInitial + $qteAjout * $pAjout)/$stock;
-                $montant = $stock * $cout;
-                $p->setPrixUnit($cout);
-            }/*else{
-                $cout = $pAjout;
-                $montant = $stock * $cout;
-                $p->setPrixUnit($cout);
-            }*/
-            $p->setQtStock($stock);
-            $p->setTotal($montant);
-            $manager->flush();
-            $this->addFlash('success', 'L\'entrée a été enregistrée avec succès.');
+
         }
         return $this->redirectToRoute('entree_liste');
     }

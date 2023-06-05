@@ -91,7 +91,13 @@
                             {% for e in entree %}
                                 <tr>
                                     <th>{{ e.fournisseur }}</th>
-                                    <th>{{ e.produit }}</th>
+                                    <th>{% if e.produit is not null %}
+                                            {{ e.produit }}
+                                        {% elseif e.detail is not null %}
+                                            {{ e.detail }}
+                                        {% else %}
+                                            {{ e.produit }}
+                                        {% endif %}</th>
                                     <th>{{ e.qtEntree }}</th>
                                     <th>{{ e.prixUnit | number_format(0, ',', ' ') }}</th>
                                     <th>{{ e.total | number_format(0, ',', ' ') }}</th>
