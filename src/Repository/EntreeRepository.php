@@ -42,12 +42,13 @@ class EntreeRepository extends ServiceEntityRepository
     public function findAllOrderedByDate($limit, $offset)
     {
         return $this->createQueryBuilder('p')
-            ->orderBy('p.dateEntree', 'DESC')
+            ->orderBy('p.dateEntree', 'DESC') // Modifier 'DESC' en 'ASC' pour trier par ordre croissant
             ->setMaxResults($limit)
             ->setFirstResult($offset)
             ->getQuery()
             ->getResult();
     }
+
 
     public function countAll(): int
     {

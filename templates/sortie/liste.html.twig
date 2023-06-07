@@ -73,7 +73,6 @@
             {% for message in app.session.flashBag.get('danger') %}
                 <div id="flash-message" class="alert alert-danger">{{ message }}</div>
             {% endfor %}
-            <button class="glow-on-hover mb-1" onclick="window.location.href='{{ path('sortie_pdf') }}'">Extraire en pdf</button>
 
             <div class="card ">
                 <div class="card-header">Liste des vendues</div>
@@ -81,7 +80,6 @@
                     <div class="table-responsive">
                         <table class="table table-bordered text-center">
                             <tr>
-                                <th>Cocher</th>
                                 <th>Produit</th>
                                 <th>Quantite vendue</th>
                                 <th>PrixUnit</th>
@@ -91,8 +89,6 @@
                             </tr>
                             {% for s in sortie %}
                                 <tr>
-                                    <th><input type="checkbox" name="selected_rows[]" value="{{ s.id }}"></th>
-
                                     <th>
                                         {% if s.produit is not null %}
                                             {{ s.produit }}
@@ -102,7 +98,6 @@
                                             {{ s.produit }}
                                         {% endif %}
                                     </th>
-
                                     <th>{{ s.qtSortie }}</th>
                                     <th>{{ s.prixUnit | number_format(0, ',', ' ') }}</th>
                                     <th>{{ s.total | number_format(0, ',', ' ') }}</th>
@@ -113,6 +108,7 @@
                                     </td>
                                 </tr>
                             {% endfor %}
+
                         </table>
 
                     </div>
@@ -147,7 +143,9 @@
         </div>
     </div>
 {% endblock %}
+
 {% block javascripts %}
+
     <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
     <script>
         setTimeout(function() {
@@ -157,23 +155,5 @@
             }
         }, 10000);
     </script>
-
-    <script>
-        document.getElementById("btn-extract-pdf").addEventListener("click", function() {
-            var checkedRows = document.querySelectorAll('input[type="checkbox"]:checked');
-            var selectedIds = [];
-            checkedRows.forEach(function(row) {
-                selectedIds.push(row.id.replace("checkbox-", ""));
-            });
-            if (selectedIds.length > 0) {
-                window.location.href = '{{ path('sortie_pdf') }}?ids=' + selectedIds.join(',');
-            } else {
-                alert("Veuillez sélectionner au moins une sortie.");
-            }
-        });
-
-    </script>
-
-
 
 {% endblock %}
