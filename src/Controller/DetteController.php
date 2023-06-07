@@ -82,4 +82,22 @@ class DetteController extends AbstractController
         $this->addFlash('success', 'La dette a été supprimé avec succès');
         return $this->redirectToRoute('dette_liste');
     }
+
+    #[Route('/dette/info/{id}', name: 'dette_info')]
+    public function info(Dette $dette, DetteRepository $repository, Request $request)
+    {
+        $nomClient = $dette->getClient()->getNom();
+        $infos = $dette->getPaiement()->getOwner();
+
+        // Renvoie les informations dans la vue du modal
+        return $this->render('dette/detail.html.twig', [
+            'nomClient' => $nomClient,
+            'infos' => $infos,
+
+        ]);
+    }
+
+
+
+
 }

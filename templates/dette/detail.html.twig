@@ -1,0 +1,68 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Dette{% endblock %}
+
+{% block body %}
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="container col-md-9">
+            <div class="card ">
+                <div class="card-header">
+                    <a href="#">Détails du client</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tr>
+                                <th>Nom du client</th>
+                                <td>{{ nomClient }}</td>
+                            </tr>
+                            <tr>
+                                <th>Montant dette</th>
+                                <td>{{ infos.montantDette }}</td>
+                            </tr>
+                            <tr>
+                                <th>Statut</th>
+                                <td>{{ infos.statut }}</td>
+                            </tr>
+                            <tr>
+                                <th>Reste</th>
+                                <td>{{ infos.reste }}</td>
+                            </tr>
+                            <tr>
+                                <th>Commentaire</th>
+                                <td>{{ infos.commentaire }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date</th>
+                                <td>{{ infos.dateCreated| date('d/m/Y') }}</td>
+                            </tr>
+                            <!-- Ajoutez d'autres lignes de la table pour afficher les autres détails de la dette -->
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 10000);
+    </script>
+
+{% endblock %}
