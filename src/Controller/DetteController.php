@@ -86,14 +86,10 @@ class DetteController extends AbstractController
     #[Route('/dette/info/{id}', name: 'dette_info')]
     public function info(Dette $dette, DetteRepository $repository, Request $request)
     {
-        $nomClient = $dette->getClient()->getNom();
         $infos = $dette->getPaiement()->getOwner();
-
         // Renvoie les informations dans la vue du modal
         return $this->render('dette/detail.html.twig', [
-            'nomClient' => $nomClient,
             'infos' => $infos,
-
         ]);
     }
 

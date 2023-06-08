@@ -72,7 +72,7 @@
         }
     </style>
     <button class="glow-on-hover ml-3 m-1">
-        <a onclick="window.location.href='{{ path('paiement_add') }}'">remboursement</a>
+        <a onclick="window.location.href='{{ path('paiement_add') }}'">Paiement</a>
     </button>
     <button class="glow-on-hover">
         <a onclick="window.location.href='{{ path('client_add') }}'">Nouveau client</a>
@@ -93,7 +93,6 @@
                                 {% if dette %}
                                     <th>{{ dette[0].reste < 0 ? 'A Remettre' : 'Reste' }}</th>
                                 {% endif %}
-                                <th>comment</th>
                                 <th>statut</th>
                                 <th>Date</th>
                                 <th>action</th>
@@ -109,7 +108,6 @@
                                     {% else %}
                                         <th>{{ d.reste }}</th>
                                     {% endif %}
-                                    <th>{{ d.commentaire }}</th>
                                     <th style="color: {% if d.statut == 'payée' %}#1cc88a{% else %}red{% endif %}">{{ d.statut }}</th>
                                     <th>{{ d.dateCreated | date('d/m/Y') }}</th>
                                     <th>
@@ -148,26 +146,6 @@
             </div>
         </div>
     </div>
-    <!-- Contenu du modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Titre du modal</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    MODAL
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                    <button type="button" class="btn btn-primary">Enregistrer</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
 {% endblock %}
 {% block javascripts %}
@@ -187,4 +165,5 @@
             }
         }, 10000);
     </script>
+
 {% endblock %}

@@ -39,10 +39,11 @@
                             {% for p in paiements %}
                                 <tr>
                                     <th>{{ p.client.nom }}</th>
-                                    <th>{{ p.montant }}</th>
-                                    <th>{{ p.reste }}</th>
+                                    <th>{{ p.montant | number_format(0, ',', ' ') }}</th>
+                                    <th>{{ p.reste | number_format(0, ',', ' ') }}</th>
                                     <th>{{ p.datePaiement | date('d/m/Y') }}</th>
                                     <th>
+                                        <a title="detail" href="{{ path('paiement_detail',{'id':p.id}) }}"><i class="far fa-address-card"></i></a>
                                         <a title="Modifier" href="{{ path('paiement_edit',{'id':p.id}) }}"><i class="fa fa-edit"></i></a>
                                         <a title="supprimer" href="{{ path('paiement_delete', {'id':p.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
                                     </th>

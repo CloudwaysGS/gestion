@@ -14,35 +14,23 @@
         <div class="container col-md-9">
             <div class="card ">
                 <div class="card-header">
-                    <a href="#">Détails du client</a>
+                    <a href="#">Détails paiement du client</a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table text-center">
                             <tr>
                                 <th>Nom du client</th>
-                                <td>{{ infos.client.nom }}</td>
-                            </tr>
-                            <tr>
-                                <th>Montant dette</th>
-                                <td>{{ infos.montantDette }}</td>
-                            </tr>
-                            <tr>
-                                <th>Statut</th>
-                                <td>{{ infos.statut }}</td>
-                            </tr>
-                            <tr>
-                                <th>Reste</th>
-                                <td>{{ infos.reste }}</td>
-                            </tr>
-                            <tr>
-                                <th>Descriptions</th>
-                                <td>{{ infos.commentaire }}</td>
-                            </tr>
-                            <tr>
+                                <th>Montant avance</th>
                                 <th>Date</th>
-                                <td>{{ infos.dateCreated| date('d/m/Y') }}</td>
                             </tr>
+                            {% for p in paiements %}
+                            <tr>
+                                <th>{{ p.client }}</th>
+                                <td>{{ p.montant | number_format(0, ',', ' ') }}</td>
+                                <td>{{ p.datePaiement | date('d/m/Y H:i') }}</td>
+                            </tr>
+                            {% endfor %}
                             <!-- Ajoutez d'autres lignes de la table pour afficher les autres détails de la dette -->
                         </table>
                     </div>

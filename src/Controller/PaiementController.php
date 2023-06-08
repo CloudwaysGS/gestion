@@ -133,5 +133,18 @@ class PaiementController extends AbstractController
         return $this->redirectToRoute('paiement_liste');
     }
 
+    #[Route('/paiement/detail/{id}', name: 'paiement_detail')]
+    public function detail(Paiement $paiement, EntityManagerInterface $entityManager): Response
+    {
+        $client = $paiement->getClient(); // Supposons que la relation entre Paiement et Client existe et que vous pouvez récupérer le client associé à un paiement.
+
+        $repository = $entityManager->getRepository(Paiement::class);
+        $paiements = $repository->findBy(['client' => $client]);
+        return $this->render('paiement/detail.html.twig', [
+            'controller_name' => 'ClientController',
+            'paiements' => $paiements
+        ]);
+    }
+
 
 }
