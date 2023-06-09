@@ -66,7 +66,7 @@ class FactureType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'style' => 'height: 5rem;', // ajout de la hauteur personnalisée
-                    'onmouseover' => 'this.style.height = "12rem";', // hauteur augmentée lors du survol de la souris
+                    'onmouseover' => 'this.style.height = "20rem";', // hauteur augmentée lors du survol de la souris
                     'onmouseout' => 'this.style.height = "5rem";', // hauteur rétablie lorsque la souris quitte le champ
                 ],
                 'required' => false,

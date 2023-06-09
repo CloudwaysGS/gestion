@@ -25,32 +25,51 @@
                                 <th>Date</th>
                             </tr>
                             {% for p in paiements %}
-                            <tr>
-                                <th>{{ p.client }}</th>
-                                <td>{{ p.montant | number_format(0, ',', ' ') }}</td>
-                                <td>{{ p.datePaiement | date('d/m/Y H:i') }}</td>
-                            </tr>
+                                <tr>
+                                    <th>{{ p.client }}</th>
+                                    <td>{{ p.montant | number_format(0, ',', ' ') }}</td>
+                                    <td>{{ p.datePaiement | date('d/m/Y H:i') }}</td>
+                                </tr>
                             {% endfor %}
-                            <!-- Ajoutez d'autres lignes de la table pour afficher les autres détails de la dette -->
+                            {% if showAll %}
+                                {% for p in additionalPaiements %}
+                                    <tr class="additional-payment" style="display: none;">
+                                        <th>{{ p.client }}</th>
+                                        <td>{{ p.montant | number_format(0, ',', ' ') }}</td>
+                                        <td>{{ p.datePaiement | date('d/m/Y H:i') }}</td>
+                                    </tr>
+                                {% endfor %}
+                                <tr>
+                                {% if showAll %}
+                                    <tr>
+                                        <td colspan="3">
+                                            <a href="#" id="voir-tous-les-paiements" onclick="showAllPayments()">Voir tous les paiements</a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+
+                                </tr>
+                            {% endif %}
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
-
 {% endblock %}
-{% block javascripts %}
-    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
-    <script>
-        setTimeout(function() {
-            var flashMessage = document.getElementById('flash-message');
-            if (flashMessage !== null) {
-                flashMessage.remove();
-            }
-        }, 10000);
-    </script>
 
+{% block javascripts %}
+    <script>
+        function showAllPayments() {
+            var additionalPayments = document.querySelectorAll('.additional-payment');
+
+            for (var i = 0; i < additionalPayments.length; i++) {
+                additionalPayments[i].style.display = 'table-row';
+            }
+            var voirTousLesPaiementsButton = document.getElementById('voir-tous-les-paiements');
+            voirTousLesPaiementsButton.style.display = 'none';
+        }
+
+    </script>
 {% endblock %}

@@ -17,7 +17,7 @@ class DetailController extends AbstractController
     {
         $details = $charge->findAllOrderedByDate();
         $page = $request->query->getInt('page', 1);
-        $limit = 6; // number of products to display per page
+        $limit = 10; // number of products to display per page
         $total = count($details);
         $offset = ($page - 1) * $limit;
         $details = array_slice($details, $offset, $limit);
