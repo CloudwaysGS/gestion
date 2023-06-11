@@ -43,6 +43,9 @@ class Chargement
     #[ORM\Column(length: 255)]
     private ?string $connect = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $numeroFacture = null;
+
     public function __construct()
     {
         $this->facture = new ArrayCollection();
@@ -195,6 +198,18 @@ class Chargement
     public function setConnect(string $connect): self
     {
         $this->connect = $connect;
+
+        return $this;
+    }
+
+    public function getNumeroFacture(): ?string
+    {
+        return $this->numeroFacture;
+    }
+
+    public function setNumeroFacture(?string $numeroFacture): self
+    {
+        $this->numeroFacture = $numeroFacture;
 
         return $this;
     }

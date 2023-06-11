@@ -17,7 +17,8 @@
                 <div class="table-responsive">
                     <table class="table table-bordered text-center">
                         <tr>
-                            <th>Nombre de produit</th>
+                            <th>N.Facture</th>
+                            <th>Nbre</th>
                             <th>Client</th>
                             <th>Adresse</th>
                             <th>Téléphone</th>
@@ -27,6 +28,7 @@
                         </tr>
                         {% for c in chargement %}
                             <tr>
+                                <th>{{ c.numeroFacture }}</th>
                                 <th>{{ c.nombre }}</th>
                                 <th>{{ c.nomClient }}</th>
                                 <th>{{ c.adresse }}</th>

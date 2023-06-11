@@ -89,9 +89,9 @@ class FactureController extends AbstractController
                         $this->addFlash('danger', $facture->getNomProduit() . ' a déjà été ajouté précédemment.');
                         return $this->redirectToRoute('facture_liste');
                     }
+
                     $manager->persist($facture);
                     $manager->flush();
-
 
                     //Mise à jour du produit
                     $p->setQtStock($p->getQtStock() - $facture->getQuantite());
@@ -254,6 +254,7 @@ class FactureController extends AbstractController
                     $telephone = $factures[0]->getClient()->getTelephone();
                 }
             }
+
             // Save invoices to the Chargement table
             $chargement = new Chargement();
             $chargement->setNomClient($client);
@@ -274,6 +275,7 @@ class FactureController extends AbstractController
                 $entityManager->persist($facture);
             }
             $chargement->setConnect($facture->getConnect());
+            $chargement->setNumeroFacture('FACTURE-' . $facture->getId());
             $chargement->setTotal($total);
             $entityManager->persist($chargement);
             $entityManager->flush();
