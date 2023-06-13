@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Client;
 use App\Entity\Dette;
+use App\Entity\Search;
 use App\Form\DetteType;
+use App\Form\SearchType;
 use App\Form\UpdateType;
 use App\Repository\ClientRepository;
 use App\Repository\DetteRepository;
@@ -25,11 +27,17 @@ class DetteController extends AbstractController
         $form = $this->createForm(DetteType::class, $d, array(
             'action' => $this->generateUrl('dette_add'),
         ));
+
+        $search = new Search();
+        $form2 = $this->createForm(SearchType::class, $search);
+        $form2->handleRequest($request);
+
+        $nom = $search->getNom();
         $page = $request->query->getInt('page', 1); // current page number
         $limit = 10; // number of products to display per page
-        $dette = $dette->findAllOrderedByDate();
-        $total = count($dette);
+        $total = $nom ? count($dette->findByName($nom)) : $dette->countAll();
         $offset = ($page - 1) * $limit;
+        $dette = $nom ? $dette->findByName($nom, $limit, $offset) : $dette->findAllOrderedByDate($limit, $offset);
         $dette = array_slice($dette, $offset, $limit);
         return $this->render('dette/liste.html.twig', [
             'controller_name' => 'DetteController',
@@ -37,7 +45,8 @@ class DetteController extends AbstractController
             'total' => $total,
             'page' => $page,
             'limit' => $limit,
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'form2' => $form2->createView()
         ]);
         return $this->render('dette/liste.html.twig');
     }

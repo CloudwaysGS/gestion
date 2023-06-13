@@ -48,6 +48,28 @@ class DetteRepository extends ServiceEntityRepository
             ;
     }
 
+    public function countAll(): int
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb->select('COUNT(p)');
+        $query = $qb->getQuery();
+        return $query->getSingleScalarResult();
+    }
+
+
+    // src/Repository/ProduitRepository.php
+
+    public function findByName($nom)
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.client', 'c')
+            ->andWhere('c.nom LIKE :nom')
+            ->setParameter('nom', '%'.$nom.'%')
+            ->orderBy('p.datePaiement', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Dette[] Returns an array of Dette objects
 //     */

@@ -142,7 +142,7 @@ class ChargementController extends AbstractController
             $data = [];
             $total = 0;
             foreach ($f as $facture) {
-                    $data[] = array(
+                $data[] = array(
                         'Quantité achetée' => $facture->getQuantite(),
                         'Produit' => $facture->getNomProduit(),
                         'Prix unitaire' => $facture->getPrixUnit(),
@@ -195,12 +195,11 @@ class ChargementController extends AbstractController
         // Initialisation du PDF
         $pdf = new \FPDF();
         $pdf->AddPage();
-
         // Titre de la facture
         $pdf->SetFont('Arial','BI',12);
         $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
-        $pdf->Cell(0, 10, 'Facture', 0, 1, 'C', true);
+        $pdf->Cell(0, 10, ''.$factures->getNumeroFacture(), 0, 1, 'C', true);
         $pdf->Ln(1);
 
         $prenomNom = $this->getUser() ? $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom() : 'Anonyme';
