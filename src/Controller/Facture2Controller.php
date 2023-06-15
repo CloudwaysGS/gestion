@@ -271,6 +271,7 @@ class Facture2Controller extends AbstractController
                 $entityManager->persist($facture);
             }
             $chargement->setConnect($facture->getConnect());
+            $chargement->setNumeroFacture('FACTURE-' . $facture->getId());
             $chargement->setTotal($total);
             $entityManager->persist($chargement);
             $entityManager->flush();
