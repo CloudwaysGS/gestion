@@ -85,7 +85,9 @@
             <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_delete_all') }}'">Enregistrer</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'">Mes factures</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">Créer client</button>
+            {% if is_granted("ROLE_GESTION_STOCK") %}
             <button class="glow-on-hover" onclick="window.location.href='{{ path('produit_liste') }}'">Ajouter Produit</button>
+            {% endif %}
             <button class="glow-on-hover" onclick="window.location.href='{{ path('facture_liste') }}'">Facture</button>
 
             {% for message in app.session.flashBag.get('danger') %}
@@ -97,7 +99,7 @@
                     <div class="table-responsive" >
                         <table id="facture_liste" class="table table-striped table-hover">
                             <tr>
-                                <th>Quantite acheté</th>
+                                <th>Quantite</th>
                                 <th>Produit</th>
                                 <th>PrixUnit</th>
                                 <th>Montant</th>

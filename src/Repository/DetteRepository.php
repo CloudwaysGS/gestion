@@ -56,16 +56,13 @@ class DetteRepository extends ServiceEntityRepository
         return $query->getSingleScalarResult();
     }
 
-
-    // src/Repository/ProduitRepository.php
-
     public function findByName($nom)
     {
         return $this->createQueryBuilder('p')
             ->join('p.client', 'c')
             ->andWhere('c.nom LIKE :nom')
             ->setParameter('nom', '%'.$nom.'%')
-            ->orderBy('p.datePaiement', 'DESC')
+            ->orderBy('p.dateCreated', 'DESC')
             ->getQuery()
             ->getResult();
     }

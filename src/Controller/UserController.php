@@ -74,12 +74,6 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/user/edit/{id}', name: 'edit_user')]
-    public function edit($id, UserRepository $repository, Request $request, EntityManagerInterface $entityManager)
-    {
-
-    }
-
     #[Route('/user/delete/{id}', name: 'user_delete')]
     public function delete(User $user, UserRepository $repository, EntityManagerInterface $entityManager){
         $entityManager->remove($user); // supprimer le client après avoir supprimé toutes les dettes associées

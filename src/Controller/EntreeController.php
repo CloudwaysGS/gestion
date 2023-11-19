@@ -65,16 +65,16 @@ class EntreeController extends AbstractController
                 ///////////***************Mise à jour du produit******************/////////////////////////
                 $p = $manager->getRepository(Produit::class)->find($entree->getProduit()->getId());
                 $qteInitial = $p->getQtStock();
-                $pInitial = $p->getPrixUnit();
+                //$pInitial = $p->getPrixUnit();
                 $qteAjout = $entree->getQtEntree();
-                $pAjout = $entree->getPrixUnit();
+                //$pAjout = $entree->getPrixUnit();
                 $stock = $qteInitial + $qteAjout;
 
-                if ($qteInitial != 0 && $pAjout > $pInitial){
+                /**if ($qteInitial != 0 && $pAjout > $pInitial){
                     $cout = ($qteInitial * $pInitial + $qteAjout * $pAjout)/$stock;
                     $montant = $stock * $cout;
                     $p->setPrixUnit($cout);
-                }
+                }**/
                 $detail = $entree->getDetail();
                 if ($detail !== null) {
                     $d = $manager->getRepository(Detail::class)->find($detail->getId());

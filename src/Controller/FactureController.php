@@ -7,7 +7,9 @@ use App\Entity\Detail;
 use App\Entity\Facture;
 use App\Entity\Facture2;
 use App\Entity\Produit;
+use App\Entity\Search;
 use App\Form\FactureType;
+use App\Form\SearchType;
 use App\Repository\FactureRepository;
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,23 +26,31 @@ class FactureController extends AbstractController
 {
     private $enregistrerClicked = false;
     #[Route('/facture', name: 'facture_liste')]
-    public function index(FactureRepository $fac, Request $request, SessionInterface $session): Response
+    public function index(FactureRepository $fac,ProduitRepository $produitRepository, Request $request): Response
     {
+        $search = new Search();
+        $form2 = $this->createForm(SearchType::class, $search);
+        $form2->handleRequest($request);
+        $nom = $search->getNom();
+
         // Récupération de toutes les factures
         $factures = $fac->findAllOrderedByDate();
+        $produits = null; // Initialize $produits with a default value
 
-        // Création du formulaire et suppression du champ 'prixUnit'
+        if ($nom) {
+            $produits = $produitRepository->findByName($nom);
+        }
+
         $facture = new Facture();
         $form = $this->createForm(FactureType::class, $facture, array(
             'action' => $this->generateUrl('facture_add'),
         ));
         $form->remove('prixUnit');
 
-        // Affichage de la vue avec les variables à transmettre
         return $this->render('facture/index.html.twig', [
-            'controller_name' => 'FactureController',
-            'facture' => $factures,
-            'form' => $form->createView()
+            'facture'  => $factures,
+            'produits' => $produits,
+            'form'     => $form->createView()
         ]);
     }
 
@@ -237,7 +247,7 @@ class FactureController extends AbstractController
     }
 
     #[Route('/facture/delete_all', name: 'facture_delete_all')]
-    public function deleteAll(EntityManagerInterface $entityManager, FactureRepository $fac)
+    public function deleteAll(EntityManagerInterface $entityManager)
     {
         if (!$this->enregistrerClicked) {
             $repository = $entityManager->getRepository(Facture::class);
@@ -282,6 +292,30 @@ class FactureController extends AbstractController
             return $this->redirectToRoute('facture_liste');
         }
     }
+
+    #[Route('/facture/rajout/{id}', name: 'rajout_facture')]
+    public function rajout($id, EntityManagerInterface $entityManager)
+    {
+        $produit = $entityManager->getRepository(Produit::class)->find($id);
+
+        if (!$produit) {
+            throw new \Exception('Product not found');
+        }
+
+        $facture = new Facture();
+        $p = $facture->addProduit($produit)->getProduit()->first();
+
+        $facture->setQuantite(1); // You can set it as an integer directly.
+        $facture->setNomProduit($p->getLibelle());
+        $facture->setPrixUnit($p->getPrixUnit());
+        $facture->setMontant($p->getPrixUnit() * $facture->getQuantite());
+        $facture->setConnect(true);
+
+        $entityManager->persist($facture);
+        $entityManager->flush();
+        return $this->redirectToRoute('facture_liste');
+    }
+
 
 
 }

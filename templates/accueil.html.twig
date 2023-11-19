@@ -39,7 +39,7 @@
 
         <!-- Divider -->
         <hr class="sidebar-divider my-0">
-        {% if is_granted('ROLE_GESTION_STOCK') or is_granted('ROLE_USER') %}
+        {% if is_granted('ROLE_GESTION_STOCK') or is_granted('ROLE_VENDEUR') %}
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
                 <a class="nav-link" href="{{ path('accueil') }}">
@@ -391,99 +391,94 @@
                             </div>
                         </div>
 
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                VENDU (MENSUEL)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sortieTotalMonth | number_format(0, ',', ' ') }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                ACHAT (MENSUEL)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ entreetotal | number_format(0, ',', ' ') }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        {% if is_granted('ROLE_GESTION_STOCK') %}
+                            <div class="col-xl-3 col-md-6 mb-4">
+                                <div class="card border-left-primary shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                    VENDU (MENSUEL)</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sortieTotalMonth | number_format(0, ',', ' ') }}</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Earnings (Monthly) Card Example -->
-
-                        <!-- Pending Requests Card Example -->
-
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-warning shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                VENDU (ANNUEL)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sortieAnnuelle | number_format(0, ',', ' ') }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            <div class="col-xl-3 col-md-6 mb-4">
+                                <div class="card border-left-primary shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                    ACHAT (MENSUEL)</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ entreetotal | number_format(0, ',', ' ') }}</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-secondary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                ACHAT (ANNUEL)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ entreeAnnuelle | number_format(0, ',', ' ') }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            <div class="col-xl-3 col-md-6 mb-4">
+                                <div class="card border-left-warning shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                    VENDU (ANNUEL)</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sortieAnnuelle | number_format(0, ',', ' ') }}</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-danger shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                TRESORERIE (ANNUEL)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ gainAnnuel | number_format(0, ',', ' ') }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            <div class="col-xl-3 col-md-6 mb-4">
+                                <div class="card border-left-secondary shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                    ACHAT (ANNUEL)</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ entreeAnnuelle | number_format(0, ',', ' ') }}</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+
+                            <div class="col-xl-3 col-md-6 mb-4">
+                                <div class="card border-left-danger shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                    TRESORERIE (ANNUEL)</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ gainAnnuel | number_format(0, ',', ' ') }}</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                     </div>
 
-                    <!-- Content Row -->
-
-                    <div class="row">
+                        <div class="row">
 
                         <!-- Area Chart -->
                         <div class="col-xl-8 col-lg-7">
@@ -558,6 +553,28 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
+
+                    {% if is_granted("ROLE_VENDEUR") %}
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-danger shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            TRA (ANNUEL)</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ gainAnnuel | number_format(0, ',', ' ') }}</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+
                         <!-- Content Row -->
                     <div class="row">
                         <div class="col-xl-3 col-md-6 mb-4">

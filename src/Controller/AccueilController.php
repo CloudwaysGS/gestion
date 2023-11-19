@@ -24,7 +24,7 @@ class AccueilController extends AbstractController
                           ChargementRepository $charge,
     ): Response
     {
-        $prenomNom = $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom();
+        //$prenomNom = $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom();
 
         //Compte nombre de produit
         $total = $prod->createQueryBuilder('p')

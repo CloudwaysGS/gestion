@@ -69,13 +69,13 @@ class PaiementController extends AbstractController
 
         $paymentAmount = $payment->getMontant();
         if ($currentDebt->getStatut() == 'payée') {
-            $this->addFlash('success','La dette a déjà été réglée.');
+            $this->addFlash('danger','La dette a déjà été réglée.');
             return $this->redirectToRoute('paiement_liste');
         }
 
         $remainingDebt -= $paymentAmount;
         if ($remainingDebt < 0) {
-            $this->addFlash('danger',$client->getNom().' a payé plus que ce qu\'il devait et on doit lui  rembourser '.abs($remainingDebt).' F');
+            $this->addFlash('success',$client->getNom().' a payé plus que ce qu\'il devait et on doit lui  rembourser '.abs($remainingDebt).' F');
             $currentDebt->setStatut('payée');
             $currentDebt->setReste($remainingDebt);
             $payment->setReste('0');
@@ -146,7 +146,7 @@ class PaiementController extends AbstractController
 
         if (count($paiements) > 5) {
             $showAll = true;
-            $additionalPaiements = array_slice($paiements, 5); // Récupérer les paiements supplémentaires à partir de l'indice 3
+            $additionalPaiements = array_slice($paiements, 5); // Récupérer les paiements supplémentaires à partir de l'indice 5
         }
         $paiements = array_slice($paiements,0,5);
 

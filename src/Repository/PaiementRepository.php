@@ -57,9 +57,6 @@ class PaiementRepository extends ServiceEntityRepository
         return $query->getSingleScalarResult();
     }
 
-
-    // src/Repository/ProduitRepository.php
-
     public function findByName($nom)
     {
         return $this->createQueryBuilder('p')

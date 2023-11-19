@@ -59,7 +59,6 @@ class ChargementController extends AbstractController
         ]);
     }
 
-
     #[Route('/chargement/extraire/{id}', name: 'extraire')]
     public function extraire(Chargement $chargement)
     {
@@ -122,6 +121,7 @@ class ChargementController extends AbstractController
             throw $this->createNotFoundException('Chargement non trouvé');
         }
         $user = $chargements->getConnect();
+        
         return new JsonResponse(['user' => $user]);
     }
 
