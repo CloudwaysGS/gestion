@@ -38,7 +38,6 @@
                                 <th>Stock_detail</th>
                                 <th>Prix Unit</th>
                                 <th>Nbre Vendus en gros</th>
-                                <th>Date</th>
                                 <th>Action</th>
                             </tr>
                             {% for produit in details %}
@@ -48,7 +47,6 @@
                                     <th>{{ produit.qtStock }}</th>
                                     <th>{{ produit.prixUnit }}</th>
                                     <th>{{ produit.nombreVendus|round }}</th>
-                                    <th>{{ produit.releaseDate|date('d-m-Y') }}</th>
                                     <th class="text-center">
                                         <a title="Modifier" href="{{ path('produit_edit',{'id':produit.id}) }}"><i class="fa fa-edit"></i></a>
                                         <a title="supprimer" href="{{ path('detail_delete', {'id':produit.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>

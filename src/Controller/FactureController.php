@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Chargement;
+use App\Entity\Client;
 use App\Entity\Detail;
 use App\Entity\Facture;
 use App\Entity\Facture2;
@@ -10,15 +11,16 @@ use App\Entity\Produit;
 use App\Entity\Search;
 use App\Form\FactureType;
 use App\Form\SearchType;
+use App\Repository\ClientRepository;
 use App\Repository\FactureRepository;
 use App\Repository\ProduitRepository;
+use App\Service\FactureService;
 use Doctrine\ORM\EntityManagerInterface;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 
@@ -26,35 +28,34 @@ class FactureController extends AbstractController
 {
     private $enregistrerClicked = false;
     #[Route('/facture', name: 'facture_liste')]
-    public function index(FactureRepository $fac,ProduitRepository $produitRepository, Request $request): Response
+    public function index(FactureRepository $fac,ProduitRepository $prod,ClientRepository $clientRepository, Request $request): Response
     {
+        // Récupération de toutes les factures
+        $factures = $fac->findAllOrderedByDate();
+        $facture = new Facture();
         $search = new Search();
         $form2 = $this->createForm(SearchType::class, $search);
         $form2->handleRequest($request);
         $nom = $search->getNom();
-
-        // Récupération de toutes les factures
-        $factures = $fac->findAllOrderedByDate();
-        $produits = null; // Initialize $produits with a default value
-
-        if ($nom) {
-            $produits = $produitRepository->findByName($nom);
-        }
-
-        $facture = new Facture();
-        $form = $this->createForm(FactureType::class, $facture, array(
-            'action' => $this->generateUrl('facture_add'),
-        ));
-        $form->remove('prixUnit');
+        $page = $request->query->getInt('page', 1); // current page number
+        $limit = 100; // number of products to display per page
+        $total = $nom ? count($prod->findByName($nom)) : $prod->countAll();
+        $offset = ($page - 1) * $limit;
+        $produits = $nom ? $prod->findByName($nom, $limit, $offset) : $prod->findAllOrderedByDate($limit, $offset);
+        $clients = $clientRepository->findAll();
 
         return $this->render('facture/index.html.twig', [
-            'facture'  => $factures,
             'produits' => $produits,
-            'form'     => $form->createView()
-        ]);
+            'facture'  => $factures,
+            'clients'  => $clients,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'form2' => $form2->createView(),
+            ]);
     }
 
-    #[Route('/facture/add', name: 'facture_add')]
+    /*#[Route('/facture/add', name: 'facture_add')]
     public function add(EntityManagerInterface $manager,FactureRepository $factureRepository,ProduitRepository $prod, Request $request, Security $security): Response
     {
         $user = $security->getUser();
@@ -67,7 +68,6 @@ class FactureController extends AbstractController
         $form = $this->createForm(FactureType::class, $facture);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
             $produit = $facture->getProduit()->first();
             $details = $facture->getDetail()->first();
             if ($produit && $details){
@@ -155,7 +155,6 @@ class FactureController extends AbstractController
             }
 
         }
-
         $total = $manager->createQueryBuilder()
             ->select('SUM(f.montant)')
             ->from(Facture::class, 'f')
@@ -168,7 +167,7 @@ class FactureController extends AbstractController
         $facture->setTotal($total);
         $manager->flush();
         return $this->redirectToRoute('facture_liste', ['total' => $total]);
-    }
+    }*/
 
     private function isProductAlreadyAdded(FactureRepository $factureRepository, string $produitLibelle): bool
     {
@@ -258,13 +257,12 @@ class FactureController extends AbstractController
             if (!empty($factures)) {
                 $lastFacture = end($factures);
                 $firstFacture = reset($factures);
-                $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
+                $client = ($firstFacture !== false) ? $firstFacture->getClient() ?? $lastFacture->getClient() : null;
                 if ($factures[0]->getClient() !== null) {
                     $adresse = $factures[0]->getClient()->getAdresse();
                     $telephone = $factures[0]->getClient()->getTelephone();
                 }
             }
-
             // Save invoices to the Chargement table
             $chargement = new Chargement();
             $chargement->setNomClient($client);
@@ -285,7 +283,7 @@ class FactureController extends AbstractController
                 $entityManager->persist($facture);
             }
             $chargement->setConnect($facture->getConnect());
-            $chargement->setNumeroFacture('FACTURE-' . $facture->getId());
+            $chargement->setNumeroFacture('FACTURE-' . $facture->getId() );
             $chargement->setTotal($total);
             $entityManager->persist($chargement);
             $entityManager->flush();
@@ -293,28 +291,51 @@ class FactureController extends AbstractController
         }
     }
 
-    #[Route('/facture/rajout/{id}', name: 'rajout_facture')]
-    public function rajout($id, EntityManagerInterface $entityManager)
-    {
-        $produit = $entityManager->getRepository(Produit::class)->find($id);
+    private $factureService;
+    private $security;
 
-        if (!$produit) {
-            throw new \Exception('Product not found');
+    public function __construct(FactureService $factureService, Security $security)
+    {
+        $this->factureService = $factureService;
+        $this->security = $security;
+    }
+
+    #[Route('/facture/rajout/{id}', name: 'rajout_facture')]
+    public function rajout($id, EntityManagerInterface $entityManager, Request $request)
+    {
+        $quantity = $request->query->get('quantity', 1);
+        $clientId = $request->query->get('clientId');
+        $user = $this->getUser();
+
+        try {
+            $facture = $this->factureService->createFacture($request, $id, $quantity, $clientId, $user);
+            $total = $this->factureService->updateTotalForFactures();
+
+            return $this->redirectToRoute('facture_liste', ['total' => $total]);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', $e->getMessage());
+            return $this->redirectToRoute('facture_liste');
+        }
+    }
+
+    /*#[Route('/search', name: 'search')]
+    public function searchAction(Request $request, ProduitRepository $prod, ClientRepository $clientRepository,FactureRepository $factureRepository)
+    {
+        $searchTerm = $request->query->get('searchTerm');
+        $clients = $clientRepository->findAll();
+        $facture = $factureRepository->findAll();
+
+
+        if ($searchTerm) {
+            $produits = $prod->findByName($searchTerm);
         }
 
-        $facture = new Facture();
-        $p = $facture->addProduit($produit)->getProduit()->first();
-
-        $facture->setQuantite(1); // You can set it as an integer directly.
-        $facture->setNomProduit($p->getLibelle());
-        $facture->setPrixUnit($p->getPrixUnit());
-        $facture->setMontant($p->getPrixUnit() * $facture->getQuantite());
-        $facture->setConnect(true);
-
-        $entityManager->persist($facture);
-        $entityManager->flush();
-        return $this->redirectToRoute('facture_liste');
-    }
+        return $this->render('facture/index.html.twig', [
+            'produits' => $produits,
+            'clients' => $clients,
+            'facture' => $facture,
+        ]);
+    }*/
 
 
 

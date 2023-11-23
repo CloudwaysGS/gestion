@@ -42,7 +42,7 @@ class ProduitRepository extends ServiceEntityRepository
     public function findAllOrderedByDate($limit, $offset)
     {
         return $this->createQueryBuilder('p')
-            ->orderBy('p.releaseDate', 'DESC')
+            ->orderBy('p.libelle', 'ASC')
             ->setMaxResults($limit)
             ->setFirstResult($offset)
             ->getQuery()
