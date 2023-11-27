@@ -52,7 +52,6 @@ class ProduitController extends AbstractController
         $offset = ($page - 1) * $limit;
         $produits = $nom ? $prod->findByName($nom, $limit, $offset) : $prod->findAllOrderedByDate($limit, $offset);
         $flashy->info('Vous avez '.$total.' produits pour l\'instant');
-
         return $this->render('produit/liste.html.twig', [
             'controller_name' => 'ProduitController',
             'produits' => $produits,
@@ -85,6 +84,7 @@ class ProduitController extends AbstractController
             $user = $this->getUser() ?? throw new \Exception("Aucun utilisateur n'est actuellement connecté");
             $data->setUser($user);
             $data->setReleaseDate(new \DateTime());
+            $data->setQtStockDetail($data->getNombre() * $data->getQtStock());
             $montant = $data->getQtStock() * $data->getPrixUnit();
             $data->setTotal($montant);
             $manager->persist($data);

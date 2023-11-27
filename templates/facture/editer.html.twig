@@ -1,0 +1,32 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Facture{% endblock %}
+
+{% block body %}
+<div class="container col-md-6">
+    <div class="card ">
+        <div class="card-header">Mes produits</div>
+        <div class="card-body">
+            <form method="post" action="{{ path('modifier', {'id': facture.id}) }}">
+                <label for="quantite">Quantité :</label>
+                <input class="form-control" type="number" id="quantite" name="quantite" value="{{ facture.quantite }}" min="1">
+
+                <label for="quantite">Prix Unitaire :</label>
+                <input class="form-control" type="number" id="prixUnit" name="prixUnit" value="{{ facture.prixUnit }}" >
+
+                <label for="produit">Produit :</label>
+                <select class="form-control mb-1" name="produit" id="produit">
+                    {% for p in facture.produit %}
+                        <option value="{{ p.id }}">{{ p.libelle }}</option>
+                    {% endfor %}
+                </select>
+
+                <button class="form-control" type="submit">Enregistrer les modifications</button>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

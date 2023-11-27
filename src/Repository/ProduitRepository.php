@@ -39,12 +39,17 @@ class ProduitRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllOrderedByDate($limit, $offset)
+    public function findAllOrderedByDate()
     {
         return $this->createQueryBuilder('p')
             ->orderBy('p.libelle', 'ASC')
-            ->setMaxResults($limit)
-            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+    }
+    public function findAllDetail()
+    {
+        return $this->createQueryBuilder('p')
+            ->orderBy('p.nomProduitDetail', 'ASC')
             ->getQuery()
             ->getResult();
     }
@@ -58,6 +63,22 @@ class ProduitRepository extends ServiceEntityRepository
             ->orderBy('p.libelle', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+    /*public function findByNameDetail($nom)
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.nomProduitDetail LIKE :nomProduitDetail')
+            ->setParameter('nomProduitDetail', '%'.$nom.'%')
+            ->orderBy('p.nomProduitDetail', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }*/
+
+    public function paginationQuery()
+    {
+        return $this->createQueryBuilder('p')
+            ->orderBy('p.libelle', 'ASC')
+            ->getQuery();
     }
 
     public function countAll(): int

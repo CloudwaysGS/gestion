@@ -58,6 +58,12 @@ class Facture
     #[ORM\Column(length: 255)]
     private ?string $connect = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $nombre = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $nombreVendus = null;
+
     public function __construct()
     {
         $this->produit = new ArrayCollection();
@@ -267,6 +273,30 @@ class Facture
     public function setConnect(string $connect): self
     {
         $this->connect = $connect;
+
+        return $this;
+    }
+
+    public function getNombre(): ?float
+    {
+        return $this->nombre;
+    }
+
+    public function setNombre(?float $nombre): self
+    {
+        $this->nombre = $nombre;
+
+        return $this;
+    }
+
+    public function getNombreVendus(): ?float
+    {
+        return $this->nombreVendus;
+    }
+
+    public function setNombreVendus(?float $nombreVendus): self
+    {
+        $this->nombreVendus = $nombreVendus;
 
         return $this;
     }

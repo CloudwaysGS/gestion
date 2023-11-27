@@ -3,20 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Chargement;
-use App\Entity\Client;
-use App\Entity\Detail;
 use App\Entity\Facture;
-use App\Entity\Facture2;
 use App\Entity\Produit;
 use App\Entity\Search;
-use App\Form\FactureType;
-use App\Form\SearchType;
 use App\Repository\ClientRepository;
 use App\Repository\FactureRepository;
 use App\Repository\ProduitRepository;
 use App\Service\FactureService;
 use Doctrine\ORM\EntityManagerInterface;
-use MercurySeries\FlashyBundle\FlashyNotifier;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,148 +21,33 @@ use Symfony\Component\Security\Core\Security;
 
 class FactureController extends AbstractController
 {
-    private $enregistrerClicked = false;
+
     #[Route('/facture', name: 'facture_liste')]
-    public function index(FactureRepository $fac,ProduitRepository $prod,ClientRepository $clientRepository, Request $request): Response
+    public function index(
+        FactureRepository $fac,
+        ProduitRepository $prod,
+        ClientRepository $clientRepository,
+        PaginatorInterface $paginator,
+    ): Response
     {
+
         // Récupération de toutes les factures
         $factures = $fac->findAllOrderedByDate();
-        $facture = new Facture();
+
         $search = new Search();
-        $form2 = $this->createForm(SearchType::class, $search);
-        $form2->handleRequest($request);
         $nom = $search->getNom();
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 100; // number of products to display per page
-        $total = $nom ? count($prod->findByName($nom)) : $prod->countAll();
-        $offset = ($page - 1) * $limit;
-        $produits = $nom ? $prod->findByName($nom, $limit, $offset) : $prod->findAllOrderedByDate($limit, $offset);
+
+        $produits = $nom ? $prod->findByName($nom) : $prod->findAllOrderedByDate();
+        $details = $prod->findAllDetail();
         $clients = $clientRepository->findAll();
 
         return $this->render('facture/index.html.twig', [
             'produits' => $produits,
-            'facture'  => $factures,
-            'clients'  => $clients,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
-            'form2' => $form2->createView(),
-            ]);
+            'details' => $details,
+            'facture' => $factures,
+            'clients' => $clients,
+        ]);
     }
-
-    /*#[Route('/facture/add', name: 'facture_add')]
-    public function add(EntityManagerInterface $manager,FactureRepository $factureRepository,ProduitRepository $prod, Request $request, Security $security): Response
-    {
-        $user = $security->getUser();
-        if (!$user) {
-            $this->addFlash('error', 'Vous devez être connecté pour accéder à cette page.');
-            return $this->redirectToRoute('app_login');
-        }
-
-        $facture = new Facture();
-        $form = $this->createForm(FactureType::class, $facture);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $produit = $facture->getProduit()->first();
-            $details = $facture->getDetail()->first();
-            if ($produit && $details){
-                $this->addFlash('danger','Choisir un champ produit ou détail pas les deux à la fois');
-                return $this->redirectToRoute('facture_liste');
-            }
-            if ($produit){
-
-                $p = $manager->getRepository(Produit::class)->find($produit);
-                if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
-                    $this->addFlash('danger','La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
-                } else if ($facture->getQuantite() <= 0) {
-                    $this->addFlash('danger','Entrée une quantité positive svp!');
-
-                } else {
-
-                    $date = new \DateTime();
-                    $facture->setDate($date);
-                    $facture->setPrixUnit($p->getPrixUnit());
-                    $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
-                    $facture->setNomProduit($produit->getLibelle());
-                    $client = $facture->getClient();
-                    if ($client != null) {
-                        $nomClient = $client->getNom();
-                        $facture->setNomClient($nomClient);
-                    }
-                    $facture->setConnect($this->getUser()->getPrenom().' '.$this->getUser()->getNom());
-                    if ($this->isProductAlreadyAdded($factureRepository, $facture->getNomProduit())) {
-                        $this->addFlash('danger', $facture->getNomProduit() . ' a déjà été ajouté précédemment.');
-                        return $this->redirectToRoute('facture_liste');
-                    }
-
-                    $manager->persist($facture);
-                    $manager->flush();
-
-                    //Mise à jour du produit
-                    $p->setQtStock($p->getQtStock() - $facture->getQuantite());
-                    $manager->flush();
-                }
-            } else if ($details){
-                $p = $manager->getRepository(Detail::class)->find($details);
-                if ($p !== null && $p->getQtStock() < $facture->getQuantite()) {
-                    $this->addFlash('danger','La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
-
-                } else if ($facture->getQuantite() <= 0) {
-                    $this->addFlash('danger','Entrée une quantité positive svp!');
-                } else {
-                    $date = new \DateTime();
-                    $facture->setDate($date);
-                    $facture->setPrixUnit($p->getPrixUnit());
-                    $facture->setMontant($facture->getQuantite() * $p->getPrixUnit());
-                    $facture->setNomProduit($details->getLibelle());
-                    $client = $facture->getClient();
-                    if ($client != null) {
-                        $nomClient = $client->getNom();
-                        $facture->setNomClient($nomClient);
-                    }
-                    $facture->setConnect($this->getUser()->getPrenom().' '.$this->getUser()->getNom());
-                    if ($this->isProductAlreadyAdded($factureRepository, $facture->getNomProduit())) {
-                        $this->addFlash('danger', $facture->getNomProduit() . ' a déjà été ajouté précédemment.');
-                        return $this->redirectToRoute('facture_liste');
-                    }
-                    $manager->persist($facture);
-                    $manager->flush();
-                    //Mise à jour du produit
-                    $dstock = $p->getQtStock() - $facture->getQuantite();
-                    $p->setQtStock($dstock);
-                    $manager->flush();
-
-                    $quantite = floatval($facture->getQuantite());
-                    $nombre = $details->getNombre();
-                    $vendus = $details->getNombreVendus();
-                    if ($quantite >= $nombre) {
-                        $multiplier = $quantite / $nombre;
-                        $vendus += $multiplier;
-                        $p->setNombreVendus($vendus);
-                    }else{
-                        $multiplier = $quantite / $nombre;
-                        $vendus += $multiplier;
-                        $p->setNombreVendus($vendus);
-                    }
-
-                    $manager->flush();
-                }
-            }
-
-        }
-        $total = $manager->createQueryBuilder()
-            ->select('SUM(f.montant)')
-            ->from(Facture::class, 'f')
-            ->where('f.etat = :etat')
-            ->setParameter('etat', 1)
-            ->getQuery()
-            ->getSingleScalarResult();
-        $total = is_null($total) ? 0 : $total;
-
-        $facture->setTotal($total);
-        $manager->flush();
-        return $this->redirectToRoute('facture_liste', ['total' => $total]);
-    }*/
 
     private function isProductAlreadyAdded(FactureRepository $factureRepository, string $produitLibelle): bool
     {
@@ -189,22 +69,41 @@ class FactureController extends AbstractController
         return false;
     }
 
+
     #[Route('/produit/modifier/{id}', name: 'modifier')]
     public function modifier($id, FactureRepository $repo, Request $request, EntityManagerInterface $entityManager): Response
     {
         $facture = $repo->find($id);
-        $form = $this->createForm(FactureType::class, $facture);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $facture->setPrixUnit($facture->getPrixUnit());
-            $facture->setMontant($facture->getQuantite() * $facture->getPrixUnit());
-            $entityManager->persist($form->getData());
-            $entityManager->flush();
-            return $this->redirectToRoute("facture_liste");
+        if (!$facture) {
+            throw $this->createNotFoundException('Facture non trouvée');
         }
-        return $this->render('facture/index.html.twig', [
+
+        if ($request->isMethod('POST')) {
+            // Récupérer les données modifiées depuis la requête
+            $quantite = $request->request->get('quantite');
+            $prixUnit = $request->request->get('prixUnit');
+            $produitId = $request->request->get('produit');
+
+            $produit = $entityManager->getRepository(Produit::class)->find($produitId);
+            // Mettre à jour la facture avec les nouvelles données
+            $facture->setQuantite($quantite);
+            $facture->setNomProduit($produit);
+            $facture->setPrixUnit($prixUnit);
+            $facture->setMontant($quantite * $prixUnit);
+            $total = $this->factureService->updateTotalForFactures();
+            $facture->setTotal($total);
+            // Enregistrez les modifications
+            $entityManager->flush();
+
+            return $this->redirectToRoute('facture_liste');
+        }
+
+        // Récupérer la liste des produits pour afficher dans le formulaire
+        $produits = $entityManager->getRepository(Produit::class)->findAll();
+
+        return $this->render('facture/editer.html.twig', [
             'facture' => $facture,
-            'form' => $form->createView(),
+            'produits' => $produits,
         ]);
     }
 
@@ -212,36 +111,24 @@ class FactureController extends AbstractController
     public function delete(Facture $facture,EntityManagerInterface $entityManager, FactureRepository $repository)
     {
         $produit = $facture->getProduit()->first();
-        $details = $facture->getDetail()->first();
-        if ($produit){
-            $p = $entityManager->getRepository(Produit::class)->find($produit);
-            $quantite = $facture->getQuantite();
+            if ($produit){
+                $p = $entityManager->getRepository(Produit::class)->find($produit);
+                $vendu = $p->getNbreVendu();
+                if ($vendu !== null){
+                    $repository->remove($facture); // Mise à jour de l'état de la facture
+                    $p->setQtStock($p->getQtStock() + $vendu);
+                } else {
+                    $quantite = $facture->getQuantite();
+                    $repository->remove($facture); // Mise à jour de l'état de la facture
+                    $p->setQtStock($p->getQtStock() + $quantite);
+                }
 
-            $repository->remove($facture); // Mise à jour de l'état de la facture
+                $entityManager->flush();
 
-            // Restaurer la quantité de stock du produit
-            $p->setQtStock($p->getQtStock() + $quantite);
-        }
-        elseif ($details){
-            $p = $entityManager->getRepository(Detail::class)->find($details);
-            $quantite = $facture->getQuantite();
-
-            $repository->remove($facture); // Mise à jour de l'état de la facture
-
-            // Restaurer la quantité de stock du produit
-            $quantite = floatval($facture->getQuantite());
-            $nombre = $details->getNombre();
-            $stock = $details->getStockProduit();
-            if ($quantite >= $nombre && $quantite <= 4 * $nombre) {
-                $stock += $quantite / $nombre;
-                $p->setStockProduit($stock);
+                $this->addFlash('success', 'La facture a été supprimée avec succès.');
+                return $this->redirectToRoute('facture_liste');
             }
-            $p->setQtStock($p->getQtStock() + $quantite);
-        }
-
-        $entityManager->flush();
-
-        $this->addFlash('success', 'La facture a été supprimée avec succès.');
+        $this->addFlash('error', 'Erreur lors de la suppression de la facture.');
         return $this->redirectToRoute('facture_liste');
     }
 
@@ -292,7 +179,6 @@ class FactureController extends AbstractController
     }
 
     private $factureService;
-    private $security;
 
     public function __construct(FactureService $factureService, Security $security)
     {
@@ -303,12 +189,19 @@ class FactureController extends AbstractController
     #[Route('/facture/rajout/{id}', name: 'rajout_facture')]
     public function rajout($id, EntityManagerInterface $entityManager, Request $request)
     {
+        $quantityDetail = null;
+        $clientIdDetail = null;
+        $actionType = $request->query->get('actionType', 'addToFacture');
+        if ($actionType == 'addToFactureDetail'){
+            $quantityDetail = $request->query->get('quantityDetail', 1);
+            $clientIdDetail = $request->query->get('clientIdDetail');
+        }
+
         $quantity = $request->query->get('quantity', 1);
         $clientId = $request->query->get('clientId');
         $user = $this->getUser();
-
         try {
-            $facture = $this->factureService->createFacture($request, $id, $quantity, $clientId, $user);
+            $facture = $this->factureService->createFacture($id, $quantity, $clientId, $user, $actionType, $quantityDetail, $clientIdDetail );
             $total = $this->factureService->updateTotalForFactures();
 
             return $this->redirectToRoute('facture_liste', ['total' => $total]);
@@ -318,25 +211,23 @@ class FactureController extends AbstractController
         }
     }
 
-    /*#[Route('/search', name: 'search')]
-    public function searchAction(Request $request, ProduitRepository $prod, ClientRepository $clientRepository,FactureRepository $factureRepository)
+
+    #[Route('/search', name: 'search')]
+    public function search(Request $request, ProduitRepository $prod): JsonResponse
     {
-        $searchTerm = $request->query->get('searchTerm');
-        $clients = $clientRepository->findAll();
-        $facture = $factureRepository->findAll();
+        $searchTerm = $request->query->get('term');
+        $produits = $prod->findByName($searchTerm);
 
-
-        if ($searchTerm) {
-            $produits = $prod->findByName($searchTerm);
+        $data = [];
+        foreach ($produits as $produit) {
+            $data[] = [
+                'id' => $produit->getId(),
+                'libelle' => $produit->getLibelle(),
+                'path' => $this->generateUrl('rajout_facture', ['id' => $produit->getId()]),
+            ];
         }
 
-        return $this->render('facture/index.html.twig', [
-            'produits' => $produits,
-            'clients' => $clients,
-            'facture' => $facture,
-        ]);
-    }*/
-
-
+        return $this->json($data);
+    }
 
 }

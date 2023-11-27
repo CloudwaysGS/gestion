@@ -5,6 +5,25 @@
 {% block body %}
     <style>
 
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button{
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .custom-input-small {
+            max-width: 53px; /* Ajustez la largeur maximale selon vos préférences */
+            height: 30px;
+        }
+
+        .small-text {
+            font-size: 15px; /* ajustez la taille de police selon vos préférences */
+        }
+        .pagination-container {
+            overflow-x: auto; /* Ajoutez une barre de défilement horizontale si nécessaire */
+            max-width: 100%;  /* Assurez-vous que le conteneur n'excède pas la largeur parente */
+        }
+
         .card {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Example box shadow */
         }
@@ -17,8 +36,8 @@
         }
 
         .glow-on-hover {
-            width: 110px;
-            height: 35px;
+            width: 90px;
+            height: 30px;
             border: none;
             outline: none;
             color: #fff;
@@ -78,147 +97,163 @@
             100% { background-position: 0 0; }
         }
     </style>
-        <div class="row">
 
-            <div class="container col-md-5">
-                <select class="form-control mb-1" name="client" id="client">
-                    <option value="" selected disabled>Choisissez un client</option>
-                    {% for clients in clients %}
-                        <option value="{{ clients.id }}">{{ clients.nom }}</option>
-                    {% endfor %}
+    <div class="row">
+        <div class="container col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <select class="form-control mb-1" name="client" id="client">
+                        <option value="" selected disabled>Choisissez un client</option>
+                        {% for clients in clients %}
+                            <option value="{{ clients.id }}">{{ clients.nom }}</option>
+                        {% endfor %}
+                    </select>
 
-                </select>
-                <input type="hidden" name="clientId" id="selectedClientId" value="">
-                <input type="hidden" name="productId" id="selectedProductId" value="">
-                <input type="hidden" name="quantity" id="selectedQuantity" value="">
-
-                {#
-                <form name="search" method="post" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                    <div class="input-group">
-                        <input type="text" id="search_nom" name="search[nom]" class="form-control bg-light border-0 small" placeholder="Search for..."
-                               aria-label="Search" aria-describedby="basic-addon2">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="button" id="search-button">
-                                <i class="fas fa-search fa-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-#}
+                    <input type="hidden" name="clientId" id="selectedClientId" value="">
+                    <input type="hidden" name="productId" id="selectedProductId" value="">
+                    <input type="hidden" name="quantity" id="selectedQuantity" value="">
 
 
-                <div class="card ">
-                    <div class="card-header">Mes produits</div>
-                    <div class="card-body">
-                        <div class="table-responsive" >
-                            <table class="table table-striped table-hover">
-                                <tr>
-                                    <th>Libelle</th>
-                                    <th>Quantité</th>
-                                    <th>Action</th>
-                                </tr>
-                                {% set total = 0 %}
-                                {% for p in produits %}
-                                    <tr>
-                                        <th>{{ p.libelle }}</th>
-                                        <td>
-                                            <input type="number" class="form-control custom-input" name="quantity" id="quantity_{{ p.id }}" value="1" min="1">
-                                        </td>
-
-                                        <td>
-                                            <a title="Ajouter" href="javascript:void(0);" onclick="addToFacture('{{ path('rajout_facture', {'id': p.id}) }}', {{ p.id }})">
-                                                <i class="fa fa-cart-plus" aria-hidden="true"></i>
-                                            </a>
-
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            {#<div class="container col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        {{ form(form, {'attr': { 'id': 'form'}}) }}
-                    </div>
-                </div>
-            </div>#}
-            <div class="container col-md-7">
-                {% for message in app.session.flashBag.get('success') %}
-                    <div id="flash-message" class="alert alert-success">{{ message }}</div>
-                {% endfor %}
-                {% for message in app.session.flashBag.get('danger') %}
-                    <div id="flash-message" class="alert alert-danger">{{ message }}</div>
-                {% endfor %}
-
-                <button class="glow-on-hover mb-1" onclick="window.location.href='{{ path('facture_delete_all') }}'">Enregistrer</button>
-                <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'">Mes factures</button>
-                <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">Créer client</button>
-                {% if is_granted("ROLE_GESTION_STOCK") %}
-                <button class="glow-on-hover" onclick="window.location.href='{{ path('produit_liste') }}'">Ajout Produit</button>
-                {% endif %}
-                <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">Facture 2</button>
-
-                {% for message in app.session.flashBag.get('danger') %}
-                    <div class="alert alert-danger">{{ message }}</div>
-                {% endfor %}
-                    <div class="card ">
-                        <div class="card-header">Facture</div>
+                    <div class="card">
+                        <div class="card-header">Vente en gros de produits</div>
                         <div class="card-body">
-                            <div class="table-responsive" >
-                                <table id="facture_liste" class="table table-striped table-hover">
+                            <div class="table-responsive" onmouseover="changeHeight('15rem')" onmouseout="changeHeight('15rem')" style="height: 15rem;">
+                                <table class="table table-striped table-hover">
                                     <tr>
-                                        <th>Quantite</th>
-                                        <th>Produit</th>
-                                        <th>PrixUnit</th>
-                                        <th>Montant</th>
+                                        <th>Libelle</th>
+                                        <th>Qté</th>
                                         <th>Action</th>
                                     </tr>
                                     {% set total = 0 %}
-                                    {% if facture is empty %}
-                                    <tr>
-                                        <td colspan="5">Aucun produit dans la facture. Veuillez ajouter des produits.</td>
-                                    </tr>
-                                    {% else %}
-                                    {% for f in facture %}
+                                    {% for p in produits %}
                                         <tr>
-                                            <td>{{ f.quantite }}</td>
+                                            <th class="small-text">{{ p.libelle }}</th>
                                             <td>
-                                                {% if f.nomProduit > 0 %}
-                                                    {{ f.nomProduit }}
-                                                {% endif %}
+                                                <input type="number" class="form-control custom-input custom-input-small" name="quantity" id="quantity_{{ p.id }}" value="1" min="1">
                                             </td>
 
                                             <td>
-                                                {% if f.prixUnit > 0 %}
-                                                    {{ f.prixUnit|number_format(0, ',', ' ') }}
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ f.montant | number_format(0, ',', ' ') }}</td>
-                                            <td>
-                                                <a title="Modifier" href="{{ path('modifier',{'id':f.id}) }}"><i class="fa fa-edit"></i></a>
-                                                <a title="supprimer" href="{{ path('facture_delete', {'id':f.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                                <a title="Ajouter" href="javascript:void(0);" onclick="addToFacture('{{ path('rajout_facture', {'id': p.id}) }}', {{ p.id }}, 'addToFacture')">
+                                                    <i class="fa fa-cart-plus" aria-hidden="true"></i>
+                                                </a>
+
                                             </td>
                                         </tr>
-                                        {% set total = total + f.montant %}
                                     {% endfor %}
-                                    <td>Total</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td>{{ total|number_format(0, ',', ' ') }}  </td>
-                                    <td></td>
-                                    {% endif %}
                                 </table>
                             </div>
                         </div>
-                    </div>
-            </div>
 
+                    </div>
+
+                    <input type="hidden" name="clientIdDetail" id="selectedClientIdDetail" value="">
+                    <input type="hidden" name="productId" id="selectedProductIdDetail" value="">
+                    <input type="hidden" name="quantity" id="selectedQuantityDetail" value="">
+
+                    <div class="card">
+                        <div class="card-header">Vente en détail de produits</div>
+                        <div class="card-body">
+                            <div class="table-responsive" id="table-responsive" onmouseover="changeHeightDetails('20rem')" onmouseout="changeHeightDetails('20rem')" style="height: 20rem;">
+                                <table class="table table-striped table-hover">
+                                    <tr>
+                                        <th>Libelle</th>
+                                        <th>Qté</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    {% set total = 0 %}
+                                    {% for d in details %}
+                                        {% if d.nomProduitDetail is not null %}
+                                            <tr>
+                                                <th class="small-text">{{ d.nomProduitDetail }}</th>
+                                                <td>
+                                                    <input type="number" class="form-control custom-input custom-input-small" name="quantityDetail" id="quantityDetail_{{ d.id }}" value="1" min="1">
+                                                </td>
+
+                                                <td>
+                                                    <a title="Ajouter" href="javascript:void(0);" onclick="addToFactureDetail('{{ path('rajout_facture', {'id': d.id}) }}', {{ d.id }}, 'addToFactureDetail')">
+                                                        <i class="fa fa-cart-plus" aria-hidden="true"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                </table>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
         </div>
+        <div class="container col-md-6">
+            {% for message in app.session.flashBag.get('success') %}
+                <div id="flash-message" class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+            {% for message in app.session.flashBag.get('danger') %}
+                <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
+
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture_delete_all') }}'">Enreg</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'"> Mes Facts</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">+Client</button>
+            {% if is_granted("ROLE_GESTION_STOCK") %}
+                <button class="glow-on-hover" onclick="window.location.href='{{ path('produit_liste') }}'">+Prod</button>
+            {% endif %}
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">+Fact</button>
+
+            {% for message in app.session.flashBag.get('danger') %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
+            <div class="card ">
+                <div class="card-header">Facture</div>
+                <div class="card-body">
+                    <div class="table-responsive" >
+                        <table id="facture_liste" class="table table-striped table-hover">
+                            <tr>
+                                <th>Quantite</th>
+                                <th>Produit</th>
+                                <th>PrixUnit</th>
+                                <th>Montant</th>
+                                <th>Action</th>
+                            </tr>
+                            {% set total = 0 %}
+                            {% for f in facture %}
+                                <tr>
+                                    <td>{{ f.quantite }}</td>
+                                    <td>
+                                        {% if f.nomProduit > 0 %}
+                                            {{ f.nomProduit }}
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if f.prixUnit > 0 %}
+                                            {{ f.prixUnit|number_format(0, ',', ' ') }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ f.montant | number_format(0, ',', ' ') }}</td>
+                                    <td>
+                                        <a title="Modifier" href="{{ path('modifier',{'id':f.id}) }}"><i class="fa fa-edit"></i></a>
+                                        <a title="supprimer" href="{{ path('facture_delete', {'id':f.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    </td>
+                                </tr>
+                                {% set total = total + f.montant %}
+                            {% endfor %}
+                            <td>Total</td>
+                            <td></td>
+                            <td></td>
+                            <td>{{ total|number_format(0, ',', ' ') }} f </td>
+                            <td></td>
+                        </table>
+                    </div>
+                </div>
+        </div>
+
+    </div>
+    </div>
 
 {% endblock %}
 
@@ -247,8 +282,100 @@
             // Redirect to the controller action
             window.location.href = path + '?clientId=' + clientId + '&quantity=' + quantity;
         }
+
+        function addToFactureDetail(path, productId, actionType) {
+            var clientId = document.getElementById('client').value;
+            var quantity = document.getElementById('quantityDetail_' + productId).value;
+            // Set the values in the hidden fields
+            document.getElementById('selectedClientIdDetail').value = clientId;
+            document.getElementById('selectedProductIdDetail').value = productId;
+            document.getElementById('selectedQuantityDetail').value = quantity;
+            // Redirect to the controller action
+            window.location.href = path + '?clientIdDetail=' + clientId + '&quantityDetail=' + quantity + '&actionType=' + actionType;
+        }
     </script>
 
+    <script>
+        // search.js
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search_nom');
+
+            searchInput.addEventListener('input', function () {
+                const searchTerm = searchInput.value;
+                performSearch(searchTerm);
+            });
+        });
+
+        function performSearch(searchTerm) {
+            // You can use AJAX to send the search term to the server and update the results.
+            // Example using Fetch API:
+
+            fetch(`/search?term=${searchTerm}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Update the table or any other part of the page with the new search results.
+                    updateResultsTable(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateResultsTable(data) {
+            // Update your table with the new search results.
+            // You may need to modify this part based on your specific table structure.
+
+            const tableBody = document.querySelector('.table tbody');
+            tableBody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <th>${item.libelle}</th>
+            <td>
+                <input type="number" class="form-control custom-input" name="quantity" id="quantity_${item.id}" value="1" min="1">
+            </td>
+            <td>
+                <a title="Ajouter" href="javascript:void(0);" onclick="addToFacture('${item.path}', ${item.id})">
+                    <i class="fa fa-cart-plus" aria-hidden="true"></i>
+                </a>
+            </td>
+        `;
+                tableBody.appendChild(row);
+            });
+        }
+
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleButton = document.getElementById('toggleButton');
+            const factureContainer = document.getElementById('factureContainer');
+
+            toggleButton.addEventListener('click', function () {
+                // Toggle the visibility of the factureContainer
+                factureContainer.style.display = (factureContainer.style.display === 'none' || factureContainer.style.display === '') ? 'block' : 'none';
+                const buttonText = factureContainer.style.display === 'none' ? 'Afficher la facture' : 'Masquer la facture';
+                toggleButton.textContent = buttonText;
+            });
+        });
+    </script>
+
+    <script>
+        function changeHeight(height) {
+            document.querySelector('.table-responsive').style.height = height;
+        }
+    </script>
+
+    <script>
+        function changeHeightDetails(height) {
+            document.querySelector('#table-responsive').style.height = height;
+        }
+    </script>
     {#<script>
         function addToFacture(url, productId) {
             var quantity = document.getElementById('quantity_' + productId).value;
@@ -278,35 +405,5 @@
             xhr.send();
         }
     </script>#}
-
-   {# <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchButton = document.getElementById('search-button');
-            const searchInput = document.getElementById('search_nom');
-
-            searchButton.addEventListener('click', function() {
-                const searchTerm = searchInput.value;
-
-                // Check if the search term is not empty
-                if (searchTerm.trim() !== '') {
-                    // Effectuez une requête AJAX vers votre route de recherche
-                    fetch(`/search?searchTerm=${searchTerm}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            // Mettez à jour l'affichage des résultats sur la page
-                            // (par exemple, ajoutez les résultats à votre tableau)
-                            console.log(data.results); // Correct the property name to data.results
-                        })
-                        .catch(error => {
-                            console.error('Erreur lors de la recherche :', error);
-                        });
-                }
-            });
-        });
-
-
-    </script>#}
-
-
 
 {% endblock %}

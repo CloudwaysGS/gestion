@@ -59,6 +59,12 @@ class Produit
     #[ORM\ManyToMany(targetEntity: Detail::class, inversedBy: 'produits', cascade: ['persist'])]
     private Collection $detail;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $qtStockDetail = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $nbreVendu = null;
+
     public function __construct()
     {
         $this->entrees = new ArrayCollection();
@@ -154,18 +160,6 @@ class Produit
                 $sorty->setProduit(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getDate(): ?\DateTimeInterface
-    {
-        return $this->date;
-    }
-
-    public function setDate(\DateTimeInterface $date): self
-    {
-        $this->date = $date;
 
         return $this;
     }
@@ -339,6 +333,30 @@ class Produit
     public function removeDetail(Detail $detail): self
     {
         $this->detail->removeElement($detail);
+
+        return $this;
+    }
+
+    public function getQtStockDetail(): ?float
+    {
+        return $this->qtStockDetail;
+    }
+
+    public function setQtStockDetail(?float $qtStockDetail): self
+    {
+        $this->qtStockDetail = $qtStockDetail;
+
+        return $this;
+    }
+
+    public function getNbreVendu(): ?float
+    {
+        return $this->nbreVendu;
+    }
+
+    public function setNbreVendu(?float $nbreVendu): self
+    {
+        $this->nbreVendu = $nbreVendu;
 
         return $this;
     }

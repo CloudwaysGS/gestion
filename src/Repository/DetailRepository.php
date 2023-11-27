@@ -61,6 +61,14 @@ class DetailRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findAllDetail()
+    {
+        return $this->createQueryBuilder('p')
+            ->orderBy('p.libelle', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countAll(): int
     {
         $qb = $this->createQueryBuilder('p');
