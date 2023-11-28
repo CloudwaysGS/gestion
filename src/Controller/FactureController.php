@@ -230,4 +230,22 @@ class FactureController extends AbstractController
         return $this->json($data);
     }
 
+    #[Route('/searchDetail', name: 'searchDetail')]
+    public function searchDetail(Request $request, ProduitRepository $prod): JsonResponse
+    {
+        $searchTerm = $request->query->get('term');
+        $produits = $prod->findByNameDetail($searchTerm);
+
+        $data = [];
+        foreach ($produits as $produit) {
+            $data[] = [
+                'id' => $produit->getId(),
+                'nomProduitDetail' => $produit->getNomProduitDetail(),
+                'path' => $this->generateUrl('rajout_facture', ['id' => $produit->getId()]),
+            ];
+        }
+
+        return $this->json($data);
+    }
+
 }

@@ -48,14 +48,17 @@ class FactureService
             $facture->setDate(new \DateTime());
             $facture->setConnect($user->getPrenom() . ' ' . $user->getNom());
 
+            $existingProduit = $this->entityManager->getRepository(Facture::class)
+                ->findOneBy(['nomProduit' => $facture->getNomProduit(), 'etat' => 1]);
+            if ($existingProduit && $this->compareStrings($existingProduit->getNomProduit(), $facture->getNomProduit())) {
+                throw new \Exception($facture->getNomProduit() . ' a déjà été ajouté précédemment.');
+            }
+
             $p = $this->entityManager->getRepository(Produit::class)->find($produit);
             if ($p->getqtStockDetail() < $facture->getQuantite()) {
                 throw new \Exception('La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getqtStockDetail());
             } else if ($facture->getQuantite() <= 0) {
                 throw new \Exception('Entrez une quantité positive, s\'il vous plaît !');
-            }
-            if ($this->isProductAlreadyAdded($this->factureRepository, $facture->getNomProduit())) {
-                throw new \Exception($facture->getNomProduit() . ' a déjà été ajouté précédemment.');
             }
 
             $this->entityManager->persist($facture);
@@ -109,7 +112,10 @@ class FactureService
         } else if ($facture->getQuantite() <= 0) {
             throw new \Exception('Entrez une quantité positive, s\'il vous plaît !');
         }
-        if ($this->isProductAlreadyAdded($this->factureRepository, $facture->getNomProduit())) {
+
+        $existingProduit = $this->entityManager->getRepository(Facture::class)
+            ->findOneBy(['nomProduit' => $facture->getNomProduit(), 'etat' => 1]);
+        if ($existingProduit && $this->compareStrings($existingProduit->getNomProduit(), $facture->getNomProduit())) {
             throw new \Exception($facture->getNomProduit() . ' a déjà été ajouté précédemment.');
         }
         $this->entityManager->persist($facture);
@@ -123,25 +129,11 @@ class FactureService
         return $facture;
     }
 
-    private function isProductAlreadyAdded(FactureRepository $factureRepository, string $produitLibelle): bool
+    private function compareStrings(string $str1, string $str2): bool
     {
-        $factures = $factureRepository->findAllOrderedByDate();
-
-        foreach ($factures as $facture) {
-            foreach ($facture->getProduit() as $produit) {
-                if ($produit->getLibelle() === $produitLibelle) {
-                    return true;
-                }
-            }
-
-            foreach ($facture->getDetail() as $detail) {
-                if ($detail->getLibelle() === $produitLibelle) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        $str1 = str_replace(' ', '', strtolower($str1));
+        $str2 = str_replace(' ', '', strtolower($str2));
+        return $str1 === $str2;
     }
 
     public function updateTotalForFactures()

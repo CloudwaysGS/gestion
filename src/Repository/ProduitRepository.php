@@ -64,7 +64,7 @@ class ProduitRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-    /*public function findByNameDetail($nom)
+    public function findByNameDetail($nom)
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.nomProduitDetail LIKE :nomProduitDetail')
@@ -72,7 +72,7 @@ class ProduitRepository extends ServiceEntityRepository
             ->orderBy('p.nomProduitDetail', 'ASC')
             ->getQuery()
             ->getResult();
-    }*/
+    }
 
     public function paginationQuery()
     {
