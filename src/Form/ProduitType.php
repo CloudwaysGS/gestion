@@ -48,7 +48,7 @@ class ProduitType extends AbstractType
                 'label' => false,
                 'attr' => array(
                     'class' => 'form-control form-group',
-                    'placeholder' => 'prix unitaire',
+                    'placeholder' => 'prix unitaire en gros',
                 ),
                 'constraints' => array(
                     new NotBlank(),
@@ -81,7 +81,7 @@ class ProduitType extends AbstractType
                 'required' => false,
                 'attr' => array(
                     'class' => 'form-control form-group',
-                    'placeholder' => 'prix unitaire',
+                    'placeholder' => 'prix unitaire en détail',
                 ),
                 'constraints' => array(
                     new Type('numeric')

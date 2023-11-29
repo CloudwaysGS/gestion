@@ -3,16 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Chargement;
-use App\Entity\Client;
 use App\Entity\Facture;
 use App\Entity\Facture2;
 use App\Entity\Search;
 use App\Form\SearchType;
 use App\Repository\ChargementRepository;
-use App\Repository\FactureRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use Dompdf\Dompdf;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

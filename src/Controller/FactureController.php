@@ -21,7 +21,7 @@ use Symfony\Component\Security\Core\Security;
 
 class FactureController extends AbstractController
 {
-
+    private $enregistrerClicked = false;
     #[Route('/facture', name: 'facture_liste')]
     public function index(
         FactureRepository $fac,
@@ -48,27 +48,6 @@ class FactureController extends AbstractController
             'clients' => $clients,
         ]);
     }
-
-    private function isProductAlreadyAdded(FactureRepository $factureRepository, string $produitLibelle): bool
-    {
-        $factures = $factureRepository->findAllOrderedByDate();
-
-        foreach ($factures as $facture) {
-            foreach ($facture->getProduit() as $produit) {
-                if ($produit->getLibelle() === $produitLibelle) {
-                    return true;
-                }
-            }
-            foreach ($facture->getDetail() as $detail) {
-                if ($detail->getLibelle() === $produitLibelle) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
 
     #[Route('/produit/modifier/{id}', name: 'modifier')]
     public function modifier($id, FactureRepository $repo, Request $request, EntityManagerInterface $entityManager): Response
@@ -135,6 +114,7 @@ class FactureController extends AbstractController
     #[Route('/facture/delete_all', name: 'facture_delete_all')]
     public function deleteAll(EntityManagerInterface $entityManager)
     {
+
         if (!$this->enregistrerClicked) {
             $repository = $entityManager->getRepository(Facture::class);
             $factures = $repository->findBy(['etat' => 1]);

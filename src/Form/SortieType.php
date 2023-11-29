@@ -3,13 +3,11 @@
 namespace App\Form;
 
 use App\Entity\Client;
-use App\Entity\Detail;
 use App\Entity\Produit;
 use App\Entity\Sortie;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -39,23 +37,7 @@ class SortieType extends AbstractType
                     'class' => 'form-control form-group',
                 ),
                 'required' => false,
-                'placeholder' => 'grossistes',
-                'query_builder' => function(EntityRepository $er) use ($libelle) {
-                    return $er->createQueryBuilder('p')
-                        ->where('p.libelle LIKE :libelle')
-                        ->setParameter('libelle', '%'.$libelle.'%')
-                        ->orderBy('p.libelle', 'ASC');
-                },
-            ))
-
-            ->add('detail',EntityType::class, array(
-                'class' => Detail::class,
-                'label' => false,
-                'attr' => array(
-                    'class' => 'form-control form-group',
-                ),
-                'placeholder' => 'details',
-                'required' => false,
+                'placeholder' => 'Vente en gros',
                 'query_builder' => function(EntityRepository $er) use ($libelle) {
                     return $er->createQueryBuilder('p')
                         ->where('p.libelle LIKE :libelle')

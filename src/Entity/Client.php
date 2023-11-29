@@ -49,6 +49,9 @@ class Client
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Entree::class)]
     private Collection $entrees;
 
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Produit::class)]
+    private Collection $produits;
+
 
     public function __construct()
     {
@@ -59,6 +62,7 @@ class Client
         $this->facture2s = new ArrayCollection();
         $this->sorties = new ArrayCollection();
         $this->entrees = new ArrayCollection();
+        $this->produits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -320,6 +324,36 @@ class Client
             // set the owning side to null (unless already changed)
             if ($entree->getClient() === $this) {
                 $entree->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Produit>
+     */
+    public function getProduits(): Collection
+    {
+        return $this->produits;
+    }
+
+    public function addProduit(Produit $produit): self
+    {
+        if (!$this->produits->contains($produit)) {
+            $this->produits->add($produit);
+            $produit->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduit(Produit $produit): self
+    {
+        if ($this->produits->removeElement($produit)) {
+            // set the owning side to null (unless already changed)
+            if ($produit->getClient() === $this) {
+                $produit->setClient(null);
             }
         }
 

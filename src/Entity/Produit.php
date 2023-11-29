@@ -56,14 +56,14 @@ class Produit
     #[ORM\Column(nullable: true)]
     private ?float $prixDetail = null;
 
-    #[ORM\ManyToMany(targetEntity: Detail::class, inversedBy: 'produits', cascade: ['persist'])]
-    private Collection $detail;
-
     #[ORM\Column(nullable: true)]
     private ?float $qtStockDetail = null;
 
     #[ORM\Column(nullable: true)]
     private ?float $nbreVendu = null;
+
+    #[ORM\ManyToOne(inversedBy: 'produits')]
+    private ?Client $client = null;
 
     public function __construct()
     {
@@ -313,30 +313,6 @@ class Produit
         return $this;
     }
 
-    /**
-     * @return Collection<int, Detail>
-     */
-    public function getDetail(): Collection
-    {
-        return $this->detail;
-    }
-
-    public function addDetail(Detail $detail): self
-    {
-        if (!$this->detail->contains($detail)) {
-            $this->detail->add($detail);
-        }
-
-        return $this;
-    }
-
-    public function removeDetail(Detail $detail): self
-    {
-        $this->detail->removeElement($detail);
-
-        return $this;
-    }
-
     public function getQtStockDetail(): ?float
     {
         return $this->qtStockDetail;
@@ -357,6 +333,18 @@ class Produit
     public function setNbreVendu(?float $nbreVendu): self
     {
         $this->nbreVendu = $nbreVendu;
+
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): self
+    {
+        $this->client = $client;
 
         return $this;
     }

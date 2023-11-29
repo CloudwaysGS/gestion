@@ -49,9 +49,6 @@ class Facture2
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $nomClent = null;
 
-    #[ORM\ManyToMany(targetEntity: Detail::class, mappedBy: 'facture2')]
-    private Collection $details;
-
     #[ORM\Column(length: 255)]
     private ?string $nomProduit = null;
 
@@ -221,33 +218,6 @@ class Facture2
     public function setNomClent(?string $nomClent): self
     {
         $this->nomClent = $nomClent;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Detail>
-     */
-    public function getDetails(): Collection
-    {
-        return $this->details;
-    }
-
-    public function addDetail(Detail $detail): self
-    {
-        if (!$this->details->contains($detail)) {
-            $this->details->add($detail);
-            $detail->addFacture2($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDetail(Detail $detail): self
-    {
-        if ($this->details->removeElement($detail)) {
-            $detail->removeFacture2($this);
-        }
 
         return $this;
     }

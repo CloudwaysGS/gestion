@@ -47,8 +47,6 @@ security:
     - { path: ^/client, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/fournisseur, roles: [ROLE_GESTION_STOCK] }
     - { path: ^/user, roles: [ROLE_GESTION_STOCK] }
-    - { path: ^/detail, roles: [ROLE_GESTION_STOCK] }
-
     #- { path: ^/login$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
 when@test:

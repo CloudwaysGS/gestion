@@ -2,14 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\Detail;
 use App\Entity\Produit;
 use App\Entity\Search;
 use App\Form\ProduitType;
 use App\Form\SearchType;
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ManagerRegistry;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -87,25 +85,9 @@ class ProduitController extends AbstractController
             $data->setQtStockDetail($data->getNombre() * $data->getQtStock());
             $montant = $data->getQtStock() * $data->getPrixUnit();
             $data->setTotal($montant);
+            $data->setNbreVendu('0');
             $manager->persist($data);
             $manager->flush();
-
-            if ($data->getNomProduitDetail() !== null) {
-                $detail = new Detail();
-                $detail->setLibelle($data->getNomProduitDetail());
-                $detail->setPrixUnit($data->getPrixDetail());
-                $detail->setQtStock($data->getNombre() * $data->getQtStock());
-                $detail->setTotal($detail->getPrixUnit() * $detail->getQtStock());
-                $detail->setReleaseDate(new \DateTime());
-                $detail->setNomProduit($libelleProduit);
-                $detail->setStockProduit($data->getQtStock());
-                $detail->setNombre($data->getNombre());
-                $detail->setPrixUnitDetail($data->getPrixUnit());
-                $detail->setNombreVendus('0');
-
-                $manager->persist($detail);
-                $manager->flush();
-            }
 
             $this->addFlash('success', 'Le produit a été ajouté avec succès.');
         }
