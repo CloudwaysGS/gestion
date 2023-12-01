@@ -136,7 +136,11 @@ class ProduitController extends AbstractController
         $produits = array_slice($produits, $offset, $limit);
         if($form->isSubmitted() && $form->isValid()){
             $update = $form->getData()->getQtStock() * $form->getData()->getPrixUnit();
+            if ($form->getData()->getNombre() !== 0){
+                $updateDetail = $form->getData()->getNombre() * $form->getData()->getQtStock();
+            }
             $form->getData()->setTotal($update);
+            $form->getData()->setQtStockDetail($updateDetail);
             $entityManager->persist($form->getData());
            $entityManager->flush();
             return $this->redirectToRoute("produit_liste");

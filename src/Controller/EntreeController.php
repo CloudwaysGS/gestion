@@ -49,7 +49,6 @@ class EntreeController extends AbstractController
     {
         if ($request->isMethod('POST')) {
             // Get the data from the request
-            $clientId = $request->request->get('client_id');
             $produitId = $request->request->get('produit_id');
             $fournisseurId = $request->request->get('fournisseur_id');
             $qtEntree = $request->request->get('qt_sortie');
@@ -101,10 +100,10 @@ class EntreeController extends AbstractController
                     $produit->setQtStock($qtStock + $qtEntree);
                     $produit->setTotal($produit->getPrixUnit() * $produit->getQtStock());
 
-                    // Mise à jour detail stoct
+                    // Mise à jour detail stock
                     if ($produit->getPrixDetail() !== null && $produit->getNombre() !== null){
-                        $tockDetail = $produit->getNombre() * $entree->getQtEntree();
-                        $produit->setQtStockDetail($produit->getQtStockDetail() + $tockDetail);
+                        $stockDetail = $produit->getNombre() * $entree->getQtEntree();
+                        $produit->setQtStockDetail($produit->getQtStockDetail() + $stockDetail);
                     }
 
                     $manager->persist($produit);

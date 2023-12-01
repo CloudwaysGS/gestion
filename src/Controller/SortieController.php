@@ -11,7 +11,6 @@ use App\Repository\SortieRepository;
 use App\Service\SortieValidatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -124,6 +123,8 @@ class SortieController extends AbstractController
                         $p->setQtStock($dstock);
                         $p->setNbreVendu($vendus);
                     }
+                    $upd = $nombre * $p->getQtStock();
+                    $produit->setQtStockDetail($upd);
                     $manager->persist($sortie);
                     $manager->flush();
 
@@ -165,7 +166,8 @@ class SortieController extends AbstractController
                     // Mise à jour qtestock produit
                     $produit->setQtStock($qtStock - $qtSortie);
                     $produit->setTotal($produit->getPrixUnit() * $produit->getQtStock());
-
+                    $upd = $produit->getNombre() * $sortie->getQtSortie();
+                    $produit->setQtStockDetail($produit->getQtStockDetail() - $upd);
                     $manager->persist($produit);
                     $manager->flush();
 
