@@ -2,7 +2,6 @@
 
 namespace App\Form;
 
-use App\Entity\Detail;
 use App\Entity\Entree;
 use App\Entity\Fournisseur;
 use App\Entity\Produit;
@@ -37,22 +36,6 @@ class EntreeType extends AbstractType
                     'class' => 'form-control form-group',
                     ),
                 'placeholder' => 'grossistes',
-                'required' => false,
-                'query_builder' => function(EntityRepository $er) use ($libelle) {
-                    return $er->createQueryBuilder('p')
-                        ->where('p.libelle LIKE :libelle')
-                        ->setParameter('libelle', '%'.$libelle.'%')
-                        ->orderBy('p.libelle', 'ASC');
-                },
-            ))
-
-            ->add('detail',EntityType::class, array(
-                'class' => Detail::class,
-                'label' => false,
-                'attr' => array(
-                    'class' => 'form-control form-group',
-                ),
-                'placeholder' => 'détails',
                 'required' => false,
                 'query_builder' => function(EntityRepository $er) use ($libelle) {
                     return $er->createQueryBuilder('p')

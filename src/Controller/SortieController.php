@@ -5,13 +5,11 @@ namespace App\Controller;
 use App\Entity\Client;
 use App\Entity\Produit;
 use App\Entity\Sortie;
-use App\Form\SortieType;
 use App\Repository\ClientRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\SortieRepository;
 use App\Service\SortieValidatorService;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,8 +21,6 @@ class SortieController extends AbstractController
     #[Route('/sortie/liste', name: 'sortie_liste')]
     public function index(SortieRepository $sort, ClientRepository $clientRepository, ProduitRepository $detail, Request $request): Response
     {
-        $s = new Sortie();
-
         $page = $request->query->getInt('page', 1); // current page number
         $limit = 10; // number of products to display per page
         $total = $sort->countAll();

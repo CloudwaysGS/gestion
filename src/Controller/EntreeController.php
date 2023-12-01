@@ -2,14 +2,16 @@
 
 namespace App\Controller;
 
-use App\Entity\Detail;
+use App\Entity\Client;
 use App\Entity\Entree;
+use App\Entity\Fournisseur;
 use App\Entity\Produit;
-use App\Entity\Sortie;
 use App\Form\EntreeType;
-use App\Form\SortieType;
+use App\Repository\ClientRepository;
 use App\Repository\EntreeRepository;
-use App\Repository\SortieRepository;
+use App\Repository\FournisseurRepository;
+use App\Repository\ProduitRepository;
+use App\Service\EntreeValidatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,96 +21,101 @@ use Symfony\Component\Routing\Annotation\Route;
 class EntreeController extends AbstractController
 {
     #[Route('/entree/liste', name: 'entree_liste')]
-    public function index(EntreeRepository $entre, Request $request): Response
+    public function index(EntreeRepository $entre,ClientRepository $clientRepository,ProduitRepository $detail,FournisseurRepository $fourni, Request $request): Response
     {
-        $e = new Entree();
-        $form = $this->createForm(EntreeType::class, $e, array(
-            'action' => $this->generateUrl('entree_add'),
-        ));
         $page = $request->query->getInt('page', 1); // current page number
         $limit = 10; // number of products to display per page
         $total = $entre->countAll();
         $offset = ($page - 1) * $limit;
         $entree = $entre->findAllOrderedByDate($limit, $offset);
+        $clients = $clientRepository->findAll();
+        $produits = $detail->findAllOrderedByDate();
+        $fournisseur = $fourni->findAll();
         return $this->render('entree/liste.html.twig', [
             'controller_name' => 'EntreeController',
             'entree'=>$entree,
+            'clients' => $clients,
+            'produits' => $produits,
+            'fournisseur' => $fournisseur,
             'total' => $total,
             'page' => $page,
             'limit' => $limit,
-            'form' => $form->createView()
         ]);
         return $this->render('entree/liste.html.twig');
     }
 
     #[Route('/entree/add', name: 'entree_add')]
-    public function add(EntityManagerInterface $manager, Request $request): Response
+    public function add(EntityManagerInterface $manager, Request $request, EntreeValidatorService $validatorService): Response
     {
-        $entree = new Entree();
-        $date = new \DateTime();
-        $entree->setDateEntree($date);
-        $form = $this->createForm(EntreeType::class, $entree);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $user = $this->getUser();
-            if (!$user){
-                throw $this->createNotFoundException("Aucun utilisateur n'est actuellement connecté");
+        if ($request->isMethod('POST')) {
+            // Get the data from the request
+            $clientId = $request->request->get('client_id');
+            $produitId = $request->request->get('produit_id');
+            $fournisseurId = $request->request->get('fournisseur_id');
+            $qtEntree = $request->request->get('qt_sortie');
+            $prixUnit = $request->request->get('prix_unit');
+            if (!empty($produitId) && !empty($detailId)) {
+                $this->addFlash('danger', 'produit et detail ne peuvent pas être remplis en même temps.');
+                return $this->redirectToRoute('sortie_liste');
             }
-            $produit = $entree->getProduit();
-            $detail = $entree->getDetail();
-            if ($produit){
-                $montant = $entree->getPrixUnit() * $entree->getQtEntree();
-                $entree->setTotal($montant);
-                $entree->setUser($user);
-                $manager->persist($entree);
-                $manager->flush();
-                ///////////***************Mise à jour du produit******************/////////////////////////
-                $p = $manager->getRepository(Produit::class)->find($entree->getProduit()->getId());
-                $qteInitial = $p->getQtStock();
-                //$pInitial = $p->getPrixUnit();
-                $qteAjout = $entree->getQtEntree();
-                //$pAjout = $entree->getPrixUnit();
-                $stock = $qteInitial + $qteAjout;
+            $validationErrors = $validatorService->validate([
+                'produitId' => $produitId,
+                'qtSortie' => $qtEntree,
+                'prixUnit' => $prixUnit,
+            ]);
 
-                /**if ($qteInitial != 0 && $pAjout > $pInitial){
-                    $cout = ($qteInitial * $pInitial + $qteAjout * $pAjout)/$stock;
-                    $montant = $stock * $cout;
-                    $p->setPrixUnit($cout);
-                }**/
-                $detail = $entree->getDetail();
-                if ($detail !== null) {
-                    $d = $manager->getRepository(Detail::class)->find($detail->getId());
-                    $d->setStockProduit($stock);
-                    $d->setQtStock($stock * $d->getNombre());
+            if (!empty($validationErrors)) {
+                foreach ($validationErrors as $error) {
+                    $this->addFlash('danger', $error);
+                }
+                return $this->redirectToRoute('sortie_liste');
+            }
+
+            $fournisseur = $manager->getRepository(Fournisseur::class)->find($fournisseurId);
+            if (!empty($produitId)){
+                $entree = new Entree();
+                $date = new \DateTime();
+                $entree->setDateEntree($date);
+                $entree->setQtEntree($qtEntree);
+                $entree->setPrixUnit($prixUnit);
+                $entree->setFournisseur($fournisseur);
+                $produit = $manager->getRepository(Produit::class)->find($produitId);
+                if (!$produit) {
+                    $this->addFlash('danger', 'Produit not found.');
+                    return $this->redirectToRoute('sortie_liste');
                 }
 
-                $p->setQtStock($stock);
-                $p->setTotal($montant);
-                $manager->flush();
-                $this->addFlash('success', 'L\'entrée a été enregistrée avec succès.');
-            }elseif ($detail){
+                $qtStock = $produit->getQtStock();
+                if ($qtStock < $qtEntree) {
+                    $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $qtStock);
+                } else {
 
-                $montant = $entree->getPrixUnit() * $entree->getQtEntree();
-                $entree->setTotal($montant);
-                $entree->setUser($user);
-                $manager->persist($entree);
-                $manager->flush();
+                    $entree->setProduit($produit);
+                    $entree->setTotal($prixUnit * $qtEntree);
+                    $user = $this->getUser();
+                    $entree->setUser($user);
 
-                ///////////***************Mise à jour du produit******************/////////////////////////
-                $p = $entree->getDetail();
-                $qteInitial = $p->getQtStock();
-                $qteAjout = $entree->getQtEntree();
-                $stock = $qteInitial + $qteAjout;
-                $p->setQtStock($stock);
-                $p->setStockProduit($stock * $p->getNombre());
+                    $manager->persist($entree);
+                    $manager->flush();
+                    // Mise à jour qtestock produit
+                    $produit->setQtStock($qtStock + $qtEntree);
+                    $produit->setTotal($produit->getPrixUnit() * $produit->getQtStock());
 
+                    // Mise à jour detail stoct
+                    if ($produit->getPrixDetail() !== null && $produit->getNombre() !== null){
+                        $tockDetail = $produit->getNombre() * $entree->getQtEntree();
+                        $produit->setQtStockDetail($produit->getQtStockDetail() + $tockDetail);
+                    }
 
-                $p->setTotal($montant);
-                $manager->flush();
-                $this->addFlash('success', 'L\'entrée a été enregistrée avec succès.');
+                    $manager->persist($produit);
+                    $manager->flush();
+
+                    $this->addFlash('success', 'Le produit a été enregistré avec succès.');
+                }
             }
 
         }
+
         return $this->redirectToRoute('entree_liste');
     }
 

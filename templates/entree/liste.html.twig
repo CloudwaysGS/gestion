@@ -132,7 +132,29 @@
             <div class="card">
                 <div class="card-header">Formulaire de gestion des produits</div>
                 <div class="card-body">
-                    {{ form(form) }}
+                    <form method="post" action="{{ path('entree_add') }}">
+                        <select class="form-control mb-1" name="fournisseur_id" id="fournisseur_id">
+                            <option value="" selected disabled>Choisissez un fournisseur</option>
+                            {% for f in fournisseur %}
+                                <option value="{{ f.id }}">{{ f.nom }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <select class="form-control mb-1" name="produit_id" id="produit_id">
+                            <option value="" selected disabled>Choisissez un produit</option>
+                            {% for p in produits %}
+                                <option value="{{ p.id }}">{{ p.libelle }}</option>
+                            {% endfor %}
+                        </select>
+                        <div>
+
+                        </div>
+                        <input class="form-control" type="text" id="qt_sortie" name="qt_sortie" placeholder="quantité" required>
+
+                        <input class="form-control mt-1" type="text" id="prix_unit" name="prix_unit" placeholder="prix unitaire" required>
+
+                        <button class="form-control mt-1" type="submit">Enregistrer</button>
+                    </form>
                 </div>
             </div>
         </div>
