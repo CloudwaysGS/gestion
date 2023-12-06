@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -93,9 +94,13 @@ class FactureController extends AbstractController
             if ($produit){
                 $p = $entityManager->getRepository(Produit::class)->find($produit);
                 $vendu = $p->getNbreVendu();
+                $nombre = $facture->getNombre();
+
                 if ($vendu !== null){
                     $repository->remove($facture); // Mise à jour de l'état de la facture
                     $p->setQtStock($p->getQtStock() + $vendu);
+                    $upd = $nombre * $facture->getQuantite();
+                    $produit->setQtStockDetail($produit->getQtStockDetail() + $upd);
                 } else {
                     $quantite = $facture->getQuantite();
                     $repository->remove($facture); // Mise à jour de l'état de la facture
@@ -117,7 +122,8 @@ class FactureController extends AbstractController
 
         if (!$this->enregistrerClicked) {
             $repository = $entityManager->getRepository(Facture::class);
-            $factures = $repository->findBy(['etat' => 1]);
+            $factures = $repository->findBy(['etat' => 1], ['date' => 'DESC']);
+
             $client = null;
             $adresse = null;
             $telephone = null;
@@ -142,6 +148,10 @@ class FactureController extends AbstractController
             $date = new \DateTime();
             $chargement->setDate($date);
             $total = 0;
+
+            $derniereFacture = array_slice($factures, 0, 1);
+            $derniereFacture[0]->setConnect("no_connect");
+
             foreach ($factures as $facture) {
                 $total = $facture->getTotal();
                 $facture->setEtat(0);
@@ -167,11 +177,17 @@ class FactureController extends AbstractController
     }
 
     #[Route('/facture/rajout/{id}', name: 'rajout_facture')]
-    public function rajout($id, EntityManagerInterface $entityManager, Request $request)
+    public function add($id, EntityManagerInterface $entityManager, Request $request, Security $security): RedirectResponse
     {
+        $user = $security->getUser();
+        if (!$user) {
+            $this->addFlash('warning', 'Vous devez être connecté pour ajouter une facture.');
+            return $this->redirectToRoute('app_login');
+        }
         $quantityDetail = null;
         $clientIdDetail = null;
         $actionType = $request->query->get('actionType', 'addToFacture');
+
         if ($actionType == 'addToFactureDetail'){
             $quantityDetail = $request->query->get('quantityDetail', 1);
             $clientIdDetail = $request->query->get('clientIdDetail');
@@ -180,6 +196,7 @@ class FactureController extends AbstractController
         $quantity = $request->query->get('quantity', 1);
         $clientId = $request->query->get('clientId');
         $user = $this->getUser();
+
         try {
             $facture = $this->factureService->createFacture($id, $quantity, $clientId, $user, $actionType, $quantityDetail, $clientIdDetail );
             $total = $this->factureService->updateTotalForFactures();
@@ -193,8 +210,13 @@ class FactureController extends AbstractController
 
 
     #[Route('/search', name: 'search')]
-    public function search(Request $request, ProduitRepository $prod): JsonResponse
+    public function search(Request $request, ProduitRepository $prod, Security $security): JsonResponse
     {
+        $user = $security->getUser();
+        if (!$user) {
+            $this->addFlash('warning', 'Vous devez être connecté pour ajouter une facture.');
+            return $this->redirectToRoute('app_login');
+        }
         $searchTerm = $request->query->get('term');
         $produits = $prod->findByName($searchTerm);
 
@@ -211,8 +233,13 @@ class FactureController extends AbstractController
     }
 
     #[Route('/searchDetail', name: 'searchDetail')]
-    public function searchDetail(Request $request, ProduitRepository $prod): JsonResponse
+    public function searchDetail(Request $request, ProduitRepository $prod, Security $security): JsonResponse
     {
+        $user = $security->getUser();
+        if (!$user) {
+            $this->addFlash('warning', 'Vous devez être connecté pour ajouter une facture.');
+            return $this->redirectToRoute('app_login');
+        }
         $searchTerm = $request->query->get('term');
         $produits = $prod->findByNameDetail($searchTerm);
 

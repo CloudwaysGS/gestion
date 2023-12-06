@@ -2,27 +2,24 @@
 namespace App\Service;
 
 use App\Entity\Client;
-use App\Entity\Facture;
+use App\Entity\Facture2;
 use App\Entity\Produit;
-use App\Repository\FactureRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Security;
 
 
-class FactureService
+class Facture2Service
 {
-    private $factureRepository;
     private $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager, FactureRepository $factureRepository, Security $security)
+    public function __construct(EntityManagerInterface $entityManager, Security $security)
     {
         $this->entityManager = $entityManager;
-        $this->factureRepository = $factureRepository;
         $this->security = $security;
     }
-    public function createFacture( $id, $quantity, $clientId, $user, $actionType, $quantityDetail = 1, $clientIdDetail = null)
+    public function createFacture2( $id, $quantity, $clientId, $user, $actionType, $quantityDetail = 1, $clientIdDetail = null)
     {
-        $factures = $this->entityManager->getRepository(Facture::class)->findBy(['etat' => 1]);
+        $factures = $this->entityManager->getRepository(Facture2::class)->findBy(['etat' => 1]);
 
         if (empty($factures) && empty($clientId) && empty($clientIdDetail)) {
             throw new \Exception('Veuillez choisir un client avant d\'ajouter des produits.');
@@ -40,11 +37,10 @@ class FactureService
 
         if ($actionType === 'addToFactureDetail') {
             $produit = $this->entityManager->getRepository(Produit::class)->find($id);
-            $facture = (new Facture())
+            $facture = (new Facture2())
                 ->addProduit($produit)
                 ->setQuantite($quantityDetail);
             $client = $this->entityManager->getRepository(Client::class)->find($clientIdDetail);
-
             if ($client !== null) {
                 $facture->setClient($client);
                 $facture->setNomClient($client->getNom());
@@ -60,7 +56,7 @@ class FactureService
             $facture->setDate(new \DateTime());
             $facture->setConnect($user->getPrenom() . ' ' . $user->getNom());
 
-            $existingProduit = $this->entityManager->getRepository(Facture::class)
+            $existingProduit = $this->entityManager->getRepository(Facture2::class)
                 ->findOneBy(['nomProduit' => $facture->getNomProduit(), 'etat' => 1]);
             if ($existingProduit && $this->compareStrings($existingProduit->getNomProduit(), $facture->getNomProduit())) {
                 throw new \Exception($facture->getNomProduit() . ' a déjà été ajouté précédemment.');
@@ -103,7 +99,7 @@ class FactureService
         }
 
         $produit = $this->entityManager->getRepository(Produit::class)->find($id);
-        $facture = (new Facture())
+        $facture = (new Facture2())
             ->addProduit($produit)
             ->setQuantite($quantity);
         $client = $this->entityManager->getRepository(Client::class)->find($clientId);
@@ -120,15 +116,15 @@ class FactureService
         $facture->setMontant($produitInFacture->getPrixUnit() * $facture->getQuantite());
         $facture->setDate(new \DateTime());
         $facture->setConnect($user->getPrenom() . ' ' . $user->getNom());
-        $p = $this->entityManager->getRepository(Produit::class)->find($produit);
 
+        $p = $this->entityManager->getRepository(Produit::class)->find($produit);
         if ($p->getQtStock() < $facture->getQuantite()) {
             throw new \Exception('La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $p->getQtStock());
         } else if ($facture->getQuantite() <= 0) {
             throw new \Exception('Entrez une quantité positive, s\'il vous plaît !');
         }
 
-        $existingProduit = $this->entityManager->getRepository(Facture::class)
+        $existingProduit = $this->entityManager->getRepository(Facture2::class)
             ->findOneBy(['nomProduit' => $facture->getNomProduit(), 'etat' => 1]);
         if ($existingProduit && $this->compareStrings($existingProduit->getNomProduit(), $facture->getNomProduit())) {
             throw new \Exception($facture->getNomProduit() . ' a déjà été ajouté précédemment.');
@@ -153,7 +149,7 @@ class FactureService
 
     public function updateTotalForFactures()
     {
-        $factures = $this->entityManager->getRepository(Facture::class)->findBy(['etat' => 1]);
+        $factures = $this->entityManager->getRepository(Facture2::class)->findBy(['etat' => 1]);
         $total = 0;
 
         foreach ($factures as $facture) {

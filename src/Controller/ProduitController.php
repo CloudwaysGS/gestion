@@ -8,6 +8,7 @@ use App\Form\ProduitType;
 use App\Form\SearchType;
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +20,7 @@ class ProduitController extends AbstractController
 
 
     #[Route('/produit/liste', name: 'produit_liste')]
-    public function index(EntityManagerInterface $manager ,ProduitRepository $prod, Request $request, FlashyNotifier $flashy): Response
+    public function index(ProduitRepository $prod, Request $request, FlashyNotifier $flashy, PaginatorInterface $paginator): Response
     {
         $lastDayOfMonth = new \DateTime('last day of this month');
         $today = new \DateTime();
@@ -44,18 +45,15 @@ class ProduitController extends AbstractController
         $form2 = $this->createForm(SearchType::class, $search);
         $form2->handleRequest($request);
         $nom = $search->getNom();
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
-        $total = $nom ? count($prod->findByName($nom)) : $prod->countAll();
-        $offset = ($page - 1) * $limit;
-        $produits = $nom ? $prod->findByName($nom, $limit, $offset) : $prod->findAllOrderedByDate($limit, $offset);
-        $flashy->info('Vous avez '.$total.' produits pour l\'instant');
+        $pagination = $paginator->paginate(
+            $prod->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
         return $this->render('produit/liste.html.twig', [
             'controller_name' => 'ProduitController',
             'produits' => $produits,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
+            'pagination' => $pagination,
             'form' => $form->createView(),
             'form2' => $form2->createView(),
             'message' => $message
@@ -112,28 +110,23 @@ class ProduitController extends AbstractController
     }
 
     #[Route('/produit/edit/{id}', name: 'produit_edit')]
-    public function edit($id,ProduitRepository $repo,Request $request,EntityManagerInterface $entityManager): Response
+    public function edit($id,ProduitRepository $prod,Request $request,EntityManagerInterface $entityManager, PaginatorInterface $paginator): Response
     {
         $lastDayOfMonth = new \DateTime('last day of this month');
         $today = new \DateTime();
         $remainingDays = $lastDayOfMonth->diff($today)->days;
         $message = ($remainingDays === 2) ? "Attention : Il ne reste que 2 jours avant la fin du mois en cours !" : (($remainingDays === 1) ? "Attention : Il ne reste plus que 1 jour avant la fin du mois en cours !" : "");
 
-        $produits =$repo->find($id);
+        $produits =$prod->find($id);
         $form = $this->createForm(ProduitType::class, $produits);
         $form->handleRequest($request);
         $search = new Search();
         $form2 = $this->createForm(SearchType::class, $search);
-        $total = $repo->count([]);
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
-        $total = $repo->count([]);
-        $offset = ($page - 1) * $limit;
-        if (!is_array($produits)) {
-            // initialize $produits as an array
-            $produits = array();
-        }
-        $produits = array_slice($produits, $offset, $limit);
+        $pagination = $paginator->paginate(
+            $prod->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
         if($form->isSubmitted() && $form->isValid()){
             $update = $form->getData()->getQtStock() * $form->getData()->getPrixUnit();
             if ($form->getData()->getNombre() !== 0){
@@ -146,10 +139,7 @@ class ProduitController extends AbstractController
             return $this->redirectToRoute("produit_liste");
         }
         return $this->render('produit/liste.html.twig', [
-            'produits'=>$produits,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
+            'pagination'=>$pagination,
             'form' => $form->createView(),
             'form2' => $form2->createView(),
             'message' => $message

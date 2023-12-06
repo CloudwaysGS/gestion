@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Client;
 use App\Entity\Produit;
 use App\Entity\Sortie;
+use App\Form\SortieType;
 use App\Repository\ClientRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\SortieRepository;
@@ -70,7 +71,6 @@ class SortieController extends AbstractController
 
                 return $this->redirectToRoute('sortie_liste');
             }
-
             if (!empty($detailId)){
                 $sortie = new Sortie();
                 $date = new \DateTime();
@@ -96,6 +96,7 @@ class SortieController extends AbstractController
                     }
 
                     $sortie->setProduit($produit);
+                    $sortie->setNomProduit($produit->getNomProduitDetail());
                     $sortie->setTotal($prixUnit * $qtSortie);
                     $user = $this->getUser();
                     $sortie->setUser($user);
@@ -125,12 +126,14 @@ class SortieController extends AbstractController
                     }
                     $upd = $nombre * $p->getQtStock();
                     $produit->setQtStockDetail($upd);
+                    $sortie->setAction('detail');
                     $manager->persist($sortie);
                     $manager->flush();
 
                     $this->addFlash('success', 'Le produit a été enregistré avec succès.');
                 }
-            }elseif (!empty($produitId)){
+            }
+            elseif (!empty($produitId)){
                 $sortie = new Sortie();
                 $date = new \DateTime();
                 $sortie->setDateSortie($date);
@@ -156,6 +159,7 @@ class SortieController extends AbstractController
                     }
 
                     $sortie->setProduit($produit);
+                    $sortie->setNomProduit($produit->getLibelle());
                     $sortie->setTotal($prixUnit * $qtSortie);
                     $user = $this->getUser();
                     $sortie->setUser($user);
@@ -180,88 +184,78 @@ class SortieController extends AbstractController
         return $this->redirectToRoute('sortie_liste');
     }
 
-
-    /*#[Route('/sortie/add', name: 'sortie_add')]
-    public function add(EntityManagerInterface $manager, Request $request): Response
-    {
-        $sortie = new Sortie();
-        $date = new \DateTime();
-        $sortie->setDateSortie($date);
-        $form = $this->createForm(SortieType::class, $sortie);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $produit = $sortie->getProduit();
-
-            if ($produit){
-                $p = $sortie->getProduit();
-                $k = $p->getQtStock();
-                if ($p->getQtStock() < $sortie->getQtSortie()){
-                    $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : '.$k);
-                } else{
-                    $user = $this->getUser();
-                    if (!$user){
-                        throw new Exception("Aucun utilisateur n'est actuellement connecté");
-                    }
-                    $montant = $sortie->getPrixUnit() * $sortie->getQtSortie();
-                    $sortie->setTotal($montant);
-                    $sortie->setUser($user);
-                    $manager->persist($sortie);
-                    $manager->flush();
-                    //Mise à jour du produit
-                    $p = $manager->getRepository(Produit::class)->find($sortie->getProduit()->getId());
-                    $stock = $p->getQtStock() - $sortie->getQtSortie();
-                    $montant = $stock * $p->getPrixUnit();
-                    $p->setTotal($montant);
-                    $p->setQtStock($stock);
-
-
-
-                    $manager->flush();
-                    $this->addFlash('success', 'Le produit a été enrégistré avec succès.');
-                }
-            }
-
-        }
-        return $this->redirectToRoute('sortie_liste');
-    }*/
-
     #[Route('/sortie/modifier/{id}', name: 'sortie_modifier')]
-    public function modifier(EntityManagerInterface $manager, Request $request, SortieRepository $sortieRepository, int $id): Response
+    public function modifier(EntityManagerInterface $manager, Request $request, SortieRepository $sortieRepository,ProduitRepository $detail, int $id): Response
     {
         $sortie = $sortieRepository->find($id);
-        $form = $this->createForm(SortieType::class, $sortie);
-        $form->handleRequest($request);
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
-        $total = $sortieRepository->count([]);
-        $offset = ($page - 1) * $limit;
+        if ($request->isMethod('POST')){
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $update = $sortie->getQtSortie() * $sortie->getPrixUnit();
-            $p = $manager->getRepository(Produit::class)->find($sortie->getProduit()->getId());
-            $stock = $p->getQtStock() - $sortie->getQtSortie();
-            $montant = $stock * $p->getPrixUnit();
-            $p->setTotal($montant);
-            $p->setQtStock($stock);
-            $sortie->setTotal($update);
+            $qtSortie = $request->request->get('qt_sortie');
+            $prixUnit = $request->request->get('prix_unit');
+
+            $sortie->setQtSortie($qtSortie);
+            $sortie->setPrixUnit($prixUnit);
+            $total = $sortie->getQtSortie() *$sortie->getPrixUnit();
+            $sortie->setTotal($total);
             $manager->flush();
             $this->addFlash('success', 'La sortie a été modifiée avec succès.');
             return $this->redirectToRoute('sortie_liste');
         }
 
-        return $this->render('sortie/liste.html.twig', [
-            'form' => $form->createView(),
+        $clients = $manager->getRepository(Client::class)->findAll();
+        $produits = $manager->getRepository(Produit::class)->findAll();
+        $details = $detail->findAllDetail();
+
+        return $this->render('sortie/editer.html.twig', [
             'sortie' => $sortie,
-            'total' => $total,
-            'limit' => $limit,
-            'page' => $page,
-            'offset' => $offset,
+            'clients' => $clients,
+            'produits' => $produits,
+            'details' => $details,
+
         ]);
     }
 
     #[Route('/sortie/delete/{id}', name: 'sortie_delete')]
-    public function delete(Sortie $sortie, SortieRepository $repository){
+    public function delete(Sortie $sortie, SortieRepository $repository, EntityManagerInterface $manager){
         $repository->remove($sortie,true);
+        $p = $manager->getRepository(Produit::class)->find($sortie->getProduit()->getId());
+        if ($sortie->getAction() == 'detail') {
+            $quantite = floatval($sortie->getQtSortie());
+            $nombre = $p->getNombre();
+            $vendus = $p->getNbreVendu();
+            if ($quantite >= $nombre) {
+                $boxe = $quantite / $nombre;
+                $vendus = $boxe;
+                $dstock = $p->getQtStock() + $vendus;
+                $p->setQtStock($dstock);
+                $p->setNbreVendu($vendus);
+            }else{
+                $boxe = $quantite / $nombre;
+                $vendus = $boxe;
+                $dstock = $p->getQtStock() + $vendus;
+                $p->setQtStock($dstock);
+                $p->setNbreVendu($vendus);
+            }
+            $upd = $nombre * $p->getQtStock();
+            $p->setQtStockDetail($upd);
+
+            $upddd = $dstock * $p->getPrixUnit();
+            $p->setTotal($upddd);
+            $manager->flush();
+        } else {
+            $stock = $p->getQtStock() + $sortie->getQtSortie();
+            $upd = $stock * $p->getPrixUnit();
+            $p->setQtStock($stock);
+            $p->setTotal($upd);
+
+            if ($p->getNombre() !== null){
+                $updQtDet = $p->getNombre() * $p->getQtStock();
+                $p->setQtStockDetail($updQtDet);
+            }
+
+            $manager->flush();
+        }
+
         $this->addFlash('success', 'Le produit sorti a été supprimé avec succès');
         return $this->redirectToRoute('sortie_liste');
     }

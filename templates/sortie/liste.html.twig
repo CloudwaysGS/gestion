@@ -91,11 +91,7 @@
                                 <tr>
                                     <th>
                                         {% if s.produit is not null %}
-                                            {{ s.produit }}
-                                        {% elseif s.detail is not null %}
-                                            {{ s.detail }}
-                                        {% else %}
-                                            {{ s.produit }}
+                                            {{ s.nomProduit }}
                                         {% endif %}
                                     </th>
                                     <th>{{ s.qtSortie }}</th>
@@ -103,8 +99,10 @@
                                     <th>{{ s.total | number_format(0, ',', ' ') }}</th>
                                     <th>{{ s.dateSortie|date('d/m/Y') }}</th>
                                     <td>
+{#
                                         <a href="{{ path('sortie_modifier', {'id': s.id}) }}" ><i class="fa fa-edit"></i></a>
-                                        <a href="{{ path('sortie_delete', {'id': s.id}) }}" ><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+#}
+                                        <a class="btn btn-danger btn-circle btn-sm" href="{{ path('sortie_delete', {'id': s.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');" ><i class="fa fa-trash" aria-hidden="true"></i></a>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -167,7 +165,8 @@
 
                         <input class="form-control mt-1" type="text" id="prix_unit" name="prix_unit" placeholder="prix unitaire" required>
 
-                        <button class="form-control mt-1" type="submit">Enregistrer</button>
+                        <button id="enregistreurBtn" class="form-control mt-1" type="submit">Enregistreur</button>
+
                     </form>
                 </div>
             </div>
@@ -187,5 +186,6 @@
             }
         }, 10000);
     </script>
+
 
 {% endblock %}

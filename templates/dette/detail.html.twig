@@ -25,15 +25,15 @@
                             </tr>
                             <tr>
                                 <th>Montant dette</th>
-                                <td>{{ infos.montantDette }}</td>
+                                <td>{{ infos.montantDette | number_format(0, ',', ' ') }}</td>
+                            </tr>
+                            <tr>
+                                <th>Reste</th>
+                                <td>{{ infos.reste | number_format(0, ',', ' ') }}</td>
                             </tr>
                             <tr>
                                 <th>Statut</th>
                                 <td>{{ infos.statut }}</td>
-                            </tr>
-                            <tr>
-                                <th>Reste</th>
-                                <td>{{ infos.reste }}</td>
                             </tr>
                             <tr>
                                 <th>Descriptions</th>

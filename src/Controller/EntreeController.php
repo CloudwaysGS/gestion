@@ -21,21 +21,21 @@ use Symfony\Component\Routing\Annotation\Route;
 class EntreeController extends AbstractController
 {
     #[Route('/entree/liste', name: 'entree_liste')]
-    public function index(EntreeRepository $entre,ClientRepository $clientRepository,ProduitRepository $detail,FournisseurRepository $fourni, Request $request): Response
+    public function index(EntreeRepository $entre,ProduitRepository $detail,FournisseurRepository $fourni, Request $request): Response
     {
         $page = $request->query->getInt('page', 1); // current page number
         $limit = 10; // number of products to display per page
         $total = $entre->countAll();
         $offset = ($page - 1) * $limit;
         $entree = $entre->findAllOrderedByDate($limit, $offset);
-        $clients = $clientRepository->findAll();
         $produits = $detail->findAllOrderedByDate();
+        $details = $detail->findAllDetail();
         $fournisseur = $fourni->findAll();
         return $this->render('entree/liste.html.twig', [
             'controller_name' => 'EntreeController',
             'entree'=>$entree,
-            'clients' => $clients,
             'produits' => $produits,
+            'details' => $details,
             'fournisseur' => $fournisseur,
             'total' => $total,
             'page' => $page,
@@ -50,9 +50,11 @@ class EntreeController extends AbstractController
         if ($request->isMethod('POST')) {
             // Get the data from the request
             $produitId = $request->request->get('produit_id');
+            $detailId = $request->request->get('detail_id');
             $fournisseurId = $request->request->get('fournisseur_id');
             $qtEntree = $request->request->get('qt_sortie');
             $prixUnit = $request->request->get('prix_unit');
+
             if (!empty($produitId) && !empty($detailId)) {
                 $this->addFlash('danger', 'produit et detail ne peuvent pas être remplis en même temps.');
                 return $this->redirectToRoute('sortie_liste');
@@ -71,13 +73,69 @@ class EntreeController extends AbstractController
             }
 
             $fournisseur = $manager->getRepository(Fournisseur::class)->find($fournisseurId);
-            if (!empty($produitId)){
+
+            if (!empty($detailId)){
                 $entree = new Entree();
                 $date = new \DateTime();
                 $entree->setDateEntree($date);
                 $entree->setQtEntree($qtEntree);
                 $entree->setPrixUnit($prixUnit);
                 $entree->setFournisseur($fournisseur);
+
+                $produit = $manager->getRepository(Produit::class)->find($detailId);
+                if (!$produit) {
+                    $this->addFlash('danger', 'detail not found.');
+                    return $this->redirectToRoute('sortie_liste');
+                }
+
+                $qtStock = $produit->getQtStockDetail();
+                if ($qtStock < $qtEntree) {
+                    $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $qtStock);
+                }
+
+                    $entree->setProduit($produit);
+                    $entree->setNomProduit($produit->getNomProduitDetail());
+                    $entree->setTotal($prixUnit * $qtEntree);
+                    $user = $this->getUser();
+                    $entree->setUser($user);
+
+                    $manager->persist($entree);
+                    $manager->flush();
+                    // Mise à jour qtestock produit
+
+                    $p = $manager->getRepository(Produit::class)->find($detailId);
+                    $quantite = floatval($entree->getQtEntree());
+                    $nombre = $p->getNombre();
+                    $vendus = $p->getNbreVendu();
+                    if ($quantite >= $nombre) {
+                        $boxe = $quantite / $nombre;
+                        $vendus = $boxe;
+                        $dstock = $p->getQtStock() + $vendus;
+                        $p->setQtStock($dstock);
+                        $p->setNbreVendu($vendus);
+                    }else{
+                        $boxe = $quantite / $nombre;
+                        $vendus = $boxe;
+                        $dstock = $p->getQtStock() + $vendus;
+                        $p->setQtStock($dstock);
+                        $p->setNbreVendu($vendus);
+                    }
+                    $upd = $nombre * $p->getQtStock();
+                    $produit->setQtStockDetail($upd);
+                    $entree->setAction('detail');
+                    $manager->persist($entree);
+                    $manager->flush();
+
+                    $this->addFlash('success', 'Le produit a été enregistré avec succès.');
+                }
+            }
+            if (!empty($produitId)){
+                $entree = new Entree();
+                $date = new \DateTime();
+                $entree->setDateEntree($date);
+                $entree->setQtEntree($qtEntree);
+                $entree->setPrixUnit($prixUnit);
+
                 $produit = $manager->getRepository(Produit::class)->find($produitId);
                 if (!$produit) {
                     $this->addFlash('danger', 'Produit not found.');
@@ -90,66 +148,100 @@ class EntreeController extends AbstractController
                 } else {
 
                     $entree->setProduit($produit);
+                    $entree->setNomProduit($produit->getLibelle());
                     $entree->setTotal($prixUnit * $qtEntree);
                     $user = $this->getUser();
                     $entree->setUser($user);
+                    $entree->setFournisseur($fournisseur);
 
                     $manager->persist($entree);
                     $manager->flush();
                     // Mise à jour qtestock produit
                     $produit->setQtStock($qtStock + $qtEntree);
                     $produit->setTotal($produit->getPrixUnit() * $produit->getQtStock());
-
-                    // Mise à jour detail stock
-                    if ($produit->getPrixDetail() !== null && $produit->getNombre() !== null){
-                        $stockDetail = $produit->getNombre() * $entree->getQtEntree();
-                        $produit->setQtStockDetail($produit->getQtStockDetail() + $stockDetail);
-                    }
-
+                    $upd = $produit->getNombre() * $entree->getQtEntree();
+                    $produit->setQtStockDetail($produit->getQtStockDetail() + $upd);
                     $manager->persist($produit);
                     $manager->flush();
 
                     $this->addFlash('success', 'Le produit a été enregistré avec succès.');
                 }
             }
-
-        }
-
         return $this->redirectToRoute('entree_liste');
     }
 
     #[Route('/entree/modifier/{id}', name: 'entrer_modifier')]
-    public function modifier(EntityManagerInterface $manager, Request $request, EntreeRepository $entreeRepository, int $id): Response
+    public function modifier(EntityManagerInterface $manager,ProduitRepository $detail,FournisseurRepository $fourni, Request $request, EntreeRepository $entreeRepository, int $id): Response
     {
         $entree = $entreeRepository->find($id);
-        $form = $this->createForm(EntreeType::class, $entree);
-        $form->handleRequest($request);
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
-        $total = $entreeRepository->count([]);
-        $offset = ($page - 1) * $limit;
+        if ($request->isMethod('POST')){
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $update = $entree->getPrixUnit() * $entree->getQtEntree();
-            $entree->setTotal($update);
+            $qtEntree = $request->request->get('qt_sortie');
+            $prixUnit = $request->request->get('prix_unit');
+
+            $entree->setQtEntree($qtEntree);
+            $entree->setPrixUnit($prixUnit);
+            $total = $entree->getQtEntree() * $entree->getPrixUnit();
+            $entree->setTotal($total);
             $manager->flush();
-            $this->addFlash('success', 'Le produit entrée a été modifiée avec succès.');
+            $this->addFlash('success', 'Modifiée avec succès.');
             return $this->redirectToRoute('entree_liste');
         }
 
-        return $this->render('entree/liste.html.twig', [
-            'form' => $form->createView(),
+        $fournisseur = $manager->getRepository(Fournisseur::class)->findAll();
+        $produits = $manager->getRepository(Produit::class)->findAll();
+        $details = $detail->findAllDetail();
+
+        return $this->render('entree/editer.html.twig', [
             'entree' => $entree,
-            'total' => $total,
-            'limit' => $limit,
-            'page' => $page,
-            'offset' => $offset,
+            'fournisseur' => $fournisseur,
+            'produits' => $produits,
+            'details' => $details,
+
         ]);
     }
 
     #[Route('/entree/delete/{id}', name: 'entrer_delete')]
-    public function delete(Entree $entree, EntreeRepository $repository){
+    public function delete(Entree $entree, EntreeRepository $repository, EntityManagerInterface $manager){
         $repository->remove($entree,true);
+        $p = $manager->getRepository(Produit::class)->find($entree->getProduit()->getId());
+        if ($entree->getAction() == 'detail') {
+            $quantite = floatval($entree->getQtEntree());
+            $nombre = $p->getNombre();
+            $vendus = $p->getNbreVendu();
+            if ($quantite >= $nombre) {
+                $boxe = $quantite / $nombre;
+                $vendus = $boxe;
+                $dstock = $p->getQtStock() - $vendus;
+                $p->setQtStock($dstock);
+                $p->setNbreVendu($vendus);
+            }else{
+                $boxe = $quantite / $nombre;
+                $vendus = $boxe;
+                $dstock = $p->getQtStock() - $vendus;
+                $p->setQtStock($dstock);
+                $p->setNbreVendu($vendus);
+            }
+            $upd = $nombre * $p->getQtStock();
+            $p->setQtStockDetail($upd);
+
+            $upddd = $dstock * $p->getPrixUnit();
+            $p->setTotal($upddd);
+            $manager->flush();
+        } else {
+            $stock = $p->getQtStock() - $entree->getQtEntree();
+            $upd = $stock * $p->getPrixUnit();
+            $p->setQtStock($stock);
+            $p->setTotal($upd);
+
+            if ($p->getNombre() !== null){
+                $updQtDet = $p->getNombre() * $p->getQtStock();
+                $p->setQtStockDetail($updQtDet);
+            }
+
+            $manager->flush();
+        }
+
         $this->addFlash('success', 'Le produit entrée a été supprimé avec succès');
         return $this->redirectToRoute('entree_liste');
     }

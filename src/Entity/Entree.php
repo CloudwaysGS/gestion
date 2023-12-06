@@ -36,6 +36,12 @@ class Entree
     #[ORM\ManyToOne(inversedBy: 'Entree')]
     private ?Fournisseur $fournisseur = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $action = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $nomProduit = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -121,6 +127,30 @@ class Entree
     public function setFournisseur(?Fournisseur $fournisseur): self
     {
         $this->fournisseur = $fournisseur;
+
+        return $this;
+    }
+
+    public function getAction(): ?string
+    {
+        return $this->action;
+    }
+
+    public function setAction(?string $action): self
+    {
+        $this->action = $action;
+
+        return $this;
+    }
+
+    public function getNomProduit(): ?string
+    {
+        return $this->nomProduit;
+    }
+
+    public function setNomProduit(string $nomProduit): self
+    {
+        $this->nomProduit = $nomProduit;
 
         return $this;
     }

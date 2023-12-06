@@ -36,6 +36,12 @@ class Sortie
     #[ORM\ManyToOne(inversedBy: 'sorties')]
     private ?Client $client = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $action = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $NomProduit = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -121,6 +127,30 @@ class Sortie
     public function setClient(?Client $client): self
     {
         $this->client = $client;
+
+        return $this;
+    }
+
+    public function getAction(): ?string
+    {
+        return $this->action;
+    }
+
+    public function setAction(?string $action): self
+    {
+        $this->action = $action;
+
+        return $this;
+    }
+
+    public function getNomProduit(): ?string
+    {
+        return $this->NomProduit;
+    }
+
+    public function setNomProduit(?string $NomProduit): self
+    {
+        $this->NomProduit = $NomProduit;
 
         return $this;
     }

@@ -31,7 +31,7 @@
                             <th>Date</th>
                             <th>Actions</th>
                         </tr>
-                        {% for produit in produits %}
+                        {% for produit in pagination %}
                             <tr>
                                 <th>{{ produit.libelle }}</th>
                                 <th>{{ produit.qtStock }}</th>
@@ -40,30 +40,15 @@
                                 <th>{{ produit.releaseDate|date('d-m-Y') }}</th>
                                 <th class="text-center">
                                     {% if is_granted('ROLE_GESTION_STOCK') %}
-                                    <a title="Modifier" href="{{ path('produit_edit',{'id':produit.id}) }}"><i class="fa fa-edit"></i></a>
-                                    <a title="supprimer" href="{{ path('produit_delete', {'id':produit.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    <a title="Modifier" href="{{ path('produit_edit',{'id':produit.id}) }}" class="btn btn-primary btn-circle btn-sm"><i class="fas fa-edit"></i></a>
+                                    <a title="supprimer" href="{{ path('produit_delete', {'id':produit.id}) }}" class="btn btn-danger btn-circle btn-sm"><i class="fas fa-trash" aria-hidden="true" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"></i></a>
                                     {% endif %}
                                 </th>
                             </tr>
                         {% endfor %}
                     </table>
                 </div>
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-center">
-                        {% if total > limit %}
-                            {% set pages = (total / limit)|round(0, 'ceil') %}
-                            {% for i in 1..pages %}
-                                {% if i == page %}
-                                    <li class="page-item active" aria-current="page">
-                                        <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item"><a class="page-link" href="{{ path('produit_liste', {'page': i}) }}">{{ i }}</a></li>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                    </ul>
-                </nav>
+                {{ knp_pagination_render(pagination) }}
             </div>
      </div>
      </div>

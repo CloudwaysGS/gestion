@@ -36,7 +36,7 @@
         }
 
         .glow-on-hover {
-            width: 90px;
+            width: 110px;
             height: 30px;
             border: none;
             outline: none;
@@ -99,7 +99,7 @@
     </style>
 
     <div class="row">
-        <div class="container col-md-6">
+        <div class="container col-md-5">
             <div class="card">
                 <div class="card-body">
                     <select class="form-control mb-1" name="client" id="client">
@@ -133,7 +133,7 @@
                                             </td>
 
                                             <td>
-                                                <a title="Ajouter" href="javascript:void(0);" onclick="addToFacture('{{ path('rajout_facture', {'id': p.id}) }}', {{ p.id }}, 'addToFacture')">
+                                                <a class="btn btn-primary btn-circle btn-sm" title="Ajouter" href="javascript:void(0);" onclick="addToFacture('{{ path('rajout_facture', {'id': p.id}) }}', {{ p.id }}, 'addToFacture')">
                                                     <i class="fa fa-cart-plus" aria-hidden="true"></i>
                                                 </a>
 
@@ -182,7 +182,7 @@
                                                 </td>
 
                                                 <td>
-                                                    <a title="Ajouter" href="javascript:void(0);" onclick="addToFactureDetail('{{ path('rajout_facture', {'id': d.id}) }}', {{ d.id }}, 'addToFactureDetail')">
+                                                    <a class="btn btn-primary btn-circle btn-sm" title="Ajouter" href="javascript:void(0);" onclick="addToFactureDetail('{{ path('rajout_facture', {'id': d.id}) }}', {{ d.id }}, 'addToFactureDetail')">
                                                         <i class="fa fa-cart-plus" aria-hidden="true"></i>
                                                     </a>
                                                 </td>
@@ -200,7 +200,7 @@
                 </div>
             </div>
         </div>
-        <div class="container col-md-6">
+        <div class="container col-md-7">
             {% for message in app.session.flashBag.get('success') %}
                 <div id="flash-message" class="alert alert-success">{{ message }}</div>
             {% endfor %}
@@ -208,13 +208,13 @@
                 <div id="flash-message" class="alert alert-danger">{{ message }}</div>
             {% endfor %}
 
-            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture_delete_all') }}'">Enreg</button>
-            <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'"> Mes Facts</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture_delete_all') }}'">Enregistrer</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'"> Mes Factures</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">+Client</button>
             {% if is_granted("ROLE_GESTION_STOCK") %}
-                <button class="glow-on-hover" onclick="window.location.href='{{ path('produit_liste') }}'">+Prod</button>
+                <button class="glow-on-hover" onclick="window.location.href='{{ path('produit_liste') }}'">+Produits</button>
             {% endif %}
-            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">+Fact</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">+Facture</button>
 
             {% for message in app.session.flashBag.get('danger') %}
                 <div class="alert alert-danger">{{ message }}</div>
@@ -248,8 +248,8 @@
                                     </td>
                                     <td>{{ f.montant | number_format(0, ',', ' ') }}</td>
                                     <td>
-                                        <a title="Modifier" href="{{ path('modifier',{'id':f.id}) }}"><i class="fa fa-edit"></i></a>
-                                        <a title="supprimer" href="{{ path('facture_delete', {'id':f.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                        <a title="Modifier" href="{{ path('modifier',{'id':f.id}) }}" class="btn btn-primary btn-circle btn-sm"><i class="fa fa-edit"></i></a>
+                                        <a title="supprimer" href="{{ path('facture_delete', {'id':f.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');" class="btn btn-danger btn-circle btn-sm"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                     </td>
                                 </tr>
                                 {% set total = total + f.montant %}
@@ -257,7 +257,7 @@
                             <td>Total</td>
                             <td></td>
                             <td></td>
-                            <td>{{ total|number_format(0, ',', ' ') }} f </td>
+                            <td>{{ total|number_format(0, ',', ' ') }}  </td>
                             <td></td>
                         </table>
                     </div>
@@ -279,7 +279,7 @@
             if (flashMessage !== null) {
                 flashMessage.remove();
             }
-        }, 10000);
+        }, 3000);
     </script>
 
     <script>

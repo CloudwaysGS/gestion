@@ -32,8 +32,8 @@
                                     <th>{{ c.telephone }}</th>
                                     <th>{{ c.ville }}</th>
                                     <th>
-                                        <a title="Modifier" href="{{ path('edit_client',{'id':c.id}) }}"><i class="fa fa-edit"></i></a>
-                                        <a title="supprimer" href="{{ path('client_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                        <a class="btn btn-primary btn-circle btn-sm" title="Modifier" href="{{ path('edit_client',{'id':c.id}) }}"><i class="fa fa-edit"></i></a>
+                                        <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="{{ path('client_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                     </th>
                                 </tr>
                             {% endfor %}

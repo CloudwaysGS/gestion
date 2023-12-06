@@ -53,6 +53,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $telephone = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $Active = null;
+
     public function __construct()
     {
         $this->roles = new ArrayCollection();
@@ -285,6 +288,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTelephone(string $telephone): self
     {
         $this->telephone = $telephone;
+
+        return $this;
+    }
+
+    public function getActive(): ?string
+    {
+        return $this->Active;
+    }
+
+    public function setActive(?string $Active): self
+    {
+        $this->Active = $Active;
 
         return $this;
     }

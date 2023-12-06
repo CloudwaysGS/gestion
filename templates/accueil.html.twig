@@ -912,6 +912,19 @@
             }
         }, 10000);
     </script>
+
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        // Attendre que le document soit prêt
+        $(document).ready(function () {
+            // Supprimer la classe 'sidebar-toggled' du corps
+            $('body').removeClass('sidebar-toggled');
+
+            // Si vous souhaitez également cacher le menu latéral, vous pouvez utiliser le code suivant :
+            // $('#accordionSidebar').removeClass('toggled');
+        });
+    </script>
+
 {% endblock %}
 
 {{ include('@MercurySeriesFlashy/flashy.html.twig') }}
