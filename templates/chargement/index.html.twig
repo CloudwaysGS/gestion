@@ -39,9 +39,10 @@
                                     <a class="popup-link" title="facture détaillée" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
 
                                     <a title="extraire en pdf" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
-                                    <a title="user" href="#" data-toggle="modal" data-target="#myModal" data-chargement-id="{{ c.id }}">
+                                    <a title="user" href="#" data-toggle="modal" data-target="#userModal" data-user-id="{{ c.id }}">
                                         <i class="fa fa-user" aria-hidden="true"></i>
                                     </a>
+
                                     {% if is_granted('ROLE_GESTION_STOCK') %}
                                     <a title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette facture ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
                                     {% endif %}
@@ -74,29 +75,26 @@
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
+                <div class="modal-body" style="max-height: 600px; overflow-y: auto;">
+                    <!-- ... extraire.html.twig ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ... autres éléments du template ... -->
+
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-ms">
+            <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Détails de la facture</h4>
+                    <h5 class="modal-title" id="userModalLabel">User</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <table class="table table-striped table-hover text-center">
-                        <tr>
-                            <th>Quantité achetée</th>
-                            <th>Produit</th>
-                            <th>PrixUnit</th>
-                            <th>Montant</th>
-                        </tr>
-                        {% for item in f %}
-                            <tr>
-                                <td>{{ item.quantite }}</td>
-                                <td>{{ item.nomProduit }}</td>
-                                <td>{{ item.prixUnit|number_format(0, ',', ' ') }}</td>
-                                <td>{{ item.montant|number_format(0, ',', ' ') }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
+                <div class="user-modal-body"> <!-- Changez le nom de la classe -->
+                    <!-- Contenu de l'utilisateur sera affiché ici -->
                 </div>
             </div>
         </div>
@@ -116,6 +114,29 @@
     </script>
 
     <script>
+        $(document).ready(function() {
+            $('a[data-toggle="modal"][data-target="#userModal"]').click(function(e) {  // Ajoutez le sélecteur du modal au lien
+                e.preventDefault();
+
+                var userId = $(this).data('user-id');
+
+                axios.get('/chargement/user/' + userId)
+                    .then(function(response) {
+                        var user = response.data.user;
+
+                        // Afficher les données dans la fenêtre modale
+                        $('#userModal .user-modal-body').text(user);
+                        $('#userModal').modal('show');
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                    });
+            });
+        });
+
+    </script>
+
+    <script>
         function openPopup(url) {
             // Effectuer une requête AJAX pour récupérer le contenu de la table
             fetch(url)
@@ -124,34 +145,12 @@
                     // Injecter le contenu dans le modal Bootstrap
                     const modalBody = document.getElementById('myModal').querySelector('.modal-body');
                     modalBody.innerHTML = data.table;
+
                     // Afficher le modal
                     $('#myModal').modal('show');
                 })
                 .catch(error => console.error('Error:', error));
         }
-
-    </script>
-
-
-    <script>
-        $(document).ready(function() {
-            $('a[data-toggle="modal"]').click(function(e) {
-                e.preventDefault();
-
-                var chargementId = $(this).data('chargement-id');
-
-                axios.get('/chargement/user/' + chargementId)
-                    .then(function(response) {
-                        var user = response.data.user;
-                        // Afficher les données dans la fenêtre modale
-                        $('#myModal .modal-body').text(user);
-                        $('#myModal').modal('show');
-                    })
-                    .catch(function(error) {
-                        console.error(error);
-                    });
-            });
-        });
 
     </script>
 
