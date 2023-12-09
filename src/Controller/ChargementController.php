@@ -81,9 +81,8 @@ class ChargementController extends AbstractController
             $firstFacture = reset($f);
             $client = ($lastFacture !== false) ? $lastFacture->getClient() ?? $firstFacture->getClient() : null;
         }
-        return $this->render('chargement/extraire.html.twig', [
-            'controller_name' => 'ChargementController',
-            'f' => $f
+        return new JsonResponse([
+            'table' => $this->renderView('chargement/extraire.html.twig', ['f' => $f]),
         ]);
     }
 

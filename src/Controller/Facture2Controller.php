@@ -188,9 +188,6 @@ class Facture2Controller extends AbstractController
             $chargement->setDate($date);
             $total = 0;
 
-            $derniereFacture = array_slice($factures, 0, 1);
-            $derniereFacture[0]->setConnect("no_connect");
-
             foreach ($factures as $facture) {
                 $total = $facture->getTotal();
                 $facture->setEtat(0);

@@ -36,7 +36,8 @@
                                 <th>{{ c.total }}</th>
                                 <th>{{ c.date | date('d/m/Y H:i:s') }}</th>
                                 <th>
-                                    <a title="facture détaillée" href="{{ path('extraire', {'id':c.id}) }}"><i class="fa fa-download"></i></a>
+                                    <a class="popup-link" title="facture détaillée" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
+
                                     <a title="extraire en pdf" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
                                     <a title="user" href="#" data-toggle="modal" data-target="#myModal" data-chargement-id="{{ c.id }}">
                                         <i class="fa fa-user" aria-hidden="true"></i>
@@ -69,26 +70,38 @@
         </div>
     </div>
 
-    <!-- ... autres éléments du template ... -->
 
-    <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="myModalLabel">Détails de l'utilisateur</h5>
+                    <h4 class="modal-title" id="myModalLabel">Détails de la facture</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <!-- Contenu de l'utilisateur sera affiché ici -->
+                    <table class="table table-striped table-hover text-center">
+                        <tr>
+                            <th>Quantité achetée</th>
+                            <th>Produit</th>
+                            <th>PrixUnit</th>
+                            <th>Montant</th>
+                        </tr>
+                        {% for item in f %}
+                            <tr>
+                                <td>{{ item.quantite }}</td>
+                                <td>{{ item.nomProduit }}</td>
+                                <td>{{ item.prixUnit|number_format(0, ',', ' ') }}</td>
+                                <td>{{ item.montant|number_format(0, ',', ' ') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ... autres éléments du template ... -->
 
 {% endblock %}
 {% block javascripts %}
@@ -103,6 +116,24 @@
     </script>
 
     <script>
+        function openPopup(url) {
+            // Effectuer une requête AJAX pour récupérer le contenu de la table
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Injecter le contenu dans le modal Bootstrap
+                    const modalBody = document.getElementById('myModal').querySelector('.modal-body');
+                    modalBody.innerHTML = data.table;
+                    // Afficher le modal
+                    $('#myModal').modal('show');
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+    </script>
+
+
+    <script>
         $(document).ready(function() {
             $('a[data-toggle="modal"]').click(function(e) {
                 e.preventDefault();
@@ -112,7 +143,6 @@
                 axios.get('/chargement/user/' + chargementId)
                     .then(function(response) {
                         var user = response.data.user;
-
                         // Afficher les données dans la fenêtre modale
                         $('#myModal .modal-body').text(user);
                         $('#myModal').modal('show');
@@ -124,4 +154,5 @@
         });
 
     </script>
+
 {% endblock %}
