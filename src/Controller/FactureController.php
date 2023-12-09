@@ -22,6 +22,7 @@ use Symfony\Component\Security\Core\Security;
 
 class FactureController extends AbstractController
 {
+
     private $enregistrerClicked = false;
     #[Route('/facture', name: 'facture_liste')]
     public function index(
@@ -116,11 +117,10 @@ class FactureController extends AbstractController
         return $this->redirectToRoute('facture_liste');
     }
 
-    #[Route('/facture/delete_all', name: 'facture_delete_all')]
-    public function deleteAll(EntityManagerInterface $entityManager)
+    #[Route('/facture/save/all', name: 'save')]
+    public function delete_all(EntityManagerInterface $entityManager)
     {
 
-        if (!$this->enregistrerClicked) {
             $repository = $entityManager->getRepository(Facture::class);
             $factures = $repository->findBy(['etat' => 1], ['date' => 'DESC']);
 
@@ -128,17 +128,16 @@ class FactureController extends AbstractController
             $adresse = null;
             $telephone = null;
             if (!empty($factures)) {
-                $lastFacture = end($factures);
-                $firstFacture = reset($factures);
-                $client = ($firstFacture !== false) ? $firstFacture->getClient() ?? $lastFacture->getClient() : null;
-                if ($factures[0]->getClient() !== null) {
-                    $adresse = $factures[0]->getClient()->getAdresse();
-                    $telephone = $factures[0]->getClient()->getTelephone();
+                $firstFacture= end($factures);
+                if ($firstFacture->getClient() !== null) {
+                    $nom = $firstFacture->getNomClient();
+                    $adresse = $firstFacture->getClient()->getAdresse();
+                    $telephone = $firstFacture->getClient()->getTelephone();
                 }
             }
             // Save invoices to the Chargement table
             $chargement = new Chargement();
-            $chargement->setNomClient($client);
+            $chargement->setNomClient($nom);
             $chargement->setAdresse($adresse);
             $chargement->setTelephone($telephone);
             $chargement->setNombre(count($factures));
@@ -148,9 +147,6 @@ class FactureController extends AbstractController
             $date = new \DateTime();
             $chargement->setDate($date);
             $total = 0;
-
-            $derniereFacture = array_slice($factures, 0, 1);
-            $derniereFacture[0]->setConnect("no_connect");
 
             foreach ($factures as $facture) {
                 $total = $facture->getTotal();
@@ -165,7 +161,7 @@ class FactureController extends AbstractController
             $entityManager->persist($chargement);
             $entityManager->flush();
             return $this->redirectToRoute('facture_liste');
-        }
+
     }
 
     private $factureService;
