@@ -175,24 +175,17 @@ class FactureController extends AbstractController
     #[Route('/facture/rajout/{id}', name: 'rajout_facture')]
     public function add($id, EntityManagerInterface $entityManager, Request $request, Security $security): RedirectResponse
     {
-        $user = $security->getUser();
-        if (!$user) {
-            $this->addFlash('warning', 'Vous devez être connecté pour ajouter une facture.');
-            return $this->redirectToRoute('app_login');
-        }
+
         $quantityDetail = null;
         $clientIdDetail = null;
         $actionType = $request->query->get('actionType', 'addToFacture');
-
         if ($actionType == 'addToFactureDetail'){
             $quantityDetail = $request->query->get('quantityDetail', 1);
             $clientIdDetail = $request->query->get('clientIdDetail');
         }
-
         $quantity = $request->query->get('quantity', 1);
         $clientId = $request->query->get('clientId');
         $user = $this->getUser();
-
         try {
             $facture = $this->factureService->createFacture($id, $quantity, $clientId, $user, $actionType, $quantityDetail, $clientIdDetail );
             $total = $this->factureService->updateTotalForFactures();
@@ -238,13 +231,12 @@ class FactureController extends AbstractController
         }
         $searchTerm = $request->query->get('term');
         $produits = $prod->findByNameDetail($searchTerm);
-
         $data = [];
         foreach ($produits as $produit) {
             $data[] = [
                 'id' => $produit->getId(),
                 'nomProduitDetail' => $produit->getNomProduitDetail(),
-                'path' => $this->generateUrl('rajout_facture', ['id' => $produit->getId()]),
+                'path' => $this->generateUrl('facture2_add', ['id' => $produit->getId()]),
             ];
         }
 

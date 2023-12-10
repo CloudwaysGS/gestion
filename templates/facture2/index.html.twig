@@ -342,7 +342,7 @@
             window.location.href = path + '?clientId=' + clientId + '&quantity=' + quantity;
         }
 
-        function addToFactureDetail(path, productId, actionType) {
+        function addToFactureDetail(path, productId, actionType = 'addToFactureDetail') {
             var clientId = document.getElementById('client').value;
             var quantity = document.getElementById('quantityDetail_' + productId).value;
             // Set the values in the hidden fields

@@ -155,12 +155,13 @@
                         <div class="card-header">Vente en détail de produits</div>
                         <div class="card-body">
                             <div class="table-responsive" id="table-responsive" onmouseover="changeHeightDetails('20rem')" onmouseout="changeHeightDetails('20rem')" style="height: 20rem;">
+
                                 <form name="searchDetail" method="post" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                                     <div class="input-group">
                                         <input type="text" id="search_nomDetail" name="search[nomDetail]" class="form-control bg-light border-0 small" placeholder="Search for detail"
                                                aria-label="Search" aria-describedby="basic-addon2">
                                         <div class="input-group-append">
-                                            <button class="btn btn-primary" type="submit">
+                                            <button class="btn btn-primary" type="button" >
                                                 <i class="fas fa-search fa-sm"></i>
                                             </button>
                                         </div>
@@ -323,6 +324,7 @@
                     </a>
                 </td>
             `;
+
                 tableBodyDetail.appendChild(row);
             });
         }
@@ -332,7 +334,6 @@
         function addToFacture(path, productId) {
             var clientId = document.getElementById('client').value;
             var quantity = document.getElementById('quantity_' + productId).value;
-
             // Set the values in the hidden fields
             document.getElementById('selectedClientId').value = clientId;
             document.getElementById('selectedProductId').value = productId;
@@ -342,13 +343,14 @@
             window.location.href = path + '?clientId=' + clientId + '&quantity=' + quantity;
         }
 
-        function addToFactureDetail(path, productId, actionType) {
+        function addToFactureDetail(path, productId, actionType = 'addToFactureDetail') {
             var clientId = document.getElementById('client').value;
             var quantity = document.getElementById('quantityDetail_' + productId).value;
             // Set the values in the hidden fields
             document.getElementById('selectedClientIdDetail').value = clientId;
             document.getElementById('selectedProductIdDetail').value = productId;
             document.getElementById('selectedQuantityDetail').value = quantity;
+            console.log(actionType)
             // Redirect to the controller action
             window.location.href = path + '?clientIdDetail=' + clientId + '&quantityDetail=' + quantity + '&actionType=' + actionType;
         }
@@ -367,8 +369,6 @@
         });
 
         function performSearch(searchTerm) {
-            // You can use AJAX to send the search term to the server and update the results.
-            // Example using Fetch API:
 
             fetch(`/search?term=${searchTerm}`, {
                 method: 'GET',
@@ -378,7 +378,6 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Update the table or any other part of the page with the new search results.
                     updateResultsTable(data);
                 })
                 .catch(error => console.error('Error:', error));
@@ -387,7 +386,6 @@
         function updateResultsTable(data) {
             // Update your table with the new search results.
             // You may need to modify this part based on your specific table structure.
-
             const tableBody = document.querySelector('.table tbody');
             tableBody.innerHTML = '';
 

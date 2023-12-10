@@ -15,6 +15,7 @@ use App\Service\Facture2Service;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -115,7 +116,7 @@ class Facture2Controller extends AbstractController
             // Enregistrez les modifications
             $entityManager->flush();
 
-            return $this->redirectToRoute('facture_liste');
+            return $this->redirectToRoute('facture2_liste');
         }
 
         // Récupérer la liste des produits pour afficher dans le formulaire
@@ -150,10 +151,10 @@ class Facture2Controller extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', 'La facture a été supprimée avec succès.');
-            return $this->redirectToRoute('facture_liste');
+            return $this->redirectToRoute('facture2_liste');
         }
         $this->addFlash('error', 'Erreur lors de la suppression de la facture.');
-        return $this->redirectToRoute('facture_liste');
+        return $this->redirectToRoute('facture2_liste');
     }
 
     #[Route('/facture/delete_all', name: 'facture2_delete_all')]
@@ -182,7 +183,7 @@ class Facture2Controller extends AbstractController
             $chargement->setTelephone($telephone);
             $chargement->setNombre(count($factures));
             if ($chargement->getNombre() == 0) {
-                return $this->redirectToRoute('facture_liste');
+                return $this->redirectToRoute('facture2_liste');
             }
             $date = new \DateTime();
             $chargement->setDate($date);
