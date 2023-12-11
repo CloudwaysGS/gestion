@@ -230,8 +230,8 @@ class EntreeController extends AbstractController
             $manager->flush();
         } else {
             $stock = $p->getQtStock() - $entree->getQtEntree();
-            $upd = $stock * $p->getPrixUnit();
             $p->setQtStock($stock);
+            $upd = $stock * $p->getPrixUnit();
             $p->setTotal($upd);
 
             if ($p->getNombre() !== null){

@@ -94,23 +94,51 @@ class FactureController extends AbstractController
         $produit = $facture->getProduit()->first();
             if ($produit){
                 $p = $entityManager->getRepository(Produit::class)->find($produit);
-                $vendu = $p->getNbreVendu();
+
+                $vendus = $p->getNbreVendu();
                 $nombre = $facture->getNombre();
 
-                if ($vendu !== null){
-                    $repository->remove($facture); // Mise à jour de l'état de la facture
-                    $p->setQtStock($p->getQtStock() + $vendu);
-                    $upd = $nombre * $facture->getQuantite();
-                    $produit->setQtStockDetail($produit->getQtStockDetail() + $upd);
-                } else {
-                    $quantite = $facture->getQuantite();
-                    $repository->remove($facture); // Mise à jour de l'état de la facture
-                    $p->setQtStock($p->getQtStock() + $quantite);
-                }
+                if ($facture->getNomProduit() == $p->getNomProduitDetail()){
+                    $repository->remove($facture);
+                    $quantite = floatval($facture->getQuantite());
+                    if ($quantite >= $nombre) {
+                        $boxe = $quantite / $nombre;
+                        $vendus = $boxe;
+                        $dstock = $p->getQtStock() + $vendus;
+                        $p->setQtStock($dstock);
+                        $p->setNbreVendu($vendus);
+                    }else{
+                        $boxe = $quantite / $nombre;
+                        $vendus = $boxe;
+                        $dstock = $p->getQtStock() + $vendus;
+                        $p->setQtStock($dstock);
+                        $p->setNbreVendu($vendus);
+                    }
 
-                $entityManager->flush();
+                    //Mise à jour du quantité Stock détail de la produit
+                    $upd = $p->getNombre() * $p->getQtStock();
+                    $p->setQtStockDetail($upd);
 
-                $this->addFlash('success', 'La facture a été supprimée avec succès.');
+                    //Mise à jour du total
+                    $upddd = $p->getQtStock() * $p->getPrixUnit();
+                    $p->setTotal($upddd);
+
+                    $this->addFlash('success', $produit->getNomProduitDetail().' a ete supprimée avec succès.');
+                    $entityManager->flush();
+                } else
+                    {
+
+                        $repository->remove($facture); // Mise à jour de l'état de la facture
+
+                        //Mise à jour quantité stock produit et total produit
+                        $quantite = $facture->getQuantite();
+                        $p->setQtStock($p->getQtStock() + $quantite);
+                        $updProd = $p->getQtStock() * $p->getPrixUnit();
+                        $p->setTotal($updProd);
+                        $this->addFlash('success', $produit->getLibelle().' a ete supprimée avec succès.');
+                        $entityManager->flush();
+                    }
+
                 return $this->redirectToRoute('facture_liste');
             }
         $this->addFlash('error', 'Erreur lors de la suppression de la facture.');

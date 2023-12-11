@@ -137,20 +137,44 @@ class Facture2Controller extends AbstractController
             $vendu = $p->getNbreVendu();
             $nombre = $facture->getNombre();
 
-            if ($vendu !== null){
-                $repository->remove($facture); // Mise à jour de l'état de la facture
-                $p->setQtStock($p->getQtStock() + $vendu);
-                $upd = $nombre * $facture->getQuantite();
-                $produit->setQtStockDetail($produit->getQtStockDetail() + $upd);
+            if ($facture->getNomProduit() == $p->getNomProduitDetail()){
+                $repository->remove($facture);
+                $quantite = floatval($facture->getQuantite());
+                if ($quantite >= $nombre) {
+                    $boxe = $quantite / $nombre;
+                    $vendus = $boxe;
+                    $dstock = $p->getQtStock() + $vendus;
+                    $p->setQtStock($dstock);
+                    $p->setNbreVendu($vendus);
+                }else{
+                    $boxe = $quantite / $nombre;
+                    $vendus = $boxe;
+                    $dstock = $p->getQtStock() + $vendus;
+                    $p->setQtStock($dstock);
+                    $p->setNbreVendu($vendus);
+                }
+                //Mise à jour du quantité Stock détail de la produit
+                $upd = $p->getNombre() * $p->getQtStock();
+                $p->setQtStockDetail($upd);
+
+                //Mise à jour du total
+                $upddd = $p->getQtStock() * $p->getPrixUnit();
+                $p->setTotal($upddd);
+
+                $this->addFlash('success', $produit->getNomProduitDetail().' a ete supprimée avec succès.');
             } else {
-                $quantite = $facture->getQuantite();
                 $repository->remove($facture); // Mise à jour de l'état de la facture
+
+                //Mise à jour quantité stock produit et total produit
+                $quantite = $facture->getQuantite();
                 $p->setQtStock($p->getQtStock() + $quantite);
+                $updProd = $p->getQtStock() * $p->getPrixUnit();
+                $p->setTotal($updProd);
+                $this->addFlash('success', $produit->getLibelle().' a ete supprimée avec succès.');
             }
 
             $entityManager->flush();
 
-            $this->addFlash('success', 'La facture a été supprimée avec succès.');
             return $this->redirectToRoute('facture2_liste');
         }
         $this->addFlash('error', 'Erreur lors de la suppression de la facture.');
@@ -168,17 +192,16 @@ class Facture2Controller extends AbstractController
             $adresse = null;
             $telephone = null;
             if (!empty($factures)) {
-                $lastFacture = end($factures);
-                $firstFacture = reset($factures);
-                $client = ($firstFacture !== false) ? $firstFacture->getClient() ?? $lastFacture->getClient() : null;
-                if ($factures[0]->getClient() !== null) {
-                    $adresse = $factures[0]->getClient()->getAdresse();
-                    $telephone = $factures[0]->getClient()->getTelephone();
+                $firstFacture= end($factures);
+                if ($firstFacture->getClient() !== null) {
+                    $nom = $firstFacture->getClient()->getNom();
+                    $adresse = $firstFacture->getClient()->getAdresse();
+                    $telephone = $firstFacture->getClient()->getTelephone();
                 }
             }
             // Save invoices to the Chargement table
             $chargement = new Chargement();
-            $chargement->setNomClient($client);
+            $chargement->setNomClient($nom);
             $chargement->setAdresse($adresse);
             $chargement->setTelephone($telephone);
             $chargement->setNombre(count($factures));
@@ -201,7 +224,7 @@ class Facture2Controller extends AbstractController
             $chargement->setTotal($total);
             $entityManager->persist($chargement);
             $entityManager->flush();
-            return $this->redirectToRoute('facture_liste');
+            return $this->redirectToRoute('facture2_liste');
         }
     }
 

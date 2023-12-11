@@ -89,8 +89,11 @@ class Facture2Service
                     $p->setQtStock($dstock);
                     $p->setNbreVendu($vendus);
                 }
-                $upd = $nombre * $facture->getQuantite();
-                $produit->setQtStockDetail($produit->getQtStockDetail() - $upd);
+
+                $upd = $p->getQtStockDetail() - $facture->getQuantite();
+                $p->setQtStockDetail($upd);
+                $upddd = $p->getQtStock() * $p->getPrixUnit();
+                $p->setTotal($upddd);
             }
 
             $this->entityManager->flush();
@@ -131,11 +134,16 @@ class Facture2Service
         }
         $this->entityManager->persist($facture);
         $this->entityManager->flush();
-        //Mise à jour quantité produit
+
+        //Mise à jour quantité produit et total produit
         $dstock = $p->getQtStock() - $facture->getQuantite();
         $p->setQtStock($dstock);
+        $upddd = $p->getQtStock() * $p->getPrixUnit();
+        $p->setTotal($upddd);
         $this->entityManager->persist($p);
         $this->entityManager->flush();
+
+        return $facture;
 
         return $facture;
     }

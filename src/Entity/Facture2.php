@@ -47,7 +47,7 @@ class Facture2
     private ?string $etat = "1";
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $nomClent = null;
+    private ?string $nomClient = null;
 
     #[ORM\Column(length: 255)]
     private ?string $nomProduit = null;
@@ -64,7 +64,6 @@ class Facture2
     public function __construct()
     {
         $this->produit = new ArrayCollection();
-        $this->details = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -216,17 +215,6 @@ class Facture2
         return $this;
     }
 
-    public function getNomClent(): ?string
-    {
-        return $this->nomClent;
-    }
-
-    public function setNomClent(?string $nomClent): self
-    {
-        $this->nomClent = $nomClent;
-
-        return $this;
-    }
 
     public function getNomProduit(): ?string
     {

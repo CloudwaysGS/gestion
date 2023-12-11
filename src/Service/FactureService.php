@@ -82,19 +82,22 @@ class FactureService
                 $vendus = $facture->getNombreVendus();
                 if ($quantite >= $nombre) {
                     $boxe = $quantite / $nombre;
-                    $vendus += $boxe;
+                    $vendus = $boxe;
                     $dstock = $p->getQtStock() - $vendus;
                     $p->setQtStock($dstock);
                     $p->setNbreVendu($vendus);
                 }else{
                     $boxe = $quantite / $nombre;
-                    $vendus += $boxe;
+                    $vendus = $boxe;
                     $dstock = $p->getQtStock() - $vendus;
                     $p->setQtStock($dstock);
                     $p->setNbreVendu($vendus);
                 }
-                $upd = $nombre * $facture->getQuantite();
-                $produit->setQtStockDetail($produit->getQtStockDetail() - $upd);
+
+                $upd = $produit->getQtStockDetail() - $facture->getQuantite();
+                $produit->setQtStockDetail($upd);
+                $upddd = $produit->getQtStock() * $produit->getPrixUnit();
+                $p->setTotal($upddd);
             }
 
             $this->entityManager->flush();
@@ -135,9 +138,12 @@ class FactureService
         }
         $this->entityManager->persist($facture);
         $this->entityManager->flush();
-        //Mise à jour quantité produit
+
+        //Mise à jour quantité produit et total produit
         $dstock = $p->getQtStock() - $facture->getQuantite();
         $p->setQtStock($dstock);
+        $upddd = $p->getQtStock() * $p->getPrixUnit();
+        $p->setTotal($upddd);
         $this->entityManager->persist($p);
         $this->entityManager->flush();
 
