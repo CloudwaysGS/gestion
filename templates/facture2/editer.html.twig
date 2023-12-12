@@ -24,23 +24,24 @@
 </head>
 {% block body %}
 
-            <form method="post" action="{{ path('modifier', {'id': facture.id}) }}">
-                <label for="quantite">Quantité du produit </label>
-                <input class="form-control" type="number" id="quantite" name="quantite" value="{{ facture.quantite }}" min="1">
+    <form method="post" action="{{ path('modifier2', {'id': facture.id}) }}">
 
-                <label for="quantite">Prix unitaire du produit</label>
-                <input class="form-control" type="number" id="prixUnit" name="prixUnit" value="{{ facture.prixUnit }}" >
+        <label for="quantite">Quantité du produit </label>
+        <input class="form-control" type="number" id="quantite" name="quantite" value="{{ facture.quantite }}" min="1">
 
-                <label for="produit">Nom du produit </label>
-                <select class="form-control mb-1" name="produit" id="produit">
-                    {% for p in facture.produit %}
-                        <option value="{{ p.id }}">{{ p.libelle }}</option>
-                    {% endfor %}
-                </select>
-                <div class="text-center">
-                    <button class="btn btn-primary btn-circle" href="#" type="submit"><i class="fas fa-check"></i></button>
-                </div>
-            </form>
+        <label for="quantite">Prix unitaire du produit</label>
+        <input class="form-control" type="number" id="prixUnit" name="prixUnit" value="{{ facture.prixUnit }}" >
+
+        <label for="produit">Nom du produit </label>
+        <select class="form-control mb-1" name="produit" id="produit">
+            {% for p in facture.produit %}
+                <option value="{{ p.id }}">{{ p.libelle }}</option>
+            {% endfor %}
+        </select>
+        <div class="text-center">
+            <button class="btn btn-primary btn-circle" href="#" type="submit"><i class="fas fa-check"></i></button>
+        </div>
+    </form>
 
 {% endblock %}
 

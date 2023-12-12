@@ -101,16 +101,78 @@ class Facture2Controller extends AbstractController
 
         if ($request->isMethod('POST')) {
             // Récupérer les données modifiées depuis la requête
-            $quantite = $request->request->get('quantite');
+            $quantiteInitiale = $facture->getQuantite(); // Ancienne quantité
+            $quantiteNouvelle = $request->request->get('quantite');
+            // Calculer la différence de quantité
+            $differenceQuantite = $quantiteNouvelle - $quantiteInitiale;
+
             $prixUnit = $request->request->get('prixUnit');
             $produitId = $request->request->get('produit');
 
             $produit = $entityManager->getRepository(Produit::class)->find($produitId);
+
+            if ($facture->getNomProduit() == $produit->getNomProduitDetail()){
+                dd("ok");
+                // Mettre à jour la facture avec les nouvelles données
+                $facture->setQuantite($quantiteNouvelle);
+                $facture->setNomProduit($produit);
+                $facture->setPrixUnit($prixUnit);
+                $facture->setMontant($quantiteNouvelle * $prixUnit);
+
+
+                // Mettre à jour la quantité en stock du produit
+                $quantiteStockActuelle = $produit->getQtStock();
+
+                if ($differenceQuantite > 0) {
+                    // Nouvelle quantité est supérieure à l'ancienne
+                    $nouvelleQuantiteStock = $quantiteStockActuelle - $differenceQuantite;
+                } elseif ($differenceQuantite < 0) {
+                    // Nouvelle quantité est inférieure à l'ancienne
+                    $nouvelleQuantiteStock = $quantiteStockActuelle + abs($differenceQuantite);
+                } elseif ($differenceQuantite == 0) {
+                    // Nouvelle quantité est égale à l'ancienne
+                    return $this->redirectToRoute('facture2_liste');
+                }
+
+                // Assurez-vous que la quantité en stock ne devient pas négative
+                $produit->setQtStock(max(0, $nouvelleQuantiteStock));
+                $produit->setTotal($produit->getQtStock()* $produit->getPrixUnit());
+
+                $total = $this->factureService->updateTotalForFactures();
+                $facture->setTotal($total);
+                // Enregistrez les modifications
+                $entityManager->flush();
+
+                return $this->redirectToRoute('facture2_liste');
+            }
+
             // Mettre à jour la facture avec les nouvelles données
-            $facture->setQuantite($quantite);
+            $facture->setQuantite($quantiteNouvelle);
             $facture->setNomProduit($produit);
             $facture->setPrixUnit($prixUnit);
-            $facture->setMontant($quantite * $prixUnit);
+            $facture->setMontant($quantiteNouvelle * $prixUnit);
+
+
+            // Mettre à jour la quantité en stock du produit
+            $quantiteStockActuelle = $produit->getQtStock();
+
+            if ($differenceQuantite > 0) {
+                // Nouvelle quantité est supérieure à l'ancienne
+                $nouvelleQuantiteStock = $quantiteStockActuelle - $differenceQuantite;
+            } elseif ($differenceQuantite < 0) {
+                // Nouvelle quantité est inférieure à l'ancienne
+                $nouvelleQuantiteStock = $quantiteStockActuelle + abs($differenceQuantite);
+            } elseif ($differenceQuantite == 0) {
+                // Nouvelle quantité est égale à l'ancienne
+                return $this->redirectToRoute('facture2_liste');
+            }
+
+            // Assurez-vous que la quantité en stock ne devient pas négative
+            $produit->setQtStock(max(0, $nouvelleQuantiteStock));
+            $produit->setTotal($produit->getQtStock()* $produit->getPrixUnit());
+            if ($produit->getNombre() != null){
+                $produit->setQtStockDetail($produit->getNombre() * $produit->getQtStock());
+            }
             $total = $this->factureService->updateTotalForFactures();
             $facture->setTotal($total);
             // Enregistrez les modifications
@@ -122,7 +184,7 @@ class Facture2Controller extends AbstractController
         // Récupérer la liste des produits pour afficher dans le formulaire
         $produits = $entityManager->getRepository(Produit::class)->findAll();
 
-        return $this->render('facture/editer.html.twig', [
+        return $this->render('facture2/editer.html.twig', [
             'facture' => $facture,
             'produits' => $produits,
         ]);

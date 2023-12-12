@@ -5,7 +5,11 @@
 {% block body %}
     <style>
 
-        input[type=number]::-webkit-inner-spin-button,
+        .custom-modal .modal-dialog {
+            max-width: 30%; /* Ajustez la valeur selon vos besoins */
+        }
+
+    input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button{
             -webkit-appearance: none;
             margin: 0;
@@ -215,7 +219,7 @@
             {% if is_granted("ROLE_GESTION_STOCK") %}
                 <button class="glow-on-hover" onclick="window.location.href='{{ path('produit_liste') }}'">+Produits</button>
             {% endif %}
-            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">+Facture</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">Facture 2</button>
 
             {% for message in app.session.flashBag.get('danger') %}
                 <div class="alert alert-danger">{{ message }}</div>
@@ -249,7 +253,7 @@
                                     </td>
                                     <td>{{ f.montant | number_format(0, ',', ' ') }}</td>
                                     <td>
-                                        <a title="Modifier" href="{{ path('modifier',{'id':f.id}) }}" class="btn btn-primary btn-circle btn-sm"><i class="fa fa-edit"></i></a>
+                                        <a class="popup-link btn btn-primary btn-circle btn-sm" title="Modifier" href="javascript:void(0);" onclick="openPopup('{{ path('modifier', {'id': f.id}) }}')"><i class="fa fa-edit"></i></a>
                                         <a title="supprimer" href="{{ path('facture_delete', {'id':f.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');" class="btn btn-danger btn-circle btn-sm"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                     </td>
                                 </tr>
@@ -267,6 +271,23 @@
 
     </div>
     </div>
+
+    <div class="modal fade custom-modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Modification</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- ... facture/editer.html.twig ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 {% endblock %}
 
@@ -418,5 +439,27 @@
         function changeHeightDetails(height) {
             document.querySelector('#table-responsive').style.height = height;
         }
+    </script>
+
+    <script>
+        function openPopup(url) {
+            // Effectuer une requête AJAX pour récupérer le contenu du formulaire
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data)
+                    // Injecter le contenu dans le modal Bootstrap
+                    const modalBody = document.getElementById('myModal').querySelector('.modal-body');
+                    modalBody.innerHTML = data;
+
+                    // Afficher le modal
+                    $('#myModal').modal('show');
+
+                    // Initialize your form (if needed, e.g., for date pickers)
+                    // Example: $(document).find('form').initPlugin();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
     </script>
 {% endblock %}
