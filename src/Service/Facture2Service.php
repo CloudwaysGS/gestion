@@ -139,6 +139,9 @@ class Facture2Service
         $dstock = $p->getQtStock() - $facture->getQuantite();
         $p->setQtStock($dstock);
         $upddd = $p->getQtStock() * $p->getPrixUnit();
+        if ($p->getNombre() != null){
+            $p->setQtStockDetail($p->getNombre() * $p->getQtStock());
+        }
         $p->setTotal($upddd);
         $this->entityManager->persist($p);
         $this->entityManager->flush();

@@ -200,7 +200,9 @@ class FactureController extends AbstractController
                         $quantite = $facture->getQuantite();
                         $p->setQtStock($p->getQtStock() + $quantite);
                         $updProd = $p->getQtStock() * $p->getPrixUnit();
-                        $p->setTotal($updProd);
+                        if ($p->getNombre() != null){
+                            $p->setQtStockDetail($p->getNombre() * $p->getQtStock());
+                        }                        $p->setTotal($updProd);
                         $this->addFlash('success', $produit->getLibelle().' a ete supprimée avec succès.');
                         $entityManager->flush();
                     }
