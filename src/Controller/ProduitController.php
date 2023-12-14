@@ -68,7 +68,7 @@ class ProduitController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-
+            $createDetail = $form->get('createDetail')->getData();
             $libelleProduit = $data->getLibelle();
             $existingProduit = $manager->getRepository(Produit::class)
                 ->findOneBy(['libelle' => $libelleProduit]);

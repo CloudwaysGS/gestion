@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Produit;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -55,15 +56,25 @@ class ProduitType extends AbstractType
                     new Type('numeric')
                 )
             ))
-
+            ->add('createDetail', ChoiceType::class, array(
+                'label' => 'Souhaitez-vous créer les détails ?',
+                'expanded' => true,
+                'choices' => [
+                    'Oui' => true,
+                    'Non' => false,
+                ],
+                'data' => false,
+                'mapped' => false, // This field is not mapped to any property
+            ))
             ->add('nomProduitDetail', TextType::class, array(
-                'label' => 'Veux-tu créer le détail ?',
+                'label' => false,
                 'required' => false,
                 'attr' => array(
                     'class' => 'form-control form-group',
                     'placeholder' => 'libelle détail',
                 ),
             ))
+
             ->add('nombre', TextType::class, array(
                 'label' => false,
                 'required' => false,
@@ -92,6 +103,7 @@ class ProduitType extends AbstractType
                 'attr' =>array('class' => 'btn btn-primary form-group')
             ))
         ;
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void

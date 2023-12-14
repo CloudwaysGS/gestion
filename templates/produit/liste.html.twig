@@ -3,6 +3,21 @@
 {% block title %}Gestion des produits{% endblock %}
 
 {% block body %}
+    <style>
+
+        #produit_nomProduitDetail{
+            display: none;
+        }
+
+        #produit_nombre{
+            display: none;
+        }
+
+        #produit_prixDetail{
+            display: none;
+        }
+
+    </style>
     <div class="row">
      <div class="container col-md-8">
          {% for message in app.session.flashBag.get('success') %}
@@ -28,7 +43,6 @@
                             <th>Stock</th>
                             <th>prixUnit</th>
                             <th>Montant</th>
-                            <th>Date</th>
                             <th>Actions</th>
                         </tr>
                         {% for produit in pagination %}
@@ -37,7 +51,9 @@
                                 <th>{{ produit.qtStock }}</th>
                                 <th>{{ produit.prixUnit | number_format(0, ',', ' ') }}</th>
                                 <th>{{ produit.total | number_format(0, ',', ' ') }}</th>
+{#
                                 <th>{{ produit.releaseDate|date('d-m-Y') }}</th>
+#}
                                 <th class="text-center">
                                     {% if is_granted('ROLE_GESTION_STOCK') %}
                                     <a title="Modifier" href="{{ path('produit_edit',{'id':produit.id}) }}" class="btn btn-primary btn-circle btn-sm"><i class="fas fa-edit"></i></a>
@@ -76,5 +92,29 @@
         }, 5000);
     </script>
 
+    <script>
+        // Récupérer le bouton radio
+        function toggleElements(displayStyle) {
+            nomProduitDetail.style.display = displayStyle;
+            nombre.style.display = displayStyle;
+            prixDetail.style.display = displayStyle;
+        }
+
+        var radioBtnOui = document.getElementById("produit_createDetail_0");
+        var radioBtnNon = document.getElementById("produit_createDetail_1");
+
+        var nomProduitDetail = document.getElementById("produit_nomProduitDetail");
+        var nombre = document.getElementById("produit_nombre");
+        var prixDetail = document.getElementById("produit_prixDetail");
+
+        radioBtnOui.addEventListener("change", function() {
+            toggleElements(radioBtnOui.checked ? "block" : "none");
+        });
+
+        radioBtnNon.addEventListener("change", function() {
+            toggleElements(radioBtnNon.checked ? "none" : "block");
+        });
+
+    </script>
 
 {% endblock %}
