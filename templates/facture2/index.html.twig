@@ -155,7 +155,7 @@
                         <div class="card-header">Vente en détail de produits</div>
                         <div class="card-body">
                             <div class="table-responsive" id="table-responsive" onmouseover="changeHeightDetails('20rem')" onmouseout="changeHeightDetails('20rem')" style="height: 20rem;">
-                                <form name="searchDetail" method="post" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                                <form name="searchDetail2" method="post" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                                     <div class="input-group">
                                         <input type="text" id="search_nomDetail" name="search[nomDetail]" class="form-control bg-light border-0 small" placeholder="Search for detail"
                                                aria-label="Search" aria-describedby="basic-addon2">
@@ -309,7 +309,7 @@
         });
 
         function performSearchDetail(searchTermDetail) {
-            fetch(`/searchDetail?term=${searchTermDetail}`, {
+            fetch(`/searchDetail2?term=${searchTermDetail}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -386,7 +386,7 @@
             // You can use AJAX to send the search term to the server and update the results.
             // Example using Fetch API:
 
-            fetch(`/search?term=${searchTerm}`, {
+            fetch(`/search2?term=${searchTerm}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

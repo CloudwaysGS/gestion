@@ -76,29 +76,36 @@ class FactureService
             $this->entityManager->persist($facture);
             $this->entityManager->flush();
 
-            if ($facture->getNombre() !== null){
+            if ($facture->getNombre() !== null) {
                 $quantite = floatval($facture->getQuantite());
                 $nombre = $facture->getNombre();
                 $vendus = $facture->getNombreVendus();
-                if ($quantite >= $nombre) {
-                    $boxe = $quantite / $nombre;
-                    $vendus = $boxe;
-                    $dstock = $p->getQtStock() - $vendus;
-                    $p->setQtStock($dstock);
-                    $p->setNbreVendu($vendus);
-                }else{
-                    $boxe = $quantite / $nombre;
-                    $vendus = $boxe;
-                    $dstock = $p->getQtStock() - $vendus;
-                    $p->setQtStock($dstock);
-                    $p->setNbreVendu($vendus);
-                }
 
-                $upd = $produit->getQtStockDetail() - $facture->getQuantite();
-                $produit->setQtStockDetail($upd);
-                $upddd = $produit->getQtStock() * $produit->getPrixUnit();
-                $p->setTotal($upddd);
+                // Vérifier que $nombre est différent de zéro avant de procéder
+                if ($nombre != 0) {
+                    if ($quantite >= $nombre) {
+                        $boxe = $quantite / $nombre;
+                        $vendus = $boxe;
+                        $dstock = $p->getQtStock() - $vendus;
+                        $p->setQtStock($dstock);
+                        $p->setNbreVendu($vendus);
+                    } else {
+                        $boxe = $quantite / $nombre;
+                        $vendus = $boxe;
+                        $dstock = $p->getQtStock() - $vendus;
+                        $p->setQtStock($dstock);
+                        $p->setNbreVendu($vendus);
+                    }
+
+                    $upd = $produit->getQtStockDetail() - $facture->getQuantite();
+                    $produit->setQtStockDetail($upd);
+                    $upddd = $produit->getQtStock() * $produit->getPrixUnit();
+                    $p->setTotal($upddd);
+                } else {
+                    throw new \Exception('Le nombre ne peut pas être zéro.');
+                }
             }
+
 
             $this->entityManager->flush();
 

@@ -35,7 +35,11 @@
         <label for="produit">Nom du produit </label>
         <select class="form-control mb-1" name="produit" id="produit">
             {% for p in facture.produit %}
-                <option value="{{ p.id }}">{{ p.libelle }}</option>
+                {% if facture.nomProduit == p.libelle %}
+                    <option value="{{ p.id }}">{{ p.libelle }}</option>
+                {% else %}
+                    <option value="{{ p.id }}">{{ p.nomProduitDetail }}</option>
+                {% endif %}
             {% endfor %}
         </select>
         <div class="text-center">
