@@ -1,6 +1,4 @@
-{% extends 'accueil.html.twig' %}
 
-{% block title %}Dette{% endblock %}
 
 {% block body %}
     {% for message in app.session.flashBag.get('success') %}
@@ -25,15 +23,19 @@
                             </tr>
                             <tr>
                                 <th>Montant dette</th>
-                                <td>{{ infos.montantDette | number_format(0, ',', ' ') }}</td>
+                                <td>{{ infos.montantDette | number_format(0, ',', ' ') }} F</td>
                             </tr>
                             <tr>
                                 <th>Reste</th>
-                                <td>{{ infos.reste | number_format(0, ',', ' ') }}</td>
+                                <td>{{ infos.reste | number_format(0, ',', ' ') }} F</td>
                             </tr>
                             <tr>
                                 <th>Statut</th>
-                                <td>{{ infos.statut }}</td>
+                                <td>
+                                    <a class="btn btn-primary btn-sm" style="background-color: {% if infos.statut == 'payée' %}primary{% else %}#e74a3b{% endif %}; color: white; border: none; height: 20px;line-height: 10px; ; text-align: center;">
+                                        {{ infos.statut }}
+                                    </a>
+                                </td>
                             </tr>
                             <tr>
                                 <th>Descriptions</th>
@@ -41,7 +43,7 @@
                             </tr>
                             <tr>
                                 <th>Date</th>
-                                <td>{{ infos.dateCreated| date('d/m/Y') }}</td>
+                                <td>{{ infos.dateCreated| date('d/m/Y H:i') }}</td>
                             </tr>
                             <!-- Ajoutez d'autres lignes de la table pour afficher les autres détails de la dette -->
                         </table>

@@ -42,7 +42,7 @@ class DetteRepository extends ServiceEntityRepository
     public function findAllOrderedByDate()
     {
         return $this->createQueryBuilder('p')
-            ->orderBy('p.dateCreated', 'DESC')
+            ->orderBy('p.statut', 'ASC')
             ->getQuery()
             ->getResult()
             ;

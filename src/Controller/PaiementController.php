@@ -144,11 +144,11 @@ class PaiementController extends AbstractController
         $showAll = false;
         $additionalPaiements = [];
 
-        if (count($paiements) > 5) {
+        if (count($paiements) > 10) {
             $showAll = true;
-            $additionalPaiements = array_slice($paiements, 5); // Récupérer les paiements supplémentaires à partir de l'indice 5
+            $additionalPaiements = array_slice($paiements, 10); // Récupérer les paiements supplémentaires à partir de l'indice 5
         }
-        $paiements = array_slice($paiements,0,5);
+        $paiements = array_slice($paiements,0,10);
 
         return $this->render('paiement/detail.html.twig', [
             'controller_name' => 'PaiementController',

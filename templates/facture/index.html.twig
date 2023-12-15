@@ -103,9 +103,9 @@
     </style>
 
     <div class="row">
-        <div class="container col-md-5">
+        <div class="containers col-md-5">
             <div class="card">
-                <div class="card-body">
+                <div class="select-container">
                     <select class="form-control mb-1" name="client" id="client">
                         <option value="" selected disabled>Choisissez un client</option>
                         {% for clients in clients %}
@@ -205,7 +205,8 @@
                 </div>
             </div>
         </div>
-        <div class="container col-md-7">
+
+        <div class="containers col-md-7">
             {% for message in app.session.flashBag.get('success') %}
                 <div id="flash-message" class="alert alert-success">{{ message }}</div>
             {% endfor %}
@@ -447,7 +448,6 @@
             fetch(url)
                 .then(response => response.text())
                 .then(data => {
-                    console.log(data)
                     // Injecter le contenu dans le modal Bootstrap
                     const modalBody = document.getElementById('myModal').querySelector('.modal-body');
                     modalBody.innerHTML = data;

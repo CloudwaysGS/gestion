@@ -84,6 +84,12 @@ class ProduitController extends AbstractController
             $montant = $data->getQtStock() * $data->getPrixUnit();
             $data->setTotal($montant);
             $data->setNbreVendu('0');
+            $majusculeLibelle = strtolower($data->getLibelle());
+            $majusculeDetail = strtolower($data->getNomProduitDetail());
+            $data->setLibelle($majusculeLibelle);
+            if ($data->getNomProduitDetail() != null){
+                $data->setNomProduitDetail($majusculeDetail);
+            }
             $manager->persist($data);
             $manager->flush();
 
