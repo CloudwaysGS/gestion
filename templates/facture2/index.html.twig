@@ -27,7 +27,7 @@
         .card {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Example box shadow */
         }
-        #select {
+        select {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Example box shadow */
         }
 
@@ -117,7 +117,7 @@
                     <div class="card">
                         <div class="card-header">Vente en gros de produits</div>
                         <div class="card-body">
-                            <div class="table-responsive" onmouseover="changeHeight('15rem')" onmouseout="changeHeight('15rem')" style="height: 15rem;">
+                            <div class="table-responsive" onmouseover="changeHeight('20rem')" onmouseout="changeHeight('6rem')" style="height: 6rem;">
                                 <table class="table table-striped table-hover">
                                     <tr>
                                         <th>Libelle</th>
@@ -154,18 +154,19 @@
                     <div class="card" style="margin-top: 1rem ">
                         <div class="card-header">Vente en détail de produits</div>
                         <div class="card-body">
-                            <div class="table-responsive" id="table-responsive" onmouseover="changeHeightDetails('20rem')" onmouseout="changeHeightDetails('20rem')" style="height: 20rem;">
-                                <form name="searchDetail2" method="post" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                                    <div class="input-group">
-                                        <input type="text" id="search_nomDetail" name="search[nomDetail]" class="form-control bg-light border-0 small" placeholder="Search for detail"
-                                               aria-label="Search" aria-describedby="basic-addon2">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-primary" type="submit">
-                                                <i class="fas fa-search fa-sm"></i>
-                                            </button>
-                                        </div>
+                            <form name="searchDetail2" method="post" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search fixed-search-form ">
+                                <div class="input-group">
+                                    <input type="text" id="search_nomDetail" name="search[nomDetail]" class="form-control bg-light border-0 small" placeholder="Recherche détail"
+                                           aria-label="Search" aria-describedby="basic-addon2">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">
+                                            <i class="fas fa-search fa-sm"></i>
+                                        </button>
                                     </div>
-                                </form>
+                                </div>
+                            </form>
+                            <div class="table-responsive" id="table-responsive" onmouseover="changeHeightDetails('20rem')" onmouseout="changeHeightDetails('6rem')" style="height: 8rem;">
+
                                 <table class="table table-striped table-hover detail-table">
                                     <tr>
                                         <th>Libelle</th>
@@ -301,10 +302,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const searchInputDetail = document.getElementById('search_nomDetail');
+            let isFirstInputDetail = true;
 
             searchInputDetail.addEventListener('input', function () {
-                const searchTermDetail = searchInputDetail.value;
-                performSearchDetail(searchTermDetail);
+                const searchTermDetail = searchInputDetail.value.trim();
+
+                if (searchTermDetail === '') {
+                    // Reset isFirstInputDetail when the input is empty
+                    isFirstInputDetail = true;
+                } else if (isFirstInputDetail) {
+                    // Skip the first input
+                    isFirstInputDetail = false;
+                } else {
+                    // Proceed with the search
+                    performSearchDetail(searchTermDetail);
+                }
             });
         });
 
@@ -323,25 +335,27 @@
         }
 
         function updateResultsTableDetail(data) {
+
             const tableBodyDetail = document.querySelector('.detail-table');
-            tableBodyDetail.innerHTML = '';
+            tableBodyDetail.innerHTML = 'Detail introuvable';
 
             data.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                <th>${item.nomProduitDetail}</th>
-                <td>
-                    <input type="number" class="form-control custom-input custom-input-small" name="quantityDetail" id="quantityDetail_${item.id}" value="1" min="1">
-                </td>
-                <td>
-                    <a title="Ajouter" href="javascript:void(0);" onclick="addToFactureDetail('${item.path}', ${item.id})">
-                        <i class="fa fa-cart-plus" aria-hidden="true"></i>
-                    </a>
-                </td>
-            `;
+            <th>${item.nomProduitDetail}</th>
+            <td>
+                <input type="number" class="form-control custom-input custom-input-small" name="quantityDetail" id="quantityDetail_${item.id}" value="1" min="1">
+            </td>
+            <td>
+                <a title="Ajouter" href="javascript:void(0);" onclick="addToFactureDetail('${item.path}', ${item.id})">
+                    <i class="fa fa-cart-plus" aria-hidden="true"></i>
+                </a>
+            </td>
+        `;
                 tableBodyDetail.appendChild(row);
             });
         }
+
     </script>
 
     <script>
@@ -375,17 +389,26 @@
         document.addEventListener('DOMContentLoaded', function () {
             const searchForm = document.getElementById('search-form');
             const searchInput = document.getElementById('search_nom');
+            let isFirstInput = true;
 
             searchInput.addEventListener('input', function () {
-                const searchTerm = searchInput.value;
-                performSearch(searchTerm);
+                const searchTerm = searchInput.value.trim();
+
+                if (searchTerm === '') {
+                    // Reset isFirstInput when the input is empty
+                    isFirstInput = true;
+                } else if (isFirstInput) {
+                    // Skip the first input
+                    isFirstInput = false;
+                } else {
+                    // Proceed with the search
+                    performSearch(searchTerm);
+                }
             });
         });
 
         function performSearch(searchTerm) {
-            // You can use AJAX to send the search term to the server and update the results.
-            // Example using Fetch API:
-
+            console.log(searchTerm)
             fetch(`/search2?term=${searchTerm}`, {
                 method: 'GET',
                 headers: {
@@ -394,18 +417,15 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Update the table or any other part of the page with the new search results.
                     updateResultsTable(data);
                 })
                 .catch(error => console.error('Error:', error));
         }
 
         function updateResultsTable(data) {
-            // Update your table with the new search results.
-            // You may need to modify this part based on your specific table structure.
-
+            console.log(data)
             const tableBody = document.querySelector('.table tbody');
-            tableBody.innerHTML = '';
+            tableBody.innerHTML = 'Produit introuvable';
 
             data.forEach(item => {
                 const row = document.createElement('tr');
@@ -423,6 +443,7 @@
                 tableBody.appendChild(row);
             });
         }
+
 
     </script>
 

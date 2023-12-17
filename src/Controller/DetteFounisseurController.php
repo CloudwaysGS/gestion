@@ -52,7 +52,7 @@ class DetteFounisseurController extends AbstractController
                 $dette->setFournisseur($client)
                     ->setDate(new \DateTime())
                     ->setReste($dette->getMontantDette())
-                    ->setStatut('non-payéé');
+                    ->setStatut('non-payée');
             }
             $manager->persist($dette);
             $manager->flush();

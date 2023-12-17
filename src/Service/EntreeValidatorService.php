@@ -23,6 +23,7 @@ class EntreeValidatorService{
     {
         return new Assert\Collection([
             'produitId' => new Assert\Optional(),
+            'fournisseur_id' => new Assert\Optional(),
             'qtSortie' => [
                 new Assert\NotBlank(['message' => 'La quantité ne doit pas être vide.']),
                 new Assert\Type(['type' => 'numeric', 'message' => 'Cette valeur doit être de type numérique.']),
@@ -31,7 +32,7 @@ class EntreeValidatorService{
             'prixUnit' => [
                 new Assert\NotBlank(['message' => 'Le prix ne doit pas être vide.']),
                 new Assert\Type(['type' => 'numeric', 'message' => 'Le prix doit être une valeur numérique.']),
-                new Assert\GreaterThan(['value' => 0, 'message' => 'Le prix doit être une valeur numérique.']),
+                new Assert\GreaterThan(['value' => 0, 'message' => 'Le prix doit être supérieure à 0.']),
             ],
         ]);
     }

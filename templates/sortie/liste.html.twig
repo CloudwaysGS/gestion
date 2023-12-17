@@ -81,8 +81,8 @@
                         <table class="table table-bordered text-center">
                             <tr>
                                 <th>Produit</th>
-                                <th>Quantite vendue</th>
-                                <th>PrixUnit</th>
+                                <th>Qté</th>
+                                <th>P.Unit</th>
                                 <th>Montant</th>
                                 <th>Date</th>
                                 <th>Action</th>
@@ -143,14 +143,14 @@
                         </select>
 
 
-                        <select class="form-control mb-1" name="produit_id" id="produit_id">
+                        <select class="form-control mb-3" name="produit_id" id="produit_id">
                             <option value="" selected disabled>Choisissez un produit</option>
                             {% for p in produits %}
                                 <option value="{{ p.id }}">{{ p.libelle }}</option>
                             {% endfor %}
                         </select>
 
-                        <select class="form-control mb-1" name="detail_id" id="detail_id">
+                        <select class="form-control mb-3" name="detail_id" id="detail_id">
                             <option value="" selected disabled>Choisissez un produit en détail</option>
                             {% for d in details %}
                                 {% if d.nomProduitDetail is not null %}
@@ -161,9 +161,9 @@
                         <div>
 
                         </div>
-                        <input class="form-control" type="text" id="qt_sortie" name="qt_sortie" placeholder="quantité" required>
+                        <input class="form-control mb-3" type="text" id="qt_sortie" name="qt_sortie" placeholder="quantité" required>
 
-                        <input class="form-control mt-1" type="text" id="prix_unit" name="prix_unit" placeholder="prix unitaire" required>
+                        <input class="form-control mb-3" type="text" id="prix_unit" name="prix_unit" placeholder="prix unitaire" required>
 
                         <button id="enregistreurBtn" class="form-control mt-1" type="submit">Enregistreur</button>
 

@@ -19,8 +19,8 @@
                             <tr>
                                 <th>Fournisseur</th>
                                 <th>Produit</th>
-                                <th>Quantite acheté</th>
-                                <th>PrixUnit</th>
+                                <th>Qté</th>
+                                <th>P.Unit</th>
                                 <th>Montant</th>
                                 <th>Date</th>
                                 <th>Action</th>
@@ -69,21 +69,21 @@
                 <div class="card-header">Formulaire de gestion des produits</div>
                 <div class="card-body">
                     <form method="post" action="{{ path('entree_add') }}">
-                        <select class="form-control mb-1" name="fournisseur_id" id="fournisseur_id">
+                        <select class="form-control mb-3" name="fournisseur_id" id="fournisseur_id">
                             <option value="" selected disabled>Choisissez un fournisseur</option>
                             {% for f in fournisseur %}
                                 <option value="{{ f.id }}">{{ f.nom }}</option>
                             {% endfor %}
                         </select>
 
-                        <select class="form-control mb-1" name="produit_id" id="produit_id">
+                        <select class="form-control mb-3" name="produit_id" id="produit_id">
                             <option value="" selected disabled>Choisissez un produit</option>
                             {% for p in produits %}
                                 <option value="{{ p.id }}">{{ p.libelle }}</option>
                             {% endfor %}
                         </select>
 
-                        <select class="form-control mb-1" name="detail_id" id="detail_id">
+                        <select class="form-control mb-3" name="detail_id" id="detail_id">
                             <option value="" selected disabled>Choisissez un produit en détail</option>
                             {% for d in details %}
                                 {% if d.nomProduitDetail is not null %}
@@ -94,11 +94,11 @@
                         <div>
 
                         </div>
-                        <input class="form-control" type="text" id="qt_sortie" name="qt_sortie" placeholder="quantité" required>
+                        <input class="form-control mb-3" type="text" id="qt_sortie" name="qt_sortie" placeholder="quantité" required>
 
-                        <input class="form-control mt-1" type="text" id="prix_unit" name="prix_unit" placeholder="prix unitaire" required>
+                        <input class="form-control mb-2" type="text" id="prix_unit" name="prix_unit" placeholder="prix unitaire" required>
 
-                        <button class="form-control mt-1" type="submit">Enregistrer</button>
+                        <button class="form-control btn-primary mt-1" type="submit">Enregistrer</button>
                     </form>
                 </div>
             </div>

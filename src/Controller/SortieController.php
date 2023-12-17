@@ -170,8 +170,11 @@ class SortieController extends AbstractController
                     // Mise à jour qtestock produit
                     $produit->setQtStock($qtStock - $qtSortie);
                     $produit->setTotal($produit->getPrixUnit() * $produit->getQtStock());
-                    $upd = $produit->getNombre() * $sortie->getQtSortie();
-                    $produit->setQtStockDetail($produit->getQtStockDetail() - $upd);
+                    if ($produit->getNombre() != null){
+                        $upd = $produit->getNombre() * $sortie->getQtSortie();
+                        $produit->setQtStockDetail($produit->getQtStockDetail() - $upd);
+                    }
+
                     $manager->persist($produit);
                     $manager->flush();
 

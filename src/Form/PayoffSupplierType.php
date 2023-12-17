@@ -30,6 +30,7 @@ class PayoffSupplierType extends AbstractType
                     'class' => 'form-control form-group',
                     'placeholder' => 'montant avance',
                 ),
+                'required' => true,
                 'constraints' => array(
                     new NotBlank(),
                     new Type('numeric')

@@ -55,18 +55,6 @@ class Dette
         return $this->id;
     }
 
-    public function getNomClient(): ?string
-    {
-        return $this->nomClient;
-    }
-
-    public function setNomClient(string $nomClient): self
-    {
-        $this->nomClient = $nomClient;
-
-        return $this;
-    }
-
     public function getMontantDette(): ?string
     {
         return $this->montantDette;

@@ -48,7 +48,7 @@ class FournisseurController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $manager->persist($client);
             $manager->flush();
-            $this->addFlash('success', 'L\'entrée a été enregistrée avec succès.');
+            $this->addFlash('success', 'Enregistrée avec succès.');
         }
         return $this->redirectToRoute('fournisseur_liste');
     }
@@ -82,7 +82,7 @@ class FournisseurController extends AbstractController
     public function delete(Fournisseur $client, FournisseurRepository $repository, EntityManagerInterface $entityManager){
         $dettes = $client->getDetteFounisseur(); // récupérer toutes les dettes associées à ce client
         foreach($dettes as $dette){
-            if ($dette->getStatut() != 'non-payéé'){
+            if ($dette->getStatut() != 'non-payée'){
                 $entityManager->remove($dette); // supprimer chaque dette associée
             }else{
                 $this->addFlash('danger', $dette->getFournisseur()->getNom().' n\'a pas encore réglé sa dette');

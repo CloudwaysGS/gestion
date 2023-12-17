@@ -106,20 +106,6 @@ class Client
         return $this;
     }
 
-    public function getPays(): ?string
-    {
-        return $this->pays;
-    }
-
-    public function setPays(?string $pays): self
-    {
-        $this->pays = $pays;
-
-        return $this;
-    }
-
-
-
     public function getDateCreated(): ?\DateTimeInterface
     {
         return $this->dateCreated;

@@ -54,15 +54,19 @@ class EntreeController extends AbstractController
             $fournisseurId = $request->request->get('fournisseur_id');
             $qtEntree = $request->request->get('qt_sortie');
             $prixUnit = $request->request->get('prix_unit');
-
             if (!empty($produitId) && !empty($detailId)) {
                 $this->addFlash('danger', 'produit et detail ne peuvent pas être remplis en même temps.');
                 return $this->redirectToRoute('sortie_liste');
+            }
+            if ($fournisseurId == null) {
+                $this->addFlash('danger', 'Choisissez un fournisseur.');
+                return $this->redirectToRoute('entree_liste');
             }
             $validationErrors = $validatorService->validate([
                 'produitId' => $produitId,
                 'qtSortie' => $qtEntree,
                 'prixUnit' => $prixUnit,
+                'fournisseur_id' => $fournisseurId,
             ]);
 
             if (!empty($validationErrors)) {
@@ -159,8 +163,11 @@ class EntreeController extends AbstractController
                     // Mise à jour qtestock produit
                     $produit->setQtStock($qtStock + $qtEntree);
                     $produit->setTotal($produit->getPrixUnit() * $produit->getQtStock());
-                    $upd = $produit->getNombre() * $entree->getQtEntree();
-                    $produit->setQtStockDetail($produit->getQtStockDetail() + $upd);
+                    if ($produit->getNombre() != null){
+                        $upd = $produit->getNombre() * $entree->getQtEntree();
+                        $produit->setQtStockDetail($produit->getQtStockDetail() + $upd);
+                    }
+
                     $manager->persist($produit);
                     $manager->flush();
 

@@ -60,6 +60,7 @@ class PaiementController extends AbstractController
         }
 
         $client = $payment->getClient();
+        dd($payment->getClient()->getDette()->last());
         $currentDebt = $client->getDette()->last();
         $remainingDebt = (!$currentDebt || !method_exists($currentDebt, 'getReste')) ? null : $currentDebt->getReste();
         if (is_null($remainingDebt)) {

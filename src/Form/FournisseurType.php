@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Constraints\Type;
 
@@ -20,6 +21,7 @@ class FournisseurType extends AbstractType
                 'label' => 'Nom fournisseur',
                 'attr' => array(
                     'class' => 'form-control form-group'),
+                'required' => true,
                 'constraints' => [
                     new Regex([
                         'pattern' => '/^[a-zA-Z0-9\s]+$/',
@@ -32,13 +34,14 @@ class FournisseurType extends AbstractType
                 'label' => 'Telephone',
                 'attr' => array(
                     'class' => 'form-control form-group'),
-                'required' => false,
+                'required' => true,
                 'constraints' => array(
-                    new Type('numeric')
+                    new Type('numeric'),
+                    new NotBlank(),
                 )
             ))
 
-            ->add('Valider', SubmitType::class, array(
+            ->add('Ajouter', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')
             ))
         ;
