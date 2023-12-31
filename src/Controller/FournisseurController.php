@@ -40,6 +40,7 @@ class FournisseurController extends AbstractController
     #[Route('/fournisseur/add', name: 'fournisseur_add')]
     public function add(EntityManagerInterface $manager, Request $request): Response
     {
+        dd("ok");
         $client = new Fournisseur();
         $date = new \DateTime();
         $client->setDate($date);

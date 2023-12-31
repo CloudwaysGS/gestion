@@ -24,6 +24,7 @@
                             <th>Téléphone</th>
                             <th>Total</th>
                             <th>Date</th>
+                            <th>Statut</th>
                             <th>Action</th>
                         </tr>
                         {% for c in chargement %}
@@ -34,10 +35,14 @@
                                 <th>{{ c.adresse }}</th>
                                 <th>{{ c.telephone }}</th>
                                 <th>{{ c.total }}</th>
-                                <th>{{ c.date | date('d/m/Y H:i:s') }}</th>
-                                <th>
-                                    <a class="popup-link" title="facture détaillée" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
+                                <th>{{ c.date | date('d/m/Y') }}</th>
+                                <th style="color: {% if c.statut == 'payée' %} green {% elseif c.statut == 'non-payée' %} red {% elseif c.statut == 'En cours' %} orange {% endif %}">
+                                    {{ c.statut }}
+                                </th>
 
+                                <th>
+                                    <a class="popup-link" title="payée" href="{{ path('statut', {'id':c.id}) }}" ><i class="fa fa-money-bill-alt"></i></a>
+                                    <a class="popup-link" title="facture détaillée" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
                                     <a title="extraire en pdf" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
                                     <a title="user" href="#" data-toggle="modal" data-target="#userModal" data-user-id="{{ c.id }}">
                                         <i class="fa fa-user" aria-hidden="true"></i>

@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Chargement;
+use App\Entity\Client;
+use App\Entity\Dette;
 use App\Entity\Facture2;
 use App\Entity\Produit;
 use App\Entity\Search;
@@ -333,8 +335,32 @@ class Facture2Controller extends AbstractController
             }
             $chargement->setConnect($facture->getConnect());
             $chargement->setNumeroFacture('FACTURE2-' . $facture->getId() );
+            $chargement->setStatut('En cours');
             $chargement->setTotal($total);
             $entityManager->persist($chargement);
+            $entityManager->flush();
+
+            $dette = new Dette();
+            $date = new \DateTime();
+            $dette->setMontantDette($chargement->getTotal());
+            $dette->setReste($chargement->getTotal());
+            $dette->setDateCreated($date);
+            $dette->setStatut('non-payée');
+            $nomClient = $chargement->getNomClient();
+            $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
+            $dette->setClient($client);
+            $dette->setCommentaire('Dette de la facture');
+            $dettes = $entityManager->getRepository(Dette::class)->findAll();
+            foreach ( $dettes as $s) {
+                if ( $dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "non-payée" && $s->getReste() != 0) {
+                    $chargement->setStatut('non-payée');
+                    $entityManager->flush();
+                    $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette non payée.');
+                    return $this->redirectToRoute('liste_chargement');
+                }
+            }
+
+            $entityManager->persist($dette);
             $entityManager->flush();
             return $this->redirectToRoute('facture2_liste');
         }

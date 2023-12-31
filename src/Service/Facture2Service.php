@@ -22,7 +22,7 @@ class Facture2Service
         $factures = $this->entityManager->getRepository(Facture2::class)->findBy(['etat' => 1]);
 
         if (empty($factures) && empty($clientId) && empty($clientIdDetail)) {
-            throw new \Exception('Veuillez choisir un client avant d\'ajouter des produits.');
+            throw new \Exception('Veuillez choisir un client.');
         }
 
         if (!empty($factures)) {

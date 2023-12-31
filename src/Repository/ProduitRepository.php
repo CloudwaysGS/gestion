@@ -89,7 +89,15 @@ class ProduitRepository extends ServiceEntityRepository
         return $query->getSingleScalarResult();
     }
 
-
+    public function getLowStockProducts()
+    {
+        return $this->createQueryBuilder('p')
+            ->select('p')
+            ->where('p.qtStock < :qtStock')
+            ->setParameter('qtStock', 10)
+            ->getQuery()
+            ->getResult();
+    }
 
 //    /**
 //     * @return Produit[] Returns an array of Produit objects

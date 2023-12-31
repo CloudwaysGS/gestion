@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Chargement;
+use App\Entity\Client;
+use App\Entity\Dette;
 use App\Entity\Facture;
 use App\Entity\Facture2;
 use App\Entity\Search;
@@ -251,5 +253,15 @@ class ChargementController extends AbstractController
 
     }
 
+    #[Route('/chargement/statut/{id}', name: 'statut')]
+    public function statut(Chargement $chargement, EntityManagerInterface $entityManager){
+
+        $chargement->setStatut('payée');
+        $entityManager->persist($chargement);
+        $entityManager->flush();
+        $this->addFlash('success', 'Le paiement de la facture a été effectué.');
+
+        return $this->redirectToRoute('liste_chargement');
+    }
 
 }

@@ -94,5 +94,4 @@ class Paiement
         return $this;
     }
 
-
 }

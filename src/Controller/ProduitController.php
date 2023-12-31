@@ -7,6 +7,7 @@ use App\Entity\Search;
 use App\Form\ProduitType;
 use App\Form\SearchType;
 use App\Repository\ProduitRepository;
+use App\Service\ProduitAddService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use MercurySeries\FlashyBundle\FlashyNotifier;
@@ -26,17 +27,12 @@ class ProduitController extends AbstractController
         $today = new \DateTime();
         $remainingDays = $lastDayOfMonth->diff($today)->days;
         $message = ($remainingDays === 2) ? "Attention : Il ne reste que 2 jours avant la fin du mois en cours !" : (($remainingDays === 1) ? "Attention : Il ne reste plus que 1 jour avant la fin du mois en cours !" : "");
-
-        $produits = $prod->createQueryBuilder('p')
-            ->select('p')
-            ->where('p.qtStock < :qtStock')
-            ->setParameter('qtStock', 10)
-            ->getQuery()
-            ->getResult();
+        $produits = $prod->getLowStockProducts();
 
         foreach ($produits as $p){
             $this->addFlash('danger', "La quantité en stock ".$p->getLibelle()." est en baisse: ".$p->getQtStock());
         }
+
         $p = new Produit();
         $form = $this->createForm(ProduitType::class, $p, [
             'action' => $this->generateUrl('produit_add')
@@ -46,7 +42,7 @@ class ProduitController extends AbstractController
         $form2->handleRequest($request);
         $nom = $search->getNom();
         $pagination = $paginator->paginate(
-            $prod->findAllOrderedByDate(),
+            ($nom !== null && $nom !== '') ? $prod->findByName($nom) : $prod->findAllOrderedByDate(),
             $request->query->get('page', 1),
             10
         );
@@ -61,52 +57,21 @@ class ProduitController extends AbstractController
     }
 
     #[Route('/produit/add', name: 'produit_add')]
-    public function add(EntityManagerInterface $manager, Request $request): Response
+    public function add(EntityManagerInterface $manager, ProduitAddService $produitAddService, Request $request): Response
     {
         $form = $this->createForm(ProduitType::class);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-            $createDetail = $form->get('createDetail')->getData();
-            $libelleProduit = $data->getLibelle();
-            $existingProduit = $manager->getRepository(Produit::class)
-                ->findOneBy(['libelle' => $libelleProduit]);
-            if ($existingProduit && $this->compareStrings($existingProduit->getLibelle(), $libelleProduit)) {
-                $this->addFlash('danger', 'Un produit avec ce nom existe déjà.');
-                return $this->redirectToRoute('produit_liste');
-            }
+        try {
 
-            $user = $this->getUser() ?? throw new \Exception("Aucun utilisateur n'est actuellement connecté");
-            $data->setUser($user);
-            $data->setReleaseDate(new \DateTime());
-            $data->setQtStockDetail($data->getNombre() * $data->getQtStock());
-            $montant = $data->getQtStock() * $data->getPrixUnit();
-            $data->setTotal($montant);
-            $data->setNbreVendu('0');
-            $majusculeLibelle = strtolower($data->getLibelle());
-            $majusculeDetail = strtolower($data->getNomProduitDetail());
-            $data->setLibelle($majusculeLibelle);
-            if ($data->getNomProduitDetail() != null){
-                $data->setNomProduitDetail($majusculeDetail);
-            }
-            $manager->persist($data);
-            $manager->flush();
+            $produitAddService->handleFormSubmission($form);
+            return $this->redirectToRoute('produit_liste');
 
-            $this->addFlash('success', 'Le produit a été ajouté avec succès.');
+        } catch (\Exception $e) {
+            $this->addFlash('danger', $e->getMessage());
+            return $this->redirectToRoute('produit_liste');
         }
-
-        return $this->redirectToRoute('produit_liste');
     }
-
-
-    private function compareStrings(string $str1, string $str2): bool
-    {
-        $str1 = str_replace(' ', '', strtolower($str1));
-        $str2 = str_replace(' ', '', strtolower($str2));
-        return $str1 === $str2;
-    }
-
 
     #[Route('/produit/delete/{id}', name: 'produit_delete')]
     public function delete(Produit $produit, ProduitRepository $repository){

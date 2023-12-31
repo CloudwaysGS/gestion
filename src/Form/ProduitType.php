@@ -99,7 +99,7 @@ class ProduitType extends AbstractType
                 )
             ))
 
-            ->add('Valider', SubmitType::class, array(
+            ->add('Ajouter', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')
             ))
         ;

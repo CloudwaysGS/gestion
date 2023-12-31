@@ -49,6 +49,7 @@ class PaiementController extends AbstractController
     #[Route('/paiement/add', name: 'paiement_add')]
     public function add(EntityManagerInterface $manager, Request $request): Response
     {
+
         $payment = new Paiement();
         $date = new \DateTime();
         $payment->setDatePaiement($date);
@@ -60,7 +61,6 @@ class PaiementController extends AbstractController
         }
 
         $client = $payment->getClient();
-        dd($payment->getClient()->getDette()->last());
         $currentDebt = $client->getDette()->last();
         $remainingDebt = (!$currentDebt || !method_exists($currentDebt, 'getReste')) ? null : $currentDebt->getReste();
         if (is_null($remainingDebt)) {
@@ -87,6 +87,7 @@ class PaiementController extends AbstractController
         if ($remainingDebt == 0){
             $currentDebt->setStatut('payée');
             $this->addFlash('success','La dette a été payée.');
+
         }
 
         $currentDebt->setReste($remainingDebt);

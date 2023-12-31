@@ -76,6 +76,7 @@ class AccueilController extends AbstractController
         $sumTotalMonth = is_null($sumTotalMonth) ? 0 : $sumTotalMonth;
 
         // le calcul du total des sorties effectuées dans le mois courant
+
         $anneeCourante = date('Y');
         $moisCourant = date('m');
         $firstDayOfMonth = new \DateTime("$anneeCourante-$moisCourant-01");

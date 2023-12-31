@@ -47,6 +47,7 @@ class Dette
     {
         $this->paiements = new ArrayCollection();
         $this->paiement = new ArrayCollection();
+        $this->chargement = new ArrayCollection();
     }
 
 
@@ -190,5 +191,6 @@ class Dette
 
         return $this;
     }
+
 
 }

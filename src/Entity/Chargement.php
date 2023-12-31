@@ -46,11 +46,16 @@ class Chargement
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $numeroFacture = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $statut = null;
+
     public function __construct()
     {
         $this->facture = new ArrayCollection();
         $this->facture2s = new ArrayCollection();
         $this->produits = new ArrayCollection();
+        $this->paiements = new ArrayCollection();
+        $this->dettes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -214,5 +219,16 @@ class Chargement
         return $this;
     }
 
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(?string $statut): self
+    {
+        $this->statut = $statut;
+
+        return $this;
+    }
 
 }
