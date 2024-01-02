@@ -28,7 +28,7 @@ class Facture
     #[ORM\ManyToMany(targetEntity: Produit::class, inversedBy: 'factures')]
     private Collection $produit;
 
-    #[ORM\Column(type: 'decimal', precision: 50, scale: 20, nullable: true)]
+    #[ORM\Column(type: ("float"))]
     private ?float $quantite = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0',nullable: true)]

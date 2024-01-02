@@ -257,6 +257,18 @@ class ChargementController extends AbstractController
     public function statut(Chargement $chargement, EntityManagerInterface $entityManager){
 
         $chargement->setStatut('payée');
+        $nomChargement = $chargement->getNomClient();
+        $totalCharge = $chargement->getTotal();
+        $dettes = $entityManager->getRepository(Dette::class)->findAll();
+        foreach ($dettes as $dette){
+            $nomDette = $dette->getClient()->getNom();
+            $montantDette = $dette->getReste();
+            if ($nomChargement == $nomDette && $totalCharge == $montantDette){
+                $entityManager->remove($dette);
+                $entityManager->flush();
+            }
+
+        }
         $entityManager->persist($chargement);
         $entityManager->flush();
         $this->addFlash('success', 'Le paiement de la facture a été effectué.');

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Chargement;
 use App\Entity\Dette;
 use App\Entity\Paiement;
 use App\Entity\Search;
@@ -85,11 +86,21 @@ class PaiementController extends AbstractController
             return $this->redirectToRoute('paiement_liste');
         }
         if ($remainingDebt == 0){
+            $montantDette = $payment->getClient()->getDette()->first()->getMontantDette();
+            $chargement = $manager->getRepository(Chargement::class)->findAll();
+            foreach ($chargement as $charge){
+                $totalFacture = $charge->getTotal();
+                $nomFact = $payment->getClient()->getNom();
+                if ($montantDette == $totalFacture && $charge->getNomClient() == $nomFact){
+                    $charge->setStatut('payée');
+                    $manager->persist($charge);
+                    $manager->flush();
+                }
+            }
             $currentDebt->setStatut('payée');
             $this->addFlash('success','La dette a été payée.');
 
         }
-
         $currentDebt->setReste($remainingDebt);
         $payment->setReste($remainingDebt);
 
