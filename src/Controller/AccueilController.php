@@ -110,7 +110,7 @@ class AccueilController extends AbstractController
 
         $gainMoisCourant = $sortieTotalMonth - $entreetotal;
 
-        /*//Alerte
+        //Alerte
         $sortieAnnuelle = 0;
         $firstDayOfYear = new \DateTime('first day of January ' . $anneeCourante);
         $lastDayOfYear = new \DateTime('last day of December ' . $anneeCourante);
@@ -150,9 +150,9 @@ class AccueilController extends AbstractController
             }
         }
 
-        $anneePrecedente = $anneeCourante - 1;
-
         $gainAnnuel = $sortieAnnuelle - $entreeAnnuelle;
+
+        /*$anneePrecedente = $anneeCourante - 1;
         $sortieAnneePrecedente = 0;
         $entreeAnneePrecedente = 0;
 
@@ -168,9 +168,9 @@ class AccueilController extends AbstractController
             if ($date->format('Y') == $anneePrecedente) {
                 $entreeAnneePrecedente += $e->getQtEntree() * $e->getPrixUnit();
             }
-        }
+        }*/
 
-        $sortieVariation = 0;
+        /*$sortieVariation = 0;
         if ($sortieAnneePrecedente != 0) {
             $sortieVariation = ($sortieAnnuelle - $sortieAnneePrecedente) / $sortieAnneePrecedente * 100;
         }
@@ -183,14 +183,14 @@ class AccueilController extends AbstractController
             'entreetotal' => $entreetotal,
             'entreetotal24H' => $entreetotal24H,
             'gainMoisCourant' =>$gainMoisCourant,
-            'message' => $message,
-            /*'sortieAnnuelle' => $sortieAnnuelle,
+            'sortieAnnuelle' => $sortieAnnuelle,
             'entreeAnnuelle' => $entreeAnnuelle,
-            'sortieVariation' => $sortieVariation,
-            'entreeVariation' => $entreeVariation,
             'gainAnnuel' => $gainAnnuel,
+            /*'sortieVariation' => $sortieVariation,
+            'entreeVariation' => $entreeVariation,
             'entreeAnneePrecedente' => $entreeAnneePrecedente,
             'sortieAnneePrecedente' => $sortieAnneePrecedente,
+            'message' => $message,
             'messageAnnee' => $messageAnnee*/
         ]);
 
