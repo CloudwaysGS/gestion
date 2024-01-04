@@ -150,9 +150,9 @@ class AccueilController extends AbstractController
             }
         }
 
-        $gainAnnuel = $sortieAnnuelle - $entreeAnnuelle;
-
         /*$anneePrecedente = $anneeCourante - 1;
+
+        $gainAnnuel = $sortieAnnuelle - $entreeAnnuelle;
         $sortieAnneePrecedente = 0;
         $entreeAnneePrecedente = 0;
 
@@ -185,9 +185,9 @@ class AccueilController extends AbstractController
             'gainMoisCourant' =>$gainMoisCourant,
             'sortieAnnuelle' => $sortieAnnuelle,
             'entreeAnnuelle' => $entreeAnnuelle,
-            'gainAnnuel' => $gainAnnuel,
             /*'sortieVariation' => $sortieVariation,
             'entreeVariation' => $entreeVariation,
+            'gainAnnuel' => $gainAnnuel,
             'entreeAnneePrecedente' => $entreeAnneePrecedente,
             'sortieAnneePrecedente' => $sortieAnneePrecedente,
             'message' => $message,
