@@ -110,7 +110,7 @@ class AccueilController extends AbstractController
 
         $gainMoisCourant = $sortieTotalMonth - $entreetotal;
 
-        //Alerte
+        /*//Alerte
         $sortieAnnuelle = 0;
         $firstDayOfYear = new \DateTime('first day of January ' . $anneeCourante);
         $lastDayOfYear = new \DateTime('last day of December ' . $anneeCourante);
@@ -174,7 +174,7 @@ class AccueilController extends AbstractController
         if ($sortieAnneePrecedente != 0) {
             $sortieVariation = ($sortieAnnuelle - $sortieAnneePrecedente) / $sortieAnneePrecedente * 100;
         }
-        $entreeVariation = ($entreeAnneePrecedente != 0) ? (($entreeAnnuelle - $entreeAnneePrecedente) / $entreeAnneePrecedente * 100) : 0;
+        $entreeVariation = ($entreeAnneePrecedente != 0) ? (($entreeAnnuelle - $entreeAnneePrecedente) / $entreeAnneePrecedente * 100) : 0;*/
         return $this->render('accueil.html.twig', [
             'controller_name' => 'AccueilController',
             'total' => $total,
@@ -183,15 +183,15 @@ class AccueilController extends AbstractController
             'entreetotal' => $entreetotal,
             'entreetotal24H' => $entreetotal24H,
             'gainMoisCourant' =>$gainMoisCourant,
-            'sortieAnnuelle' => $sortieAnnuelle,
+            'message' => $message,
+            /*'sortieAnnuelle' => $sortieAnnuelle,
             'entreeAnnuelle' => $entreeAnnuelle,
             'sortieVariation' => $sortieVariation,
             'entreeVariation' => $entreeVariation,
             'gainAnnuel' => $gainAnnuel,
             'entreeAnneePrecedente' => $entreeAnneePrecedente,
             'sortieAnneePrecedente' => $sortieAnneePrecedente,
-            'message' => $message,
-            'messageAnnee' => $messageAnnee
+            'messageAnnee' => $messageAnnee*/
         ]);
 
     }

@@ -318,11 +318,11 @@
                         {{ message }}
                     </div>
                 {% endif %}
-                {% if messageAnnee %}
+                {#{% if messageAnnee %}
                     <div class="alert alert-warning" role="alert">
                         {{ messageAnnee }}
                     </div>
-                {% endif %}
+                {% endif %}#}
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
@@ -421,7 +421,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-xl-3 col-md-6 mb-4">
+                            {#<div class="col-xl-3 col-md-6 mb-4">
                                 <div class="card border-left-warning shadow h-100 py-2">
                                     <div class="card-body">
                                         <div class="row no-gutters align-items-center">
@@ -453,9 +453,9 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div>#}
 
-                            <div class="col-xl-3 col-md-6 mb-4">
+                            {#<div class="col-xl-3 col-md-6 mb-4">
                                 <div class="card border-left-danger shadow h-100 py-2">
                                     <div class="card-body">
                                         <div class="row no-gutters align-items-center">
@@ -547,7 +547,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div>#}
                     {% endif %}
 
                     {% if is_granted("ROLE_VENDEUR") %}
@@ -571,7 +571,7 @@
 
 
                         <!-- Content Row -->
-                    <div class="row">
+                    {#<div class="row">
                         <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-info shadow h-100 py-2">
                                 <div class="card-body">
@@ -674,10 +674,10 @@
                             </div>
                         </div>
 
-                    </div>
+                    </div>#}
 
                     <!-- Content Row -->
-                    <div class="row">
+                    {#<div class="row">
 
                         <!-- Content Column -->
                         <div class="col-lg-6 mb-4">
@@ -827,7 +827,7 @@
                             </div>
 
                         </div>
-                    </div>
+                    </div>#}
 
                 </div>
             {% endblock %}
@@ -857,28 +857,6 @@
 <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
 </a>
-
-<!-- Logout Modal-->
-<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Prêt à quitter?</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">Sélectionnez « Déconnexion » ci-dessous si vous êtes prêt à mettre fin à votre session en cours.</div>
-            {% if app.user %}
-            <div class="modal-footer">
-                <button class="btn btn-danger" type="button" data-dismiss="modal">Annuler</button>
-                <a class="btn btn-primary" href="{{ path('app_logout') }}">Déconnexion</a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
 
 <!-- Bootstrap core JavaScript-->
 <script src="{{ asset('scripts.js') }}"></script>
@@ -911,18 +889,6 @@
                 flashMessage = document.getElementById('flash-message');
             }
         }, 10000);
-    </script>
-
-        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script>
-        // Attendre que le document soit prêt
-        $(document).ready(function () {
-            // Supprimer la classe 'sidebar-toggled' du corps
-            $('body').removeClass('sidebar-toggled');
-
-            // Si vous souhaitez également cacher le menu latéral, vous pouvez utiliser le code suivant :
-            // $('#accordionSidebar').removeClass('toggled');
-        });
     </script>
 
 {% endblock %}
