@@ -313,11 +313,12 @@
                 {% for message in app.session.flashBag.get('danger') %}
                     <div id="flash-message" class="alert alert-danger">{{ message }}</div>
                 {% endfor %}
-                {#{% if message %}
+                {% if message %}
                     <div class="alert alert-warning" role="alert">
                         {{ message }}
                     </div>
-                {% endif %}#}
+                {% endif %}
+
                 {#{% if messageAnnee %}
                     <div class="alert alert-warning" role="alert">
                         {{ messageAnnee }}
