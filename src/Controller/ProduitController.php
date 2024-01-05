@@ -68,7 +68,7 @@ class ProduitController extends AbstractController
             return $this->redirectToRoute('produit_liste');
 
         } catch (\Exception $e) {
-            $this->addFlash('danger', $e->getMessage());
+            $this->addFlash('success', $e->getMessage());
             return $this->redirectToRoute('produit_liste');
         }
     }
