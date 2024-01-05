@@ -90,14 +90,14 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-        /*// Somme totale des entrées pour le mois en cours
+        // Somme totale des entrées pour le mois en cours
         $entreetotal = $entree->createQueryBuilder('e')
             ->select('COALESCE(SUM(e.total), 0)')
             ->where('e.dateEntree BETWEEN :startOfMonth AND :endOfMonth')
             ->setParameter('startOfMonth', $firstDayOfMonth)
             ->setParameter('endOfMonth', $lastDayOfMonth)
             ->getQuery()
-            ->getSingleScalarResult();*/
+            ->getSingleScalarResult();
 
 
         return $this->render('accueil.html.twig', [
@@ -105,7 +105,7 @@ class AccueilController extends AbstractController
             'total' => $total,
             'sortieTotalMonth' => $sortieTotalMonth,
             'sortietotal24H' => $sortietotal24H,
-/*            'entreetotal' => $entreetotal,*/
+            'entreetotal' => $entreetotal,
             'entreetotal24H' => $entreetotal24H,
         ]);
 
