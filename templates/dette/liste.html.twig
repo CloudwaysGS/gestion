@@ -92,7 +92,7 @@
                         <table class="table table-bordered text-center">
                             <tr>
                                 <th>Nom client</th>
-                                <th>Montant dette</th>
+                                <th>Montant</th>
                                 {% if dette %}
                                     <th>{{ dette[0].reste < 0 ? 'A Remettre' : 'Reste' }}</th>
                                 {% endif %}
@@ -119,7 +119,9 @@
 
                                     <th>{{ d.dateCreated | date('d/m/Y') }}</th>
                                     <th>
+{#
                                         <a class="btn btn-primary btn-circle btn-sm" title="paiement" href="{{ path('paiement_add') }}" ><i class="fas fa-money-bill-alt"></i></a>
+#}
                                         <a class="btn btn-info btn-circle btn-sm" title="info" href="javascript:void(0);" onclick="openPopup('{{ path('dette_info', {'id': d.id}) }}')" ><i class="fas fa-info-circle"></i></a>
                                         <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="{{ path('dette_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                     </th>
