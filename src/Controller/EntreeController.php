@@ -58,10 +58,7 @@ class EntreeController extends AbstractController
                 $this->addFlash('danger', 'produit et detail ne peuvent pas être remplis en même temps.');
                 return $this->redirectToRoute('sortie_liste');
             }
-            if ($fournisseurId == null) {
-                $this->addFlash('danger', 'Choisissez un fournisseur.');
-                return $this->redirectToRoute('entree_liste');
-            }
+
             $validationErrors = $validatorService->validate([
                 'produitId' => $produitId,
                 'qtSortie' => $qtEntree,
@@ -76,15 +73,16 @@ class EntreeController extends AbstractController
                 return $this->redirectToRoute('sortie_liste');
             }
 
-            $fournisseur = $manager->getRepository(Fournisseur::class)->find($fournisseurId);
-
             if (!empty($detailId)){
                 $entree = new Entree();
                 $date = new \DateTime();
                 $entree->setDateEntree($date);
                 $entree->setQtEntree($qtEntree);
                 $entree->setPrixUnit($prixUnit);
-                $entree->setFournisseur($fournisseur);
+                if ($fournisseurId != null) {
+                    $fournisseur = $manager->getRepository(Fournisseur::class)->find($fournisseurId);
+                    $entree->setFournisseur($fournisseur);
+                }
 
                 $produit = $manager->getRepository(Produit::class)->find($detailId);
                 if (!$produit) {
@@ -156,7 +154,10 @@ class EntreeController extends AbstractController
                     $entree->setTotal($prixUnit * $qtEntree);
                     $user = $this->getUser();
                     $entree->setUser($user);
-                    $entree->setFournisseur($fournisseur);
+                    if ($fournisseurId != null) {
+                        $fournisseur = $manager->getRepository(Fournisseur::class)->find($fournisseurId);
+                        $entree->setFournisseur($fournisseur);
+                    }
 
                     $manager->persist($entree);
                     $manager->flush();

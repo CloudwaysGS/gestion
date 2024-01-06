@@ -64,12 +64,12 @@ class DetteController extends AbstractController
                 $dette->setClient($client)
                         ->setDateCreated(new \DateTime())
                         ->setReste($dette->getMontantDette())
-                        ->setStatut('non-payée');
+                        ->setStatut('impayé');
             }
 
             $c = $dettes->findAllOrderedByDate();
                 foreach ( $c as $s) {
-                    if ( $dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "non-payée" && $s->getReste() != 0) {
+                    if ( $dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "impayé" && $s->getReste() != 0) {
                         $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette non payée.');
                         return $this->redirectToRoute('dette_liste');
                     }
