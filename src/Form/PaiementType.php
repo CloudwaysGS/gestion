@@ -23,7 +23,10 @@ class PaiementType extends AbstractType
             ->add('client', EntityType::class, [
                 'class' => 'App\Entity\Client',
                 'label' => false,
-                'placeholder' => 'Sélectionnez un client',
+                'attr' => array(
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'Sélectionnez un client',
+                ),
                 'required' => true,
                 'multiple' => false,
             ])
