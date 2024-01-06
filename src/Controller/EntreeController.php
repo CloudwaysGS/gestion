@@ -145,9 +145,6 @@ class EntreeController extends AbstractController
                 }
 
                 $qtStock = $produit->getQtStock();
-                if ($qtStock < $qtEntree) {
-                    $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $qtStock);
-                } else {
 
                     $entree->setProduit($produit);
                     $entree->setNomProduit($produit->getLibelle());
@@ -173,7 +170,6 @@ class EntreeController extends AbstractController
                     $manager->flush();
 
                     $this->addFlash('success', 'Le produit a été enregistré avec succès.');
-                }
             }
         return $this->redirectToRoute('entree_liste');
     }
