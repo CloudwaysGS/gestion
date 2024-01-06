@@ -219,12 +219,12 @@
             {% endfor %}
 
             <button class="glow-on-hover" onclick="window.location.href='{{ path('save') }}'"> Save </button>
-            <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'"> Mes Factures</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'">Factures</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">+Client</button>
             {% if is_granted("ROLE_GESTION_STOCK") %}
                 <button class="glow-on-hover" onclick="window.location.href='{{ path('produit_liste') }}'">+Produits</button>
             {% endif %}
-            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">Facture 2</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_liste') }}'">Facture2</button>
 
             {% for message in app.session.flashBag.get('danger') %}
                 <div class="alert alert-danger">{{ message }}</div>

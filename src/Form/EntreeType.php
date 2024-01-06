@@ -20,14 +20,16 @@ class EntreeType extends AbstractType
     {
         $libelle = "";
         $builder
-            ->add('fournisseur',EntityType::class, array(
-                'class' => Fournisseur::class,
+            ->add('fournisseur', EntityType::class, array(
                 'label' => false,
-                'attr' => array(
-                    'class' => 'form-control form-group',
-                    ),
-                'placeholder' => 'Nom du fournisseur    ',
+                'class' => Fournisseur::class,
+                'placeholder' => 'Nom du fournisseur',
                 'required' => false,
+                'attr' => array('class' => 'form-control form-group'),
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('f')
+                        ->orderBy('f.nom', 'ASC'); // Tri par ordre alphabétique sur la colonne 'nom'
+                },
             ))
             ->add('produit',EntityType::class, array(
                 'class' => Produit::class,

@@ -23,7 +23,7 @@ class SortieValidatorService
     private function getValidationConstraints(): Assert\Collection
     {
         return new Assert\Collection([
-            'clientId' => new Assert\NotBlank(['message' => 'client ne doit pas être vide.']),
+            'clientId' => new Assert\Optional(),
             'produitId' => new Assert\Optional(),
             'detailId' => new Assert\Optional(),
             'qtSortie' => [

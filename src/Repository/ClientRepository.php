@@ -42,11 +42,11 @@ class ClientRepository extends ServiceEntityRepository
     public function findAllOrderedByDate()
     {
         return $this->createQueryBuilder('p')
-            ->orderBy('p.dateCreated', 'DESC')
+            ->orderBy('p.nom', 'ASC') // Changement de DESC à ASC
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
+
 
 //    /**
 //     * @return Client[] Returns an array of Client objects

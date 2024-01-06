@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Client;
 use App\Entity\Dette;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
@@ -25,7 +26,11 @@ class DetteType extends AbstractType
                 'label' => false,
                 'class' => Client::class,
                 'placeholder' => 'Select client',
-                'attr' => array('class' => 'form-control form-group')
+                'attr' => array('class' => 'form-control form-group'),
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('c')
+                        ->orderBy('c.nom', 'ASC'); // Tri par ordre alphabétique sur la colonne 'nom'
+                },
             ))
             ->add('montant_dette', TextType::class, array(
                 'label' => false,

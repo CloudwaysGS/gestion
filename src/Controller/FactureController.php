@@ -43,7 +43,7 @@ class FactureController extends AbstractController
 
         $produits = $nom ? $prod->findByName($nom) : $prod->findAllOrderedByDate();
         $details = $prod->findAllDetail();
-        $clients = $clientRepository->findAll();
+        $clients = $clientRepository->findAllOrderedByDate();
 
         return $this->render('facture/index.html.twig', [
             'produits' => $produits,

@@ -88,11 +88,10 @@ class SortieController extends AbstractController
                 if ($qtStock < $qtSortie) {
                     $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $qtStock);
                 } else {
-                    $client = $manager->getRepository(Client::class)->find($clientId);
 
-                    if (!$client) {
-                        $this->addFlash('danger', 'Client not found.');
-                        return $this->redirectToRoute('sortie_liste');
+                    if ($clientId != null) {
+                        $client = $manager->getRepository(Client::class)->find($clientId);
+                        $sortie->setClient($client);
                     }
 
                     $sortie->setProduit($produit);
@@ -100,8 +99,6 @@ class SortieController extends AbstractController
                     $sortie->setTotal($prixUnit * $qtSortie);
                     $user = $this->getUser();
                     $sortie->setUser($user);
-
-                    $sortie->setClient($client);
 
                     $manager->persist($sortie);
                     $manager->flush();
@@ -150,12 +147,9 @@ class SortieController extends AbstractController
                 if ($qtStock < $qtSortie) {
                     $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $qtStock);
                 } else {
-
-                    $client = $manager->getRepository(Client::class)->find($clientId);
-
-                    if (!$client) {
-                        $this->addFlash('danger', 'Client not found.');
-                        return $this->redirectToRoute('sortie_liste');
+                    if ($clientId !== null) {
+                        $client = $manager->getRepository(Client::class)->find($clientId);
+                        $sortie->setClient($client);
                     }
 
                     $sortie->setProduit($produit);
@@ -164,7 +158,6 @@ class SortieController extends AbstractController
                     $user = $this->getUser();
                     $sortie->setUser($user);
 
-                    $sortie->setClient($client);
                     $manager->persist($sortie);
                     $manager->flush();
                     // Mise à jour qtestock produit
