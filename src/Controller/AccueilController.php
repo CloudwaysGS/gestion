@@ -100,6 +100,81 @@ class AccueilController extends AbstractController
             ->getSingleScalarResult();
 
 
+        //Il ne reste que 2 jours avant la fin du mois en cours
+        $today = new \DateTime();
+        $remainingDays = $lastDayOfMonth->diff($today)->days;
+        $message = ($remainingDays === 2) ? "Attention : Il ne reste que 2 jours avant la fin du mois en cours !" : (($remainingDays === 1) ? "Attention : Il ne reste plus que 1 jour avant la fin du mois en cours !" : "");
+
+        $gainMoisCourant = $sortieTotalMonth - $entreetotal;
+        $today = new \DateTime();
+        //Alerte
+        $sortieAnnuelle = 0;
+        $firstDayOfYear = new \DateTime('first day of January ' . $anneeCourante);
+        $lastDayOfYear = new \DateTime('last day of December ' . $anneeCourante);
+        $remainingDaysOfYear = $lastDayOfYear->diff($today)->days;
+        $messageAnnee = ($remainingDaysOfYear === 5) ? "Attention : Il ne reste que 5 jours avant la fin de l'année en cours !" : (($remainingDaysOfYear === 4) ? "Attention : Il ne reste plus que 4 jour avant la fin du mois en cours !" : "");
+
+        //Récupérer la somme totale pour le mois des facture
+        $sumTotalYear = $charge->createQueryBuilder('c')
+            ->select('SUM(c.total)')
+            ->where('c.date BETWEEN :startOfYear AND :endOfYear')
+            ->setParameter('startOfYear', $firstDayOfYear)
+            ->setParameter('endOfYear', $lastDayOfYear)
+            ->getQuery()
+            ->getSingleScalarResult();
+        $sumTotalYear = is_null($sumTotalYear) ? 0 : $sumTotalYear;
+
+        // le calcul du total des sorties effectuées dans l'année courant
+        $sortie = $sort->findAll();
+        foreach ($sortie as $s) {
+            $date = $s->getDateSortie();
+            if ($date >= $firstDayOfYear && $date <= $lastDayOfYear) {
+                $montant = $s->getQtSortie() * $s->getPrixUnit();
+                $sortieAnnuelle += $montant;
+            }
+        }
+        $sortieAnnuelle += $sumTotalYear;
+
+        $entreeAnnuelle = 0;
+        $anneeCourante = date('Y');
+        $firstDayOfYear = new \DateTime("$anneeCourante-01-01");
+        $lastDayOfYear = new \DateTime("$anneeCourante-12-31");
+
+        foreach ($entree as $e) {
+            $date = $e->getDateEntree();
+            if ($date >= $firstDayOfYear && $date <= $lastDayOfYear) {
+                $montant = $e->getTotal();
+                $entreeAnnuelle += $montant;
+            }
+        }
+
+        $anneePrecedente = $anneeCourante - 1;
+
+        $gainAnnuel = $sortieAnnuelle - $entreeAnnuelle;
+        $sortieAnneePrecedente = 0;
+        $entreeAnneePrecedente = 0;
+
+        foreach ($sortie as $s) {
+            $date = $s->getDateSortie();
+            if ($date->format('Y') == $anneePrecedente) {
+                $sortieAnneePrecedente += $s->getQtSortie() * $s->getPrixUnit();
+            }
+        }
+
+        foreach ($entree as $e) {
+            $date = $e->getDateEntree();
+            if ($date->format('Y') == $anneePrecedente) {
+                $entreeAnneePrecedente += $e->getQtEntree() * $e->getPrixUnit();
+            }
+        }
+
+        $sortieVariation = 0;
+        if ($sortieAnneePrecedente != 0) {
+            $sortieVariation = ($sortieAnnuelle - $sortieAnneePrecedente) / $sortieAnneePrecedente * 100;
+        }
+        $entreeVariation = ($entreeAnneePrecedente != 0) ? (($entreeAnnuelle - $entreeAnneePrecedente) / $entreeAnneePrecedente * 100) : 0;
+
+
         return $this->render('accueil.html.twig', [
             'controller_name' => 'AccueilController',
             'total' => $total,
@@ -107,6 +182,16 @@ class AccueilController extends AbstractController
             'sortietotal24H' => $sortietotal24H,
             'entreetotal' => $entreetotal,
             'entreetotal24H' => $entreetotal24H,
+            'gainMoisCourant' =>$gainMoisCourant,
+            'sortieAnnuelle' => $sortieAnnuelle,
+            'entreeAnnuelle' => $entreeAnnuelle,
+            'sortieVariation' => $sortieVariation,
+            'entreeVariation' => $entreeVariation,
+            'gainAnnuel' => $gainAnnuel,
+            'entreeAnneePrecedente' => $entreeAnneePrecedente,
+            'sortieAnneePrecedente' => $sortieAnneePrecedente,
+            'message' => $message,
+            'messageAnnee' => $messageAnnee
         ]);
 
     }
