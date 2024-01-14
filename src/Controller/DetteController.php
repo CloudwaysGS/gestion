@@ -76,7 +76,7 @@ class DetteController extends AbstractController
                 }
             $manager->persist($dette);
             $manager->flush();
-            $notifier->success('L\'entrée a été enregistrée avec succès.');
+            $$this->addFlash('success','La dette a été enregistrée avec succès.');
         }
         return $this->redirectToRoute('dette_liste');
     }
