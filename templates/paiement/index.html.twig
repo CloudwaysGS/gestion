@@ -12,7 +12,7 @@
 
     <a href="{{ path('dette_add') }}" class="btn btn-primary ml-3 m-1">liste dettes</a>
     <div class="row">
-        <div class="container col-md-9">
+        <div class="container col-md-8">
             <div class="card ">
                 <div class="card-header">Liste des clients</div>
                 <div class="card-body">
@@ -20,7 +20,7 @@
                         <table class="table table-bordered">
                             <tr>
                                 <th>Client</th>
-                                <th>Montant avance</th>
+                                <th>Avance</th>
                                 <th>Reste</th>
                                 <th>Date</th>
                                 <th>action</th>
@@ -30,10 +30,9 @@
                                     <th>{{ p.client.nom }}</th>
                                     <th>{{ p.montant | number_format(0, ',', ' ') }}</th>
                                     <th>{{ p.reste | number_format(0, ',', ' ') }}</th>
-                                    <th>{{ p.datePaiement | date('d/m/Y H:i') }}</th>
+                                    <th>{{ p.datePaiement | date('d/m/Y') }}</th>
                                     <th>
                                         <a class="btn btn-info btn-circle btn-sm" title="detail" href="javascript:void(0);" onclick="openPopup('{{ path('paiement_detail', {'id': p.id}) }}')"><i class="fas fa-info-circle"></i></a>
-                                        <a class="btn btn-primary btn-circle btn-sm" title="Modifier" href="{{ path('paiement_edit',{'id':p.id}) }}"><i class="fa fa-edit"></i></a>
                                         <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="{{ path('paiement_delete', {'id':p.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                     </th>
                                 </tr>
@@ -59,7 +58,7 @@
                 </div>
             </div>
         </div>
-        <div class="container col-md-3">
+        <div class="container col-md-4">
             <div class="card">
                 <div class="card-header">Formulaire de gestion des clients</div>
                 <div class="card-body">
