@@ -102,6 +102,34 @@ class DetteController extends AbstractController
         ]);
     }
 
+    #[Route('/dette/edit/{id}', name: 'edit_dette')]
+    public function edit($id, DetteRepository $detteRepository, Request $request, EntityManagerInterface $entityManager)
+    {
+        $dette = $detteRepository->find($id);
+        $form = $this->createForm(DetteType::class, $dette);
+        $form->handleRequest($request);
+        $total = $detteRepository->count([]);
+        $page = $request->query->getInt('page', 1); // current page number
+        $limit = 10; // number of products to display per page
+        $offset = ($page - 1) * $limit;
+        if ($form->isSubmitted() && $form->isValid()) {
+            $reste = $form->getData()->getMontantDette();
+            // Affecter la valeur à l'entité Dette
+            $dette = $form->getData();
+            $dette->setReste($reste);
+            $entityManager->persist($dette);
+            $entityManager->flush();
+
+            return $this->redirectToRoute("dette_liste");
+        }
+        return $this->render('dette/liste.html.twig', [
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'dette' => $dette,
+            'form' => $form->createView()
+        ]);
+    }
 
 
 

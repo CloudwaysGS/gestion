@@ -93,9 +93,7 @@
                             <tr>
                                 <th>Nom client</th>
                                 <th>Montant</th>
-                                {% if dette %}
-                                    <th>{{ dette[0].reste < 0 ? 'A Remettre' : 'Reste' }}</th>
-                                {% endif %}
+                                <th>Reste</th>
                                 <th>statut</th>
                                 <th>Date</th>
                                 <th>action</th>
@@ -124,6 +122,12 @@
 #}
                                         <a class="btn btn-info btn-circle btn-sm" title="info" href="javascript:void(0);" onclick="openPopup('{{ path('dette_info', {'id': d.id}) }}')" ><i class="fas fa-info-circle"></i></a>
                                         <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="{{ path('dette_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                        <a class="btn btn-info btn-circle btn-sm" title="modifier" href="{{ path('edit_dette', {'id':d.id}) }}" ">
+
+                                            <i class="fa fa-edit" aria-hidden="true"></i>
+                                        </a>
+
+
                                     </th>
                                 </tr>
                             {% endfor %}
