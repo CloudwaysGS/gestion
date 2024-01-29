@@ -108,11 +108,12 @@ class AccueilController extends AbstractController
         //Il ne reste que 2 jours avant la fin du mois en cours
         $today = new \DateTime();
         $remainingDays = $lastDayOfMonth->format('j') - $today->format('j');
-        $message = ($remainingDays === 2)
-            ? "Attention : Il ne reste que 2 jours avant la fin du mois en cours !"
-            : (($remainingDays === 1)
-                ? "Attention : Il ne reste plus que 1 jour avant la fin du mois en cours !"
-                : "");
+
+        if ($remainingDays === 2) {
+            $this->addFlash('warning', "Attention : Il ne reste que 2 jours avant la fin du mois en cours !");
+        } elseif ($remainingDays === 1) {
+            $this->addFlash('warning', "Attention : Il ne reste plus que 1 jour avant la fin du mois en cours !");
+        }
 
         /*//Alerte
         $sortieAnnuelle = 0;
@@ -186,7 +187,6 @@ class AccueilController extends AbstractController
             'sortietotal24H' => $sortietotal24H,
             'entreetotal' => $entreetotal,
             'entreetotal24H' => $entreetotal24H,
-            'message' => $message,
             /*'sortieAnnuelle' => $sortieAnnuelle,
             'entreeAnnuelle' => $entreeAnnuelle,
             'sortieVariation' => $sortieVariation,
