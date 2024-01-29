@@ -106,14 +106,14 @@ class AccueilController extends AbstractController
             ->getSingleScalarResult();
 
         //Il ne reste que 2 jours avant la fin du mois en cours
-        $today = new \DateTime();
+        /*$today = new \DateTime();
         $remainingDays = $lastDayOfMonth->format('j') - $today->format('j');
 
         if ($remainingDays === 2) {
             $this->addFlash('warning', "Attention : Il ne reste que 2 jours avant la fin du mois en cours !");
         } elseif ($remainingDays === 1) {
             $this->addFlash('warning', "Attention : Il ne reste plus que 1 jour avant la fin du mois en cours !");
-        }
+        }*/
 
         /*//Alerte
         $sortieAnnuelle = 0;
