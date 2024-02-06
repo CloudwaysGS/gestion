@@ -49,15 +49,28 @@ class AccueilController extends AbstractController
             ->getSingleScalarResult();
         $sortietotal24H += $sumTotal24H;
 
-    
-       
+
+        // obtenir la date de début et de fin du mois en cours
+        $firstDayOfMonth = new \DateTime('first day of this month');
+        $lastDayOfMonth = new \DateTime('last day of this month');
+        $lastDayOfMonth->setTime(23, 59, 59); // Fixe l'heure à la fin de la journée
+
+        // Somme totale des entrées des dernières 24 heures
+        $twentyFourHoursAgo = new \DateTime('-24 hours');
+        $entreetotal24H = $entree->createQueryBuilder('e')
+            ->select('COALESCE(SUM(e.total), 0)')
+            ->where('e.dateEntree >= :twentyFourHoursAgo')
+            ->setParameter('twentyFourHoursAgo', $twentyFourHoursAgo)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+      
+
         return $this->render('accueil.html.twig', [
             'controller_name' => 'AccueilController',
             'total' => $total,
-            'entreetotal24H' => $entreetotal24H,
             'sortietotal24H' => $sortietotal24H,
-            
-            
+            'entreetotal24H' => $entreetotal24H,
         ]);
 
     }
