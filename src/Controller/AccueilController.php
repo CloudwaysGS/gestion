@@ -64,50 +64,6 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-        $sumTotalMonth = $charge->createQueryBuilder('c')
-        ->select('COALESCE(SUM(c.total), 0)')
-        ->where('c.date >= :startOfMonth AND c.date <= :endOfMonth')
-        ->setParameter('startOfMonth', $firstDayOfMonth)
-        ->setParameter('endOfMonth', $lastDayOfMonth)
-        ->getQuery()
-        ->getSingleScalarResult();
-
-        // le calcul du total des sorties effectuées dans le mois courant
-        $anneeCourante = date('Y');
-        $moisCourant = date('m');
-
-        $firstDayOfMonth = new \DateTime("$anneeCourante-$moisCourant-01");
-        $lastDayOfMonth = clone $firstDayOfMonth; // Clonage pour éviter la référence à la même instance
-        $lastDayOfMonth->modify('last day of this month');
-
-        $sortieTotalMonthQuery = $sort->createQueryBuilder('s')
-        ->select('COALESCE(SUM(s.total), 0)')
-        ->where('s.dateSortie BETWEEN :startOfMonth AND :endOfMonth')
-        ->setParameter('startOfMonth', $firstDayOfMonth)
-        ->setParameter('endOfMonth', $lastDayOfMonth)
-        ->getQuery();
-
-        $sortieTotalMonth = $sortieTotalMonthQuery->getSingleScalarResult();
-        $sortieTotalMonth += $sumTotalMonth;
-
-        // Somme totale des entrées des dernières 24 heures
-        $twentyFourHoursAgo = new \DateTime('-24 hours');
-        $entreetotal24H = $entree->createQueryBuilder('e')
-        ->select('COALESCE(SUM(e.total), 0)')
-        ->where('e.dateEntree >= :twentyFourHoursAgo')
-        ->setParameter('twentyFourHoursAgo', $twentyFourHoursAgo)
-        ->getQuery()
-        ->getSingleScalarResult();
-        
-        // Somme totale des entrées pour le mois en cours
-        $entreetotal = $entree->createQueryBuilder('e')
-        ->select('COALESCE(SUM(e.total), 0)')
-        ->where('e.dateEntree BETWEEN :startOfMonth AND :endOfMonth')
-        ->setParameter('startOfMonth', $firstDayOfMonth)
-        ->setParameter('endOfMonth', $lastDayOfMonth)
-        ->getQuery()
-        ->getSingleScalarResult();
-
       
 
         return $this->render('accueil.html.twig', [
@@ -115,7 +71,6 @@ class AccueilController extends AbstractController
             'total' => $total,
             'sortietotal24H' => $sortietotal24H,
             'entreetotal24H' => $entreetotal24H,
-            'entreetotal' => $entreetotal,
         ]);
 
     }
