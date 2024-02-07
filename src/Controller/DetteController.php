@@ -17,11 +17,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Knp\Component\Pager\PaginatorInterface;
 
 class DetteController extends AbstractController
 {
     #[Route('/dette', name: 'dette_liste')]
-    public function index(DetteRepository $dette,Request $request): Response
+    public function index(DetteRepository $dette,Request $request, PaginatorInterface $paginator): Response
     {
         $d = new Dette();
         $form = $this->createForm(DetteType::class, $d, array(
@@ -33,18 +34,15 @@ class DetteController extends AbstractController
         $form2->handleRequest($request);
 
         $nom = $search->getNom();
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
-        $total = $nom ? count($dette->findByName($nom)) : $dette->countAll();
-        $offset = ($page - 1) * $limit;
-        $dette = $nom ? $dette->findByName($nom, $limit, $offset) : $dette->findAllOrderedByDate($limit, $offset);
-        $dette = array_slice($dette, $offset, $limit);
+        $pagination = $paginator->paginate(
+            ($nom !== null && $nom !== '') ? $dette->findByName($nom) : $dette->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
+    
         return $this->render('dette/liste.html.twig', [
             'controller_name' => 'DetteController',
-            'dette'=>$dette,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
+            'pagination' => $pagination,
             'form' => $form->createView(),
             'form2' => $form2->createView()
         ]);
