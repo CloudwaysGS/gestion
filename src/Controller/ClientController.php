@@ -3,43 +3,32 @@
 namespace App\Controller;
 
 use App\Entity\Client;
-use App\Entity\Dette;
-use App\Entity\Facture;
-use App\Entity\Produit;
 use App\Form\ClientType;
-use App\Form\FactureType;
 use App\Repository\ClientRepository;
-use App\Repository\FactureRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Knp\Component\Pager\PaginatorInterface;
 
 class ClientController extends AbstractController
 {
     #[Route('/client', name: 'client_liste')]
-    public function index(ClientRepository $client, Request $request): Response
+    public function index(ClientRepository $client, Request $request, PaginatorInterface $paginator): Response
     {
         $c = new Client();
         $form = $this->createForm(ClientType::class, $c, array(
             'action' => $this->generateUrl('client_add'),
         ));
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
-        $client = $client->findAllOrderedByDate();
-        $total = count($client);
-        $offset = ($page - 1) * $limit;
-        $client = array_slice($client, $offset, $limit);
+        $pagination = $paginator->paginate(
+            $client->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
         return $this->render('client/index.html.twig', [
             'controller_name' => 'ClientController',
-            'client'=>$client,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
+            'pagination'=> $pagination,
             'form' => $form->createView()
         ]);
         return $this->render('dette/index.html.twig');

@@ -43,8 +43,9 @@ class DetteController extends AbstractController
         return $this->render('dette/liste.html.twig', [
             'controller_name' => 'DetteController',
             'pagination' => $pagination,
+            'form2' => $form2->createView(),
             'form' => $form->createView(),
-            'form2' => $form2->createView()
+
         ]);
         return $this->render('dette/liste.html.twig');
     }
@@ -101,15 +102,21 @@ class DetteController extends AbstractController
     }
 
     #[Route('/dette/edit/{id}', name: 'edit_dette')]
-    public function edit($id, DetteRepository $detteRepository, Request $request, EntityManagerInterface $entityManager)
+    public function edit($id, DetteRepository $detteRepository, Request $request, EntityManagerInterface $entityManager, PaginatorInterface $paginator)
     {
         $dette = $detteRepository->find($id);
         $form = $this->createForm(DetteType::class, $dette);
         $form->handleRequest($request);
-        $total = $detteRepository->count([]);
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
-        $offset = ($page - 1) * $limit;
+        $search = new Search();
+        $form2 = $this->createForm(SearchType::class, $search);
+        $form2->handleRequest($request);
+
+        $nom = $search->getNom();
+        $pagination = $paginator->paginate(
+            ($nom !== null && $nom !== '') ? $detteRepository->findByName($nom) : $detteRepository->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
         if ($form->isSubmitted() && $form->isValid()) {
             $reste = $form->getData()->getMontantDette();
             // Affecter la valeur à l'entité Dette
@@ -121,10 +128,9 @@ class DetteController extends AbstractController
             return $this->redirectToRoute("dette_liste");
         }
         return $this->render('dette/liste.html.twig', [
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
             'dette' => $dette,
+            'pagination' => $pagination,
+            'form2' => $form2->createView(),
             'form' => $form->createView()
         ]);
     }

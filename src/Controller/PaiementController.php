@@ -10,16 +10,16 @@ use App\Form\PaiementType;
 use App\Form\SearchType;
 use App\Repository\PaiementRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Knp\Component\Pager\PaginatorInterface;
 
 class PaiementController extends AbstractController
 {
     #[Route('/paiement', name: 'paiement_liste')]
-    public function index(PaiementRepository $paiement, Request $request): Response
+    public function index(PaiementRepository $paiement, Request $request, PaginatorInterface $paginator): Response
     {
         $p = new Paiement();
         $form = $this->createForm(PaiementType::class, $p, array(
@@ -30,17 +30,14 @@ class PaiementController extends AbstractController
         $form2 = $this->createForm(SearchType::class, $search);
         $form2->handleRequest($request);
         $nom = $search->getNom();
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
-        $total = $nom ? count($paiement->findByName($nom)) : $paiement->countAll();
-        $offset = ($page - 1) * $limit;
-        $paiements = $nom ? $paiement->findByName($nom, $limit, $offset) : $paiement->findAllOrderedByDate($limit, $offset);
+        $pagination = $paginator->paginate(
+            ($nom !== null && $nom !== '') ? $paiement->findByName($nom) : $paiement->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
         return $this->render('paiement/index.html.twig', [
             'controller_name' => 'ClientController',
-            'paiements'=>$paiements,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
+            'pagination' => $pagination,
             'form' => $form->createView(),
             'form2' => $form2->createView()
         ]);

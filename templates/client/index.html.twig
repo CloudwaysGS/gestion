@@ -26,7 +26,7 @@
                                 <th>Ville</th>
                                 <th>action</th>
                             </tr>
-                            {% for c in client %}
+                            {% for c in pagination %}
                                 <tr>
                                     <th>{{ c.nom }}</th>
                                     <th>{{ c.adresse }}</th>
@@ -42,22 +42,7 @@
                             {% endfor %}
                         </table>
                     </div>
-                    <nav aria-label="Page navigation example">
-                        <ul class="pagination justify-content-center">
-                            {% if total > limit %}
-                                {% set pages = (total / limit)|round(0, 'ceil') %}
-                                {% for i in 1..pages %}
-                                    {% if i == page %}
-                                        <li class="page-item active" aria-current="page">
-                                            <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item"><a class="page-link" href="{{ path('client_liste', {'page': i}) }}">{{ i }}</a></li>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
-                        </ul>
-                    </nav>
+                    {{ knp_pagination_render(pagination) }}
                 </div>
             </div>
         </div>

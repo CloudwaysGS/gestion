@@ -25,7 +25,7 @@
                                 <th>Date</th>
                                 <th>action</th>
                             </tr>
-                            {% for p in paiements %}
+                            {% for p in pagination %}
                                 <tr>
                                     <th>{{ p.client.nom }}</th>
                                     <th>{{ p.montant | number_format(0, ',', ' ') }}</th>
@@ -39,22 +39,7 @@
                             {% endfor %}
                         </table>
                     </div>
-                    <nav aria-label="Page navigation example">
-                        <ul class="pagination justify-content-center">
-                            {% if total > limit %}
-                                {% set pages = (total / limit)|round(0, 'ceil') %}
-                                {% for i in 1..pages %}
-                                    {% if i == page %}
-                                        <li class="page-item active" aria-current="page">
-                                            <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item"><a class="page-link" href="{{ path('paiement_liste', {'page': i}) }}">{{ i }}</a></li>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
-                        </ul>
-                    </nav>
+                   {{ knp_pagination_render(pagination) }}
                 </div>
             </div>
         </div>

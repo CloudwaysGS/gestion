@@ -39,15 +39,14 @@ class PaiementRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllOrderedByDate($limit, $offset)
+    public function findAllOrderedByDate()
     {
-        return $this->createQueryBuilder('p')
-            ->orderBy('p.datePaiement', 'DESC')
-            ->setMaxResults($limit)
-            ->setFirstResult($offset)
+        return $this->createQueryBuilder('d')
+            ->orderBy('d.datePaiement', 'DESC') // Tri par date de création, en mettant les plus récents en premier
             ->getQuery()
             ->getResult();
     }
+
 
     public function countAll(): int
     {
