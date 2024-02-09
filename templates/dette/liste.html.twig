@@ -201,4 +201,60 @@
 
     </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById('search_nom');
+            const tableBody = document.querySelector('.table-bordered tbody');
+            const paginationContainer = document.getElementById('pagination');
+
+            const tableHeader = `
+        <tr>
+            <th>Nom client</th>
+            <th>Montant</th>
+            <th>Reste</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    `;
+
+            let currentPage = 1;
+
+            searchInput.addEventListener('input', function(event) {
+                const searchValue = event.target.value.trim();
+
+                fetch(`/recherche?search=${encodeURIComponent(searchValue)}&page=${currentPage}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        tableBody.innerHTML = '';
+                        if (data.results.length > 0) {
+                            tableBody.innerHTML = tableHeader;
+                            data.results.forEach(result => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                            <td>${result.client}</td>
+                            <td>${result.montantDette}</td>
+                            <td>${result.reste}</td>
+                            <td><a class="btn btn-sm ${result.statut === 'payée' ? 'btn-primary' : 'btn-danger'}" href="#" style="color: white;">${result.statut}</a></td>
+                            <td>${result.dateCreated}</td>
+                            <td>
+                                <a class="btn btn-info btn-circle btn-sm" title="info" href="javascript:void(0);" onclick="openPopup('${result.infoUrl}')"><i class="fas fa-info-circle"></i></a>
+                                <a class="btn btn-warning btn-circle btn-sm" title="modifier" href="${result.editUrl}"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="${result.deleteUrl}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                            </td>
+                        `;
+                                tableBody.appendChild(row);
+                            });
+                        } else {
+                            paginationContainer.innerHTML = `Aucun résultat trouvé.`;
+                        }
+                    })
+                    .catch(error => console.error('Erreur lors de la recherche :', error));
+            });
+        });
+
+    </script>
+
+
+
 {% endblock %}

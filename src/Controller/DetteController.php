@@ -135,6 +135,49 @@ class DetteController extends AbstractController
         ]);
     }
 
+    #[Route('/recherche', name: 'recherche_dette')]
+    public function rechercheDette(Request $request, DetteRepository $detteRepository, PaginatorInterface $paginator): JsonResponse
+    {
+        $searchValue = $request->query->get('search');
 
+        if ($searchValue) {
+            $results = $detteRepository->findByName($searchValue);
+        } else {
+            $results = $detteRepository->findAllOrderedByDate();
+        }
+
+        // Paginer les résultats
+        $pagination = $paginator->paginate(
+            $results,
+            $request->query->getInt('page', 1),
+            10
+        );
+
+        // Formatage des résultats paginés en tableau associatif
+        $formattedResults = [];
+        foreach ($pagination as $result) {
+            $formattedResults[] = [
+                'client' => $result->getClient()->getNom(),
+                'montantDette' => $result->getMontantDette(),
+                'reste' => $result->getReste(),
+                'statut' => $result->getStatut(),
+                'dateCreated' => $result->getDateCreated()->format('d/m/Y'),
+                'infoUrl' => $this->generateUrl('dette_info', ['id' => $result->getId()]),
+                'editUrl' => $this->generateUrl('edit_dette', ['id' => $result->getId()]),
+                'deleteUrl' => $this->generateUrl('dette_delete', ['id' => $result->getId()]),
+                // Ajoutez d'autres champs si nécessaire
+            ];
+        }
+
+        return new JsonResponse([
+            'results' => $formattedResults,
+            'pagination' => [
+                'totalItems' => $pagination->getTotalItemCount(),
+                'itemsPerPage' => $pagination->getItemNumberPerPage(),
+                'currentPage' => $pagination->getCurrentPageNumber(),
+                'totalPages' => $pagination->getPageCount(),
+            ],
+        ]);
+    }
 
 }
