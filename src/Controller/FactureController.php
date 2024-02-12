@@ -56,6 +56,7 @@ class FactureController extends AbstractController
     #[Route('/produit/modifier/{id}', name: 'modifier')]
     public function modifier($id, FactureRepository $repo, Request $request, EntityManagerInterface $entityManager): Response
     {
+
         $facture = $repo->find($id);
         if (!$facture) {
             throw $this->createNotFoundException('Facture non trouvée');
@@ -73,6 +74,7 @@ class FactureController extends AbstractController
             $produit = $entityManager->getRepository(Produit::class)->find($produitId);
 
             if ($facture->getNomProduit() == $produit->getNomProduitDetail()){
+
                 // Mettre à jour la facture avec les nouvelles données
                 $facture->setQuantite($quantiteNouvelle);
                 $facture->setNomProduit($produit->getNomProduitDetail());
@@ -81,6 +83,7 @@ class FactureController extends AbstractController
                 // Mettre à jour la quantité en stock du produit
                 $quantiteStockActuelle = $produit->getQtStockDetail();
                 $nombre = $produit->getNombre();
+
                 if ($differenceQuantite > 0) {
 
                     // Nouvelle quantité est supérieure à l'ancienne
@@ -89,13 +92,16 @@ class FactureController extends AbstractController
                     $nouvelleNombreVendu = $differenceQuantite / $nombre;
 
                 } elseif ($differenceQuantite < 0) {
+
                     // Nouvelle quantité est inférieure à l'ancienne
                     $nouvelleQuantiteStockDetail = $quantiteStockActuelle + abs($differenceQuantite);
                     $nouvelleQuantiteStock = $nouvelleQuantiteStockDetail / $nombre;
                     $nouvelleNombreVendu = abs($differenceQuantite) / $nombre;
 
                 } elseif ($differenceQuantite == 0) {
+
                     // Nouvelle quantité est égale à l'ancienne
+                    $entityManager->flush();
                     return $this->redirectToRoute('facture_liste');
                 }
                 // Assurez-vous que la quantité en stock ne devient pas négative
@@ -129,16 +135,20 @@ class FactureController extends AbstractController
                 // Nouvelle quantité est inférieure à l'ancienne
                 $nouvelleQuantiteStock = $quantiteStockActuelle + abs($differenceQuantite);
             } elseif ($differenceQuantite == 0) {
+
                 // Nouvelle quantité est égale à l'ancienne
+                $entityManager->flush();
                 return $this->redirectToRoute('facture_liste');
             }
 
             // Assurez-vous que la quantité en stock ne devient pas négative
             $produit->setQtStock(max(0, $nouvelleQuantiteStock));
             $produit->setTotal($produit->getQtStock()* $produit->getPrixUnit());
+
             if ($produit->getNombre() != null){
                 $produit->setQtStockDetail($produit->getNombre() * $produit->getQtStock());
             }
+
             $total = $this->factureService->updateTotalForFactures();
             $facture->setTotal($total);
             // Enregistrez les modifications

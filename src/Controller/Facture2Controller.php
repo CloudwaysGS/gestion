@@ -182,6 +182,7 @@ class Facture2Controller extends AbstractController
 
                 } elseif ($differenceQuantite == 0) {
                     // Nouvelle quantité est égale à l'ancienne
+                    $entityManager->flush();
                     return $this->redirectToRoute('facture2_liste');
                 }
                 // Assurez-vous que la quantité en stock ne devient pas négative
@@ -216,6 +217,7 @@ class Facture2Controller extends AbstractController
                 $nouvelleQuantiteStock = $quantiteStockActuelle + abs($differenceQuantite);
             } elseif ($differenceQuantite == 0) {
                 // Nouvelle quantité est égale à l'ancienne
+                $entityManager->flush();
                 return $this->redirectToRoute('facture2_liste');
             }
 

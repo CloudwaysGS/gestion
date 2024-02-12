@@ -106,34 +106,43 @@ class DetteController extends AbstractController
     {
         $dette = $detteRepository->find($id);
         $form = $this->createForm(DetteType::class, $dette);
-        $form->handleRequest($request);
         $search = new Search();
         $form2 = $this->createForm(SearchType::class, $search);
-        $form2->handleRequest($request);
+
+        // Gérer les deux formulaires en une seule instruction
+        $forms = [$form, $form2];
+        foreach ($forms as $form) {
+            $form->handleRequest($request);
+        }
 
         $nom = $search->getNom();
+        $queryBuilder = $detteRepository->createQueryBuilder('d');
+        if ($nom !== null && $nom !== '') {
+            // Optimiser la requête SQL en fonction du nom de recherche
+            $queryBuilder->andWhere('d.nom LIKE :nom')->setParameter('nom', '%' . $nom . '%');
+        }
         $pagination = $paginator->paginate(
-            ($nom !== null && $nom !== '') ? $detteRepository->findByName($nom) : $detteRepository->findAllOrderedByDate(),
-            $request->query->get('page', 1),
+            $queryBuilder->getQuery(),
+            $request->query->getInt('page', 1), // Utiliser getInt pour obtenir un entier
             10
         );
+
         if ($form->isSubmitted() && $form->isValid()) {
             $reste = $form->getData()->getMontantDette();
             // Affecter la valeur à l'entité Dette
-            $dette = $form->getData();
             $dette->setReste($reste);
-            $entityManager->persist($dette);
             $entityManager->flush();
 
             return $this->redirectToRoute("dette_liste");
         }
+
         return $this->render('dette/liste.html.twig', [
             'dette' => $dette,
             'pagination' => $pagination,
-            'form2' => $form2->createView(),
-            'form' => $form->createView()
+            'forms' => $forms, // Passer les deux formulaires
         ]);
     }
+
 
     #[Route('/recherche', name: 'recherche_dette')]
     public function rechercheDette(Request $request, DetteRepository $detteRepository, PaginatorInterface $paginator): JsonResponse
