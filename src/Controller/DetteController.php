@@ -140,7 +140,7 @@ class DetteController extends AbstractController
             $request->query->getInt('page', 1), // Utiliser getInt pour obtenir un entier
             10
         );
-
+        $this->addFlash('success', 'La dette a été modifié avec succès');
         return $this->render('dette/liste.html.twig', [
             'dette' => $dette,
             'pagination' => $pagination,
