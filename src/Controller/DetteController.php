@@ -105,27 +105,14 @@ class DetteController extends AbstractController
     public function edit($id, DetteRepository $detteRepository, Request $request, EntityManagerInterface $entityManager, PaginatorInterface $paginator)
     {
         $dette = $detteRepository->find($id);
+
+        // Vérifier si la dette existe
+        if (!$dette) {
+            throw $this->createNotFoundException('Dette non trouvée');
+        }
+
         $form = $this->createForm(DetteType::class, $dette);
-        $search = new Search();
-        $form2 = $this->createForm(SearchType::class, $search);
-
-        // Gérer les deux formulaires en une seule instruction
-        $forms = [$form, $form2];
-        foreach ($forms as $form) {
-            $form->handleRequest($request);
-        }
-
-        $nom = $search->getNom();
-        $queryBuilder = $detteRepository->createQueryBuilder('d');
-        if ($nom !== null && $nom !== '') {
-            // Optimiser la requête SQL en fonction du nom de recherche
-            $queryBuilder->andWhere('d.nom LIKE :nom')->setParameter('nom', '%' . $nom . '%');
-        }
-        $pagination = $paginator->paginate(
-            $queryBuilder->getQuery(),
-            $request->query->getInt('page', 1), // Utiliser getInt pour obtenir un entier
-            10
-        );
+        $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $reste = $form->getData()->getMontantDette();
@@ -136,13 +123,31 @@ class DetteController extends AbstractController
             return $this->redirectToRoute("dette_liste");
         }
 
+        $search = new Search();
+        $form2 = $this->createForm(SearchType::class, $search);
+        $form2->handleRequest($request);
+
+        $nom = $search->getNom();
+        $queryBuilder = $detteRepository->createQueryBuilder('d');
+        if ($nom !== null && $nom !== '') {
+            // Optimiser la requête SQL en fonction du nom de recherche
+            $queryBuilder->andWhere('d.nom LIKE :nom')->setParameter('nom', '%' . $nom . '%');
+        }
+
+        // Paginer les résultats de recherche
+        $pagination = $paginator->paginate(
+            $queryBuilder->getQuery(),
+            $request->query->getInt('page', 1), // Utiliser getInt pour obtenir un entier
+            10
+        );
+
         return $this->render('dette/liste.html.twig', [
             'dette' => $dette,
             'pagination' => $pagination,
-            'forms' => $forms, // Passer les deux formulaires
+            'form' => $form->createView(),
+            'form2' => $form2->createView(),
         ]);
     }
-
 
     #[Route('/recherche', name: 'recherche_dette')]
     public function rechercheDette(Request $request, DetteRepository $detteRepository, PaginatorInterface $paginator): JsonResponse

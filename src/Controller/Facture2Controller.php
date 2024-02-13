@@ -205,7 +205,6 @@ class Facture2Controller extends AbstractController
             $facture->setPrixUnit($prixUnit);
             $facture->setMontant($quantiteNouvelle * $prixUnit);
 
-
             // Mettre à jour la quantité en stock du produit
             $quantiteStockActuelle = $produit->getQtStock();
 
