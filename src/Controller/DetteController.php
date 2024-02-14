@@ -139,7 +139,6 @@ class DetteController extends AbstractController
             10
         );
         return $this->render('dette/liste.html.twig', [
-            'dette' => $dette,
             'pagination' => $pagination,
             'form' => $form->createView(),
             //'form2' => $form2->createView(),
