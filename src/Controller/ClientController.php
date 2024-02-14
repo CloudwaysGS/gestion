@@ -51,27 +51,36 @@ class ClientController extends AbstractController
     }
 
     #[Route('/client/edit/{id}', name: 'edit_client')]
-    public function edit($id, ClientRepository $clientRepository, Request $request, EntityManagerInterface $entityManager)
+    public function edit($id, ClientRepository $clientRepository, Request $request, EntityManagerInterface $entityManager, PaginatorInterface $paginator)
     {
         $client = $clientRepository->find($id);
         $form = $this->createForm(ClientType::class, $client);
         $form->handleRequest($request);
-        $total = $clientRepository->count([]);
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
-        $offset = ($page - 1) * $limit;
+
+        $queryBuilder = $clientRepository->createQueryBuilder('c');
+
+        // Optimiser la requête SQL en fonction du nom de recherche
+        if ($request->query->has('nom')) {
+            $nom = $request->query->get('nom');
+            $queryBuilder->andWhere('c.nom LIKE :nom')->setParameter('nom', '%' . $nom . '%');
+        }
+
+        $pagination = $paginator->paginate(
+            $queryBuilder->getQuery(),
+            $request->query->getInt('page', 1), // Utiliser getInt pour obtenir un entier
+            10
+        );
 
         if($form->isSubmitted() && $form->isValid()){
-            $entityManager->persist($form->getData());
             $entityManager->flush();
+            $this->addFlash('success', 'Le client a été modifié avec succès');
+
             return $this->redirectToRoute("client_liste");
         }
+
         return $this->render('client/index.html.twig',[
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
-           'client' => $client,
-           'form' => $form->createView()
+            'pagination' => $pagination,
+            'form' => $form->createView()
         ]);
     }
 
