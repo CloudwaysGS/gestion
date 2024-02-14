@@ -108,7 +108,8 @@ class DetteController extends AbstractController
 
         // Vérifier si la dette existe
         if (!$dette) {
-            throw $this->createNotFoundException('Dette non trouvée');
+            $this->addFlash('danger', 'Dette non trouvée');
+            return $this->redirectToRoute("dette_liste");
         }
 
         $form = $this->createForm(DetteType::class, $dette);
@@ -124,16 +125,12 @@ class DetteController extends AbstractController
             return $this->redirectToRoute("dette_liste");
         }
 
-        $search = new Search();
-        $form2 = $this->createForm(SearchType::class, $search);
-        $form2->handleRequest($request);
+        //$search = new Search();
+        //$form2 = $this->createForm(SearchType::class, $search);
+        //$form2->handleRequest($request);
 
-        $nom = $search->getNom();
+        //$nom = $search->getNom();
         $queryBuilder = $detteRepository->createQueryBuilder('d');
-        if ($nom !== null && $nom !== '') {
-            // Optimiser la requête SQL en fonction du nom de recherche
-            $queryBuilder->andWhere('d.nom LIKE :nom')->setParameter('nom', '%' . $nom . '%');
-        }
 
         // Paginer les résultats de recherche
         $pagination = $paginator->paginate(
@@ -145,7 +142,7 @@ class DetteController extends AbstractController
             'dette' => $dette,
             'pagination' => $pagination,
             'form' => $form->createView(),
-            'form2' => $form2->createView(),
+            //'form2' => $form2->createView(),
         ]);
     }
 
