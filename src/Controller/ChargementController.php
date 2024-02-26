@@ -7,9 +7,11 @@ use App\Entity\Client;
 use App\Entity\Dette;
 use App\Entity\Facture;
 use App\Entity\Facture2;
+use App\Entity\Produit;
 use App\Entity\Search;
 use App\Form\SearchType;
 use App\Repository\ChargementRepository;
+use App\Repository\FactureRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -264,7 +266,7 @@ class ChargementController extends AbstractController
             $nomDette = $dette->getClient()->getNom();
             $montantDette = $dette->getReste();
             if ($nomChargement == $nomDette && $totalCharge == $montantDette){
-                $entityManager->remove($dette);
+                $dette->setStatut("payée");
                 $entityManager->flush();
             }
 
@@ -276,4 +278,77 @@ class ChargementController extends AbstractController
         return $this->redirectToRoute('liste_chargement');
     }
 
+    #[Route('/chargement/retour/{id}', name: 'retour')]
+    public function retour(Chargement $chargement)
+    {
+        $facture = new Facture();
+        $factures = $chargement->addFacture($facture);
+        foreach ($factures->getFacture() as $facture) {
+            $f = $facture->getChargement()->getFacture()->toArray();
+            array_pop($f);
+            return $this->render('chargement/extraire.html.twig', ['f' => $f]);
+        }
+    }
+    #[Route('/chargement/retour_produit/{id}', name: 'retour_produit')]
+    public function retourProduit(Facture $facture, FactureRepository $repository, EntityManagerInterface $entityManager)
+    {
+
+        $produit = $facture->getProduit()->first();
+
+        if ($produit){
+
+            $p = $entityManager->getRepository(Produit::class)->find($produit);
+            $vendus = $p->getNbreVendu();
+            $nombre = $facture->getNombre();
+
+            if ($facture->getNomProduit() == $p->getNomProduitDetail()){
+
+                $repository->remove($facture);
+                $quantite = floatval($facture->getQuantite());
+                if ($quantite >= $nombre) {
+                    $boxe = $quantite / $nombre;
+                    $vendus = $boxe;
+                    $dstock = $p->getQtStock() + $vendus;
+                    $p->setQtStock($dstock);
+                    $p->setNbreVendu($vendus);
+                }else{
+                    $boxe = $quantite / $nombre;
+                    $vendus = $boxe;
+                    $dstock = $p->getQtStock() + $vendus;
+                    $p->setQtStock($dstock);
+                    $p->setNbreVendu($vendus);
+                }
+
+                //Mise à jour du quantité Stock détail de la produit
+                $upd = $p->getNombre() * $p->getQtStock();
+                $p->setQtStockDetail($upd);
+
+                //Mise à jour du total
+                $upddd = $p->getQtStock() * $p->getPrixUnit();
+                $p->setTotal($upddd);
+
+                $this->addFlash('success', $produit->getNomProduitDetail().' a été annulé avec succès.');
+                $entityManager->flush();
+            } else
+            {
+
+                $repository->remove($facture); // Mise à jour de l'état de la facture
+
+                //Mise à jour quantité stock produit et total produit
+                $quantite = $facture->getQuantite();
+                $p->setQtStock($p->getQtStock() + $quantite);
+                $updProd = $p->getQtStock() * $p->getPrixUnit();
+                if ($p->getNombre() != null){
+                    $p->setQtStockDetail($p->getNombre() * $p->getQtStock());
+                }
+                $p->setTotal($updProd);
+                $this->addFlash('success', $produit->getLibelle().' a été annulé avec succès.');
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute('liste_chargement');
+        }
+        $this->addFlash('error', 'Erreur lors de la suppression de la facture.');
+        return $this->redirectToRoute('liste_chargement');
+    }
 }

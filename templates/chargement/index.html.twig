@@ -36,7 +36,7 @@
                                 <th>{{ c.telephone }}</th>
                                 <th>{{ c.total }}</th>
                                 <th>{{ c.date | date('d/m/Y') }}</th>
-                                <th style="color: {% if c.statut == 'payée' %} green {% elseif c.statut == 'non-payée' %} red {% elseif c.statut == 'En cours' %} orange {% endif %}">
+                                <th style="color: {% if c.statut == 'payée' %} green {% elseif c.statut == 'impayé' %} red {% elseif c.statut == 'En cours' %} orange {% endif %}">
                                     {{ c.statut }}
                                 </th>
 

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Client;
 use App\Entity\Dette;
+use App\Entity\Paiement;
 use App\Entity\Search;
 use App\Form\DetteType;
 use App\Form\SearchType;
@@ -11,13 +12,19 @@ use App\Form\UpdateType;
 use App\Repository\ClientRepository;
 use App\Repository\DetteRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use MercurySeries\FlashyBundle\FlashyNotifier;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Type;
 
 class DetteController extends AbstractController
 {
@@ -39,7 +46,7 @@ class DetteController extends AbstractController
             $request->query->get('page', 1),
             10
         );
-    
+
         return $this->render('dette/liste.html.twig', [
             'controller_name' => 'DetteController',
             'pagination' => $pagination,
@@ -125,11 +132,6 @@ class DetteController extends AbstractController
             return $this->redirectToRoute("dette_liste");
         }
 
-        //$search = new Search();
-        //$form2 = $this->createForm(SearchType::class, $search);
-        //$form2->handleRequest($request);
-
-        //$nom = $search->getNom();
         $queryBuilder = $detteRepository->createQueryBuilder('d');
 
         // Paginer les résultats de recherche
@@ -144,7 +146,6 @@ class DetteController extends AbstractController
             //'form2' => $form2->createView(),
         ]);
     }
-
     #[Route('/recherche', name: 'recherche_dette')]
     public function rechercheDette(Request $request, DetteRepository $detteRepository, PaginatorInterface $paginator): JsonResponse
     {

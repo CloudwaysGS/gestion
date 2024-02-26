@@ -24,9 +24,10 @@ class UserController extends AbstractController
     }
 
     #[Route('/user', name: 'user_liste')]
-    public function index(UserRepository $user): Response
+    public function index(UserRepository $user, FlashyNotifier $flashy): Response
     {
         $user = $user->findAll();
+        $flashy->success('Bonjour');
         return $this->render('user/liste.html.twig', [
             'controller_name' => 'UserController',
             'user' => $user

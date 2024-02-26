@@ -35,6 +35,7 @@
                         <th>Produit</th>
                         <th>PrixUnit</th>
                         <th>Montant</th>
+                        <th>Retour</th>
                     </tr>
                     {% set total = 0 %}
                     {% for f in f %}
@@ -46,13 +47,14 @@
                                 {% endif %}
                             </td>
                             <td>
-
                                 {% if f.prixUnit > 0 %}
                                     {{ f.prixUnit|number_format(0, ',', ' ') }}
                                 {% endif %}
                             </td>
                             <td>{{ f.montant | number_format(0, ',', ' ') }}</td>
-
+                            <td>
+                                <a class="popup-link" title="retour_produit" href="{{ path('retour_produit', {'id':f.id}) }}" ><i class="fa fa-backspace"></i></a>
+                            </td>
                         </tr>
                         {% set total = total + f.montant %}
                     {% endfor %}
@@ -60,6 +62,7 @@
                     <td></td>
                     <td></td>
                     <td>{{ total|number_format(0, ',', ' ') }} f </td>
+                    <td></td>
                 </table>
             </div>
         </div>

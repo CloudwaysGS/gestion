@@ -46,6 +46,7 @@ class ProduitController extends AbstractController
             $request->query->get('page', 1),
             10
         );
+        $flashy->success('Bonjour');
         return $this->render('produit/liste.html.twig', [
             'controller_name' => 'ProduitController',
             'produits' => $produits,
