@@ -44,9 +44,9 @@ class DetteController extends AbstractController
         $pagination = $paginator->paginate(
             ($nom !== null && $nom !== '') ? $dette->findByName($nom) : $dette->findAllOrderedByDate(),
             $request->query->get('page', 1),
-            10
+            20
         );
-
+        
         return $this->render('dette/liste.html.twig', [
             'controller_name' => 'DetteController',
             'pagination' => $pagination,
