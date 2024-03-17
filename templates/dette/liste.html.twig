@@ -81,7 +81,7 @@
         <a onclick="window.location.href='{{ path('client_add') }}'">+client</a>
     </button>
     <button class="glow-on-hover">
-        <a >Total :  </a>
+        <a >Total : {{ sommeMontantImpaye }} </a>
     </button>
     <div class="row">
         <div class="container col-md-9">
@@ -237,7 +237,7 @@
                                 row.innerHTML = `
                             <td>${result.client}</td>
                             <td>${result.montantDette}</td>
-                            <td>${result.reste}</td>
+                            <td style="color: ${ result.reste < 0 ? 'red' : 'inherit' }" >${result.reste}</td>
                             <td><a class="btn btn-sm ${result.statut === 'payée' ? 'btn-primary' : 'btn-danger'}" href="#" style="color: white;">${result.statut}</a></td>
                             <td>${result.dateCreated}</td>
                             <td>

@@ -21,7 +21,7 @@ class ProduitController extends AbstractController
 
 
     #[Route('/produit/liste', name: 'produit_liste')]
-    public function index(ProduitRepository $prod, Request $request, FlashyNotifier $flashy, PaginatorInterface $paginator): Response
+    public function index(ProduitRepository $prod, Request $request, FlashyNotifier $notifier, PaginatorInterface $paginator): Response
     {
         $lastDayOfMonth = new \DateTime('last day of this month');
         $today = new \DateTime();
@@ -46,7 +46,7 @@ class ProduitController extends AbstractController
             $request->query->get('page', 1),
             10
         );
-        $flashy->success('Bonjour');
+        $notifier->success('Bonjour '.$this->getUser()->getPrenom().' '.$this->getUser()->getNom().' je vous souhaite une excellente journée!!!');
         return $this->render('produit/liste.html.twig', [
             'controller_name' => 'ProduitController',
             'produits' => $produits,

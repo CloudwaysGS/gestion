@@ -31,6 +31,8 @@ class DetteController extends AbstractController
     #[Route('/dette', name: 'dette_liste')]
     public function index(DetteRepository $dette,Request $request, PaginatorInterface $paginator): Response
     {
+        $sommeMontantImpaye = $dette->findSumMontantImpaye();
+
         $d = new Dette();
         $form = $this->createForm(DetteType::class, $d, array(
             'action' => $this->generateUrl('dette_add'),
@@ -46,10 +48,11 @@ class DetteController extends AbstractController
             $request->query->get('page', 1),
             20
         );
-        
+
         return $this->render('dette/liste.html.twig', [
             'controller_name' => 'DetteController',
             'pagination' => $pagination,
+            'sommeMontantImpaye' => $sommeMontantImpaye,
             'form2' => $form2->createView(),
             'form' => $form->createView(),
 
@@ -109,6 +112,42 @@ class DetteController extends AbstractController
     }
 
     #[Route('/dette/edit/{id}', name: 'edit_dette')]
+    public function editManual($id, DetteRepository $detteRepository, Request $request, EntityManagerInterface $entityManager)
+    {
+        $dette = $detteRepository->find($id);
+
+        // Vérifier si la dette existe
+        if (!$dette) {
+            $this->addFlash('danger', 'Dette non trouvée');
+            return $this->redirectToRoute("dette_liste");
+        }
+
+        // Récupérer les données du formulaire soumis
+        $montantDette = $request->request->get('montant_dette');
+        $commentaire = $request->request->get('commentaire');
+
+        // Traiter les données soumises
+        if ($request->isMethod('POST')) {
+            // Mettre à jour la dette
+            $dette->setMontantDette($montantDette);
+            $dette->setReste($montantDette);
+            $dette->setCommentaire($commentaire);
+
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La dette a été modifiée avec succès');
+
+            return $this->redirectToRoute("dette_liste");
+        }
+
+        // Afficher le formulaire de modification
+        return $this->render('dette/edit.html.twig', [
+            'dette' => $dette,
+        ]);
+    }
+
+
+    /*#[Route('/dette/edit/{id}', name: 'edit_dette')]
     public function edit($id, DetteRepository $detteRepository, Request $request, EntityManagerInterface $entityManager, PaginatorInterface $paginator)
     {
         $dette = $detteRepository->find($id);
@@ -145,7 +184,8 @@ class DetteController extends AbstractController
             'form' => $form->createView(),
             //'form2' => $form2->createView(),
         ]);
-    }
+    }*/
+
     #[Route('/recherche', name: 'recherche_dette')]
     public function rechercheDette(Request $request, DetteRepository $detteRepository, PaginatorInterface $paginator): JsonResponse
     {

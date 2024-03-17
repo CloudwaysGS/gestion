@@ -70,6 +70,16 @@ class DetteRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findSumMontantImpaye()
+    {
+        return $this->createQueryBuilder('d')
+            ->select('SUM(d.montantDette)')
+            ->where('d.statut = :statut')
+            ->setParameter('statut', 'impayé')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
 //    /**
 //     * @return Dette[] Returns an array of Dette objects
 //     */
