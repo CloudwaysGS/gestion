@@ -65,6 +65,12 @@ class Produit
     #[ORM\ManyToOne(inversedBy: 'produits')]
     private ?Client $client = null;
 
+    #[ORM\ManyToOne(inversedBy: 'produit')]
+    private ?Depot $depot = null;
+
+    #[ORM\OneToMany(mappedBy: 'produit', targetEntity: EntreeDepot::class)]
+    private Collection $entreeDepots;
+
     public function __construct()
     {
         $this->entrees = new ArrayCollection();
@@ -73,6 +79,7 @@ class Produit
         $this->facture2s = new ArrayCollection();
         $this->detail = new ArrayCollection();
         $this->details = new ArrayCollection();
+        $this->entreeDepots = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -345,6 +352,48 @@ class Produit
     public function setClient(?Client $client): self
     {
         $this->client = $client;
+
+        return $this;
+    }
+
+    public function getDepot(): ?Depot
+    {
+        return $this->depot;
+    }
+
+    public function setDepot(?Depot $depot): self
+    {
+        $this->depot = $depot;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EntreeDepot>
+     */
+    public function getEntreeDepots(): Collection
+    {
+        return $this->entreeDepots;
+    }
+
+    public function addEntreeDepot(EntreeDepot $entreeDepot): self
+    {
+        if (!$this->entreeDepots->contains($entreeDepot)) {
+            $this->entreeDepots->add($entreeDepot);
+            $entreeDepot->setProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEntreeDepot(EntreeDepot $entreeDepot): self
+    {
+        if ($this->entreeDepots->removeElement($entreeDepot)) {
+            // set the owning side to null (unless already changed)
+            if ($entreeDepot->getProduit() === $this) {
+                $entreeDepot->setProduit(null);
+            }
+        }
 
         return $this;
     }

@@ -38,6 +38,7 @@
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered text-center">
+                        <thead>
                         <tr>
                             <th>libelle</th>
                             <th>Stock</th>
@@ -45,6 +46,7 @@
                             <th>Montant</th>
                             <th>Actions</th>
                         </tr>
+                        </thead>
                         {% for produit in pagination %}
                             <tr>
                                 <th>{{ produit.libelle }}</th>

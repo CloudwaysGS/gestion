@@ -146,7 +146,8 @@ class SortieController extends AbstractController
                 $qtStock = $produit->getQtStock();
                 if ($qtStock < $qtSortie) {
                     $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $qtStock);
-                } else {
+                } else
+                {
                     if ($clientId !== null) {
                         $client = $manager->getRepository(Client::class)->find($clientId);
                         $sortie->setClient($client);
