@@ -26,6 +26,9 @@ class EntreeDepot
     #[ORM\ManyToOne(inversedBy: 'entreeDepots')]
     private ?Depot $depot = null;
 
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $releaseDate = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +78,18 @@ class EntreeDepot
     public function setDepot(?Depot $depot): self
     {
         $this->depot = $depot;
+
+        return $this;
+    }
+
+    public function getReleaseDate(): ?\DateTimeInterface
+    {
+        return $this->releaseDate;
+    }
+
+    public function setReleaseDate(?\DateTimeInterface $releaseDate): self
+    {
+        $this->releaseDate = $releaseDate;
 
         return $this;
     }

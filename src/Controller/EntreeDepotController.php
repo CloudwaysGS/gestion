@@ -21,7 +21,7 @@ class EntreeDepotController extends AbstractController
     public function index(EntreeDepotRepository $entreeDepotRepository): Response
     {
         return $this->render('entree_depot/index.html.twig', [
-            'entree_depots' => $entreeDepotRepository->findAll(),
+            'entree_depots' => $entreeDepotRepository->findAllOrderedByDate(),
         ]);
     }
 
@@ -40,6 +40,8 @@ class EntreeDepotController extends AbstractController
             }
             $d = $manager->getRepository(Depot::class)->find($entreeDepot->getDepot()->getId());
             $nomProduit = $depot->getLibelle();
+            $date = new \DateTime();
+            $entreeDepot->setReleaseDate($date);
             $entreeDepot->setLibelle($nomProduit);
 
             //****Mise à jour****//

@@ -39,6 +39,14 @@ class DepotRepository extends ServiceEntityRepository
         }
     }
 
+    public function findAllOrderedByDate(): array
+    {
+        return $this->createQueryBuilder('d')
+            ->orderBy('d.date', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Depot[] Returns an array of Depot objects
 //     */

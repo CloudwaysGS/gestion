@@ -39,6 +39,14 @@ class EntreeDepotRepository extends ServiceEntityRepository
         }
     }
 
+    public function findAllOrderedByDate()
+    {
+        return $this->createQueryBuilder('e')
+            ->orderBy('e.releaseDate', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return EntreeDepot[] Returns an array of EntreeDepot objects
 //     */

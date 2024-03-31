@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\SortieDepotRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SortieDepotRepository::class)]
@@ -24,6 +25,9 @@ class SortieDepot
 
     #[ORM\ManyToOne(inversedBy: 'sortieDepots')]
     private ?Produit $produit = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $releaseDate = null;
 
     public function getId(): ?int
     {
@@ -83,4 +87,17 @@ class SortieDepot
 
         return $this;
     }
+
+    public function getReleaseDate(): ?\DateTimeInterface
+    {
+        return $this->releaseDate;
+    }
+
+    public function setReleaseDate(?\DateTimeInterface $releaseDate): self
+    {
+        $this->releaseDate = $releaseDate;
+
+        return $this;
+    }
+
 }

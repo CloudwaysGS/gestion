@@ -39,6 +39,14 @@ class SortieDepotRepository extends ServiceEntityRepository
         }
     }
 
+    public function findAllOrderedByDate()
+    {
+        return $this->createQueryBuilder('s')
+            ->orderBy('s.releaseDate', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return SortieDepot[] Returns an array of SortieDepot objects
 //     */

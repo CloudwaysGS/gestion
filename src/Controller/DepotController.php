@@ -18,7 +18,7 @@ class DepotController extends AbstractController
     public function index(DepotRepository $depotRepository): Response
     {
         return $this->render('depot/index.html.twig', [
-            'depots' => $depotRepository->findAll(),
+            'depots' => $depotRepository->findAllOrderedByDate(),
         ]);
     }
 

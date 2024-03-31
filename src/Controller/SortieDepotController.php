@@ -22,7 +22,7 @@ class SortieDepotController extends AbstractController
     public function index(SortieDepotRepository $sortieDepotRepository): Response
     {
         return $this->render('sortie_depot/index.html.twig', [
-            'sortie_depots' => $sortieDepotRepository->findAll(),
+            'sortie_depots' => $sortieDepotRepository->findAllOrderedByDate(),
         ]);
     }
 
@@ -47,7 +47,8 @@ class SortieDepotController extends AbstractController
                 $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $d->getStock());
                 return $this->redirectToRoute('app_sortie_depot_new');
             }
-
+            $date = new \DateTime();
+            $sortieDepot->setReleaseDate($date);
             $nomProduit = $depot->getLibelle();
             $sortieDepot->setLibelle($nomProduit);
 
