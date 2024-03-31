@@ -71,6 +71,9 @@ class Produit
     #[ORM\OneToMany(mappedBy: 'produit', targetEntity: EntreeDepot::class)]
     private Collection $entreeDepots;
 
+    #[ORM\OneToMany(mappedBy: 'produit', targetEntity: SortieDepot::class)]
+    private Collection $sortieDepots;
+
     public function __construct()
     {
         $this->entrees = new ArrayCollection();
@@ -80,6 +83,7 @@ class Produit
         $this->detail = new ArrayCollection();
         $this->details = new ArrayCollection();
         $this->entreeDepots = new ArrayCollection();
+        $this->sortieDepots = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -392,6 +396,36 @@ class Produit
             // set the owning side to null (unless already changed)
             if ($entreeDepot->getProduit() === $this) {
                 $entreeDepot->setProduit(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SortieDepot>
+     */
+    public function getSortieDepots(): Collection
+    {
+        return $this->sortieDepots;
+    }
+
+    public function addSortieDepot(SortieDepot $sortieDepot): self
+    {
+        if (!$this->sortieDepots->contains($sortieDepot)) {
+            $this->sortieDepots->add($sortieDepot);
+            $sortieDepot->setProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSortieDepot(SortieDepot $sortieDepot): self
+    {
+        if ($this->sortieDepots->removeElement($sortieDepot)) {
+            // set the owning side to null (unless already changed)
+            if ($sortieDepot->getProduit() === $this) {
+                $sortieDepot->setProduit(null);
             }
         }
 

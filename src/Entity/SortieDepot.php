@@ -22,6 +22,9 @@ class SortieDepot
     #[ORM\ManyToOne(inversedBy: 'sortieDepots')]
     private ?Depot $depot = null;
 
+    #[ORM\ManyToOne(inversedBy: 'sortieDepots')]
+    private ?Produit $produit = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -67,5 +70,17 @@ class SortieDepot
     {
         // TODO: Implement __toString() method.
         return $this->depot;
+    }
+
+    public function getProduit(): ?Produit
+    {
+        return $this->produit;
+    }
+
+    public function setProduit(?Produit $produit): self
+    {
+        $this->produit = $produit;
+
+        return $this;
     }
 }

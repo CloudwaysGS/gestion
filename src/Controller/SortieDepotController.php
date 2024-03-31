@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Depot;
+use App\Entity\Produit;
 use App\Entity\SortieDepot;
 use App\Form\SortieDepotType;
 use App\Repository\DepotRepository;
+use App\Repository\ProduitRepository;
 use App\Repository\SortieDepotRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,7 +27,7 @@ class SortieDepotController extends AbstractController
     }
 
     #[Route('/new', name: 'app_sortie_depot_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, SortieDepotRepository $sortieDepotRepository, EntityManagerInterface $manager, DepotRepository $depotRepository): Response
+    public function new(Request $request, SortieDepotRepository $sortieDepotRepository, EntityManagerInterface $manager, DepotRepository $depotRepository, ProduitRepository $produitRepository): Response
     {
         $sortieDepot = new SortieDepot();
         $form = $this->createForm(SortieDepotType::class, $sortieDepot);
@@ -33,12 +35,14 @@ class SortieDepotController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $depot = $sortieDepot->getDepot();
+            $produit = $sortieDepot->getProduit();
             if (!$depot) {
                 $this->addFlash('danger', 'Veuillez sélectionner un produit.');
                 return $this->redirectToRoute('app_sortie_depot_new');
             }
 
             $d = $manager->getRepository(Depot::class)->find($depot->getId());
+            //$p = $manager->getRepository(Produit::class)->find($produit->getId());
             if ($sortieDepot->getQtSortie() > $d->getStock()) {
                 $this->addFlash('danger', 'La quantité en stock est insuffisante pour satisfaire la demande. Quantité stock : ' . $d->getStock());
                 return $this->redirectToRoute('app_sortie_depot_new');
@@ -48,9 +52,19 @@ class SortieDepotController extends AbstractController
             $sortieDepot->setLibelle($nomProduit);
 
             //***Mise à jour***//
+            $p = $produitRepository->findAll();
+            foreach ($p as $produit){
+                if ($produit->getLibelle() == $sortieDepot->getLibelle()){
+                    $newQteProduit = $produit->getQtStock() + $sortieDepot->getQtSortie();
+                    $produit->setQtStock($newQteProduit);
 
+                }
+            }
             $newQte = $d->getStock() - $sortieDepot->getQtSortie();
             $d->setStock($newQte);
+
+            $produitRepository->save($produit, true);
+
             $depotRepository->save($d, true);
 
             $sortieDepotRepository->save($sortieDepot, true);
