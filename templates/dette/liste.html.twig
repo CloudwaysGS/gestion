@@ -3,12 +3,7 @@
 {% block title %}Dette{% endblock %}
 
 {% block body %}
-    {% for message in app.session.flashBag.get('success') %}
-        <div id="flash-message" class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-    {% for message in app.session.flashBag.get('danger') %}
-        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
-    {% endfor %}
+
     <style>
 
         .glow-on-hover {
@@ -71,6 +66,14 @@
             100% { background-position: 0 0; }
         }
     </style>
+
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
     <button class="glow-on-hover ml-3 m-1">
         <a onclick="window.location.href='{{ path('paiement_add') }}'">Paiement</a>
     </button>

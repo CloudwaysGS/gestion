@@ -33,6 +33,13 @@ class DepotController extends AbstractController
             $depot->setDate(new \DateTime());
             $nomProduit = $depot->getProduit()->first()->getLibelle();
             $depot->setLibelle($nomProduit);
+
+            // Vérifier si un dépôt avec le même libellé existe déjà
+            $existingDepot = $depotRepository->findOneBy(['libelle' => $nomProduit]);
+            if ($existingDepot) {
+                $this->addFlash('danger', 'Un dépôt avec le même libellé existe déjà.');
+                return $this->redirectToRoute('app_depot_new');
+            }
             $depotRepository->save($depot, true);
 
             return $this->redirectToRoute('app_depot_index', [], Response::HTTP_SEE_OTHER);
