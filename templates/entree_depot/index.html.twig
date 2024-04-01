@@ -84,6 +84,7 @@
                 <th>Id</th>
                 <th>Libelle</th>
                 <th>QtEntree</th>
+                <th>Date</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -93,6 +94,14 @@
                 <td>{{ entree_depot.id }}</td>
                 <td>{{ entree_depot.libelle }}</td>
                 <td>{{ entree_depot.qtEntree }}</td>
+                <td>
+                    {% if entree_depot.releaseDate is not null %}
+                        {{ entree_depot.releaseDate.format('Y-m-d H:i:s') }}
+                    {% else %}
+                        <!-- Handle the case where releaseDate is null -->
+                        Pas de date d entree disponible
+                    {% endif %}
+                </td>
                 <td>
                     <a href="{{ path('app_entree_depot_show', {'id': entree_depot.id}) }}">show</a>
                     <a href="{{ path('app_entree_depot_edit', {'id': entree_depot.id}) }}">edit</a>

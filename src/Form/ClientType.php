@@ -17,29 +17,38 @@ class ClientType extends AbstractType
     {
         $builder
             ->add('nom',TextType::class, array(
-                'label' => 'Nom client',
+                'label' => false,
                 'attr' => array(
-                    'class' => 'form-control form-group')
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'Nom client'
+                )
             ))
             ->add('adresse',TextType::class, array(
-                'label' => 'Adresse',
+                'label' => false,
                 'required' => false,
                 'attr' => array(
-                    'class' => 'form-control form-group')
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'Adresse'
+                    )
             ))
             ->add('telephone',TextType::class, array(
-                'label' => 'Telephone',
+                'label' => false,
                 'attr' => array(
-                    'class' => 'form-control form-group'),
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'Telephone'
+                ),
                 'required' => false,
                 'constraints' => array(
                     new Type('numeric')
                 )
             ))
             ->add('ville',TextType::class, array(
-                'label' => 'Ville',
+                'label' => false,
                 'attr' => array(
-                    'class' => 'form-control form-group'),
+                    'class' => 'form-control form-group',
+                    'placeholder' => 'Ville',
+
+                    ),
                 'required' => false,
             ))
 

@@ -76,6 +76,7 @@
                 <th>Id</th>
                 <th>QtSortie</th>
                 <th>Libelle</th>
+                <th>Date</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -85,6 +86,13 @@
                 <td>{{ sortie_depot.id }}</td>
                 <td>{{ sortie_depot.qtSortie }}</td>
                 <td>{{ sortie_depot.libelle }}</td>
+                <td>
+                    {% if sortie_depot.releaseDate is not null %}
+                        {{ sortie_depot.releaseDate.format('Y-m-d H:i:s') }}
+                    {% else %}
+                        <!-- Handle the case where releaseDate is null -->
+                        Pas de date de sortie disponible
+                    {% endif %}                </td>
                 <td>
                     <a href="{{ path('app_sortie_depot_show', {'id': sortie_depot.id}) }}">détail</a>
                     <a href="{{ path('app_sortie_depot_edit', {'id': sortie_depot.id}) }}">modofier</a>

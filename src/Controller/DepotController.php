@@ -3,9 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Depot;
+use App\Entity\Search;
 use App\Form\DepotType;
+use App\Form\SearchType;
 use App\Repository\DepotRepository;
 use Illuminate\Support\Facades\Date;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,10 +18,19 @@ use Symfony\Component\Routing\Annotation\Route;
 class DepotController extends AbstractController
 {
     #[Route('/', name: 'app_depot_index', methods: ['GET'])]
-    public function index(DepotRepository $depotRepository): Response
+    public function index(DepotRepository $depotRepository, PaginatorInterface $paginator, Request $request): Response
     {
+        $searchTerm = $request->query->get('search', '');
+
+        $pagination = $paginator->paginate(
+            $depotRepository->findBySearchTerm($searchTerm),
+            $request->query->get('page', 1),
+            10
+        );
+
         return $this->render('depot/index.html.twig', [
-            'depots' => $depotRepository->findAllOrderedByDate(),
+            'pagination' => $pagination,
+            'searchTerm' => $searchTerm,
         ]);
     }
 

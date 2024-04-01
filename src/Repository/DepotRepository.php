@@ -47,6 +47,21 @@ class DepotRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findBySearchTerm($searchTerm)
+    {
+        $queryBuilder = $this->createQueryBuilder('d');
+
+        if (!empty($searchTerm)) {
+            $queryBuilder->andWhere('d.libelle LIKE :searchTerm')
+                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        return $queryBuilder->orderBy('d.date', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+
 //    /**
 //     * @return Depot[] Returns an array of Depot objects
 //     */

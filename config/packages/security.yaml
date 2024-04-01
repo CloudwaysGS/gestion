@@ -47,6 +47,12 @@ security:
     - { path: ^/client, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/fournisseur, roles: [ROLE_GESTION_STOCK] }
     - { path: ^/user, roles: [ROLE_GESTION_STOCK] }
+    - { path: ^/depot, roles: [ROLE_GESTION_STOCK] }
+    - { path: ^/depot/new, roles: [ROLE_GESTION_STOCK] }
+    - { path: ^/entree/depot, roles: [ROLE_GESTION_STOCK] }
+    - { path: ^/entree/depot/new, roles: [ROLE_GESTION_STOCK] }
+    - { path: ^/sortie/depot, roles: [ROLE_GESTION_STOCK] }
+    - { path: ^/sortie/depot/new, roles: [ROLE_GESTION_STOCK] }
     #- { path: ^/login$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
 when@test:

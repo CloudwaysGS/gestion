@@ -78,6 +78,16 @@
     <button class="glow-on-hover" onclick="window.location.href='{{ path('app_entree_depot_index') }}'"> Entrées dépôt </button>
     <button class="glow-on-hover" onclick="window.location.href='{{ path('app_sortie_depot_index') }}'"> Sorties dépôt </button>
 
+    <form action="{{ path('app_depot_index') }}" method="get" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search float-lg-right">
+        <div class="input-group">
+            <input type="text" id="search_nom" name="search" class="form-control bg-light border-0 small" placeholder="Rechercher..." aria-label="Search" aria-describedby="basic-addon2">
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search fa-sm"></i>
+                </button>
+            </div>
+        </div>
+    </form>
 
     <table class="table">
         <thead>
@@ -89,7 +99,7 @@
             </tr>
         </thead>
         <tbody>
-        {% for depot in depots %}
+        {% for depot in pagination %}
             <tr>
                 <td>{{ depot.libelle }}</td>
                 <td>{{ depot.stock }}</td>
@@ -106,5 +116,6 @@
         {% endfor %}
         </tbody>
     </table>
+    {{ knp_pagination_render(pagination) }}
 
 {% endblock %}
