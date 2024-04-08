@@ -73,7 +73,7 @@ class DetteRepository extends ServiceEntityRepository
     public function findSumMontantImpaye()
     {
         return $this->createQueryBuilder('d')
-            ->select('SUM(d.montantDette)')
+            ->select('SUM(d.reste)')
             ->where('d.statut = :statut')
             ->setParameter('statut', 'impayé')
             ->getQuery()
