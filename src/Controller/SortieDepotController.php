@@ -10,6 +10,7 @@ use App\Repository\DepotRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\SortieDepotRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,11 +20,17 @@ use Symfony\Component\Routing\Annotation\Route;
 class SortieDepotController extends AbstractController
 {
     #[Route('/', name: 'app_sortie_depot_index', methods: ['GET'])]
-    public function index(SortieDepotRepository $sortieDepotRepository): Response
+    public function index(SortieDepotRepository $sortieDepotRepository, PaginatorInterface $paginator, Request $request): Response
     {
+
+        $pagination = $paginator->paginate(
+            $sortieDepotRepository->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
         return $this->render('sortie_depot/index.html.twig', [
-            'sortie_depots' => $sortieDepotRepository->findAllOrderedByDate(),
-        ]);
+            'pagination' => $pagination,
+            ]);
     }
 
     #[Route('/new', name: 'app_sortie_depot_new', methods: ['GET', 'POST'])]

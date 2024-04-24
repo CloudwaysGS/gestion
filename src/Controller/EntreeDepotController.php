@@ -9,6 +9,7 @@ use App\Form\EntreeDepotType;
 use App\Repository\DepotRepository;
 use App\Repository\EntreeDepotRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,10 +19,16 @@ use Symfony\Component\Routing\Annotation\Route;
 class EntreeDepotController extends AbstractController
 {
     #[Route('/', name: 'app_entree_depot_index', methods: ['GET'])]
-    public function index(EntreeDepotRepository $entreeDepotRepository): Response
+    public function index(EntreeDepotRepository $entreeDepotRepository, PaginatorInterface $paginator, Request $request): Response
     {
+
+        $pagination = $paginator->paginate(
+            $entreeDepotRepository->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
         return $this->render('entree_depot/index.html.twig', [
-            'entree_depots' => $entreeDepotRepository->findAllOrderedByDate(),
+            'pagination' => $pagination,
         ]);
     }
 

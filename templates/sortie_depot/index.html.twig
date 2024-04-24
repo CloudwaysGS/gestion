@@ -81,14 +81,14 @@
             </tr>
         </thead>
         <tbody>
-        {% for sortie_depot in sortie_depots %}
+        {% for sortie_depot in pagination %}
             <tr>
                 <td>{{ sortie_depot.id }}</td>
                 <td>{{ sortie_depot.qtSortie }}</td>
                 <td>{{ sortie_depot.libelle }}</td>
                 <td>
                     {% if sortie_depot.releaseDate is not null %}
-                        {{ sortie_depot.releaseDate.format('Y-m-d H:i:s') }}
+                        {{ sortie_depot.releaseDate.format('Y-m-d') }}
                     {% else %}
                         <!-- Handle the case where releaseDate is null -->
                         Pas de date de sortie disponible
@@ -106,5 +106,7 @@
         {% endfor %}
         </tbody>
     </table>
+
+    {{ knp_pagination_render(pagination) }}
 
 {% endblock %}

@@ -89,14 +89,14 @@
             </tr>
         </thead>
         <tbody>
-        {% for entree_depot in entree_depots %}
+        {% for entree_depot in pagination %}
             <tr>
                 <td>{{ entree_depot.id }}</td>
                 <td>{{ entree_depot.libelle }}</td>
                 <td>{{ entree_depot.qtEntree }}</td>
                 <td>
                     {% if entree_depot.releaseDate is not null %}
-                        {{ entree_depot.releaseDate.format('Y-m-d H:i:s') }}
+                        {{ entree_depot.releaseDate.format('Y-m-d')}}
                     {% else %}
                         <!-- Handle the case where releaseDate is null -->
                         Pas de date d entree disponible
@@ -114,5 +114,8 @@
         {% endfor %}
         </tbody>
     </table>
+
+    {{ knp_pagination_render(pagination) }}
+
 
 {% endblock %}

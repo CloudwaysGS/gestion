@@ -148,7 +148,6 @@ class Facture2Service
 
         return $facture;
 
-        return $facture;
     }
 
     private function compareStrings(string $str1, string $str2): bool
