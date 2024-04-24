@@ -42,17 +42,17 @@ security:
     - { path: ^/chargement$, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/chargement/extraire$, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/chargement/pdf$, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
-    - { path: ^/dette, roles: [ROLE_GESTION_STOCK] }
-    - { path: ^/paiement, roles: [ROLE_GESTION_STOCK] }
+    - { path: ^/dette, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
+    - { path: ^/paiement, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/client, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/fournisseur, roles: [ROLE_GESTION_STOCK] }
     - { path: ^/user, roles: [ROLE_GESTION_STOCK] }
-    - { path: ^/depot, roles: [ROLE_GESTION_STOCK] }
-    - { path: ^/depot/new, roles: [ROLE_GESTION_STOCK] }
-    - { path: ^/entree/depot, roles: [ROLE_GESTION_STOCK] }
-    - { path: ^/entree/depot/new, roles: [ROLE_GESTION_STOCK] }
-    - { path: ^/sortie/depot, roles: [ROLE_GESTION_STOCK] }
-    - { path: ^/sortie/depot/new, roles: [ROLE_GESTION_STOCK] }
+    - { path: ^/depot, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
+    - { path: ^/depot/new, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
+    - { path: ^/entree/depot, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
+    - { path: ^/entree/depot/new, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
+    - { path: ^/sortie/depot, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
+    - { path: ^/sortie/depot/new, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     #- { path: ^/login$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
 when@test:

@@ -218,7 +218,9 @@ class ChargementController extends AbstractController
         $pdf->Cell(70, 5, 'TELEPHONE : '.$phone, 0, 0, 'L');
         $pdf->Cell(120, 5, 'TELEPHONE : '. ($client ? $client->getTelephone() : ''), 0, 1, 'R');
 
-        $pdf->Cell(70, 5, 'NINEA : 0848942 - RC : 10028', 0, 1, 'L');
+        $pdf->Cell(70, 5, 'NINEA : 0848942 - RC : 10028', 0, 0, 'L');
+        $pdf->Cell(120, 5, 'DATE : '. ($facture->getDate()->format('Y-m-d H:i')), 0, 1, 'R'); // Adjust the date format as needed
+
         $pdf->Ln(2);
 
 
@@ -247,7 +249,7 @@ class ChargementController extends AbstractController
         $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
         $pdf->Cell(142.5, -10, 'Total', 0, 0, 'L', true); // true pour la couleur de fond
-        $pdf->Cell(47.5, -10, utf8_decode($total . ' F CFA'), 1, 1, 'C',true);
+        $pdf->Cell(47.5, -10, utf8_decode($total . ' F'), 1, 1, 'C',true);
 
         // Téléchargement du fichier PDF
         $pdf->Output('D', $filename);
