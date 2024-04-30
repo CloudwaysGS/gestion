@@ -94,7 +94,7 @@ class ProduitRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('p')
             ->select('p')
             ->where('p.qtStock < :qtStock')
-            ->setParameter('qtStock', 10)
+            ->setParameter('qtStock', 5)
             ->getQuery()
             ->getResult();
     }
