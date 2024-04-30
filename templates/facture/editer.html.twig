@@ -26,7 +26,7 @@
 
             <form method="post" action="{{ path('modifier', {'id': facture.id}) }}">
                 <label for="quantite">Quantité du produit </label>
-                <input class="form-control" type="number" id="quantite" name="quantite" value="{{ facture.quantite }}" min="0">
+                <input class="form-control" type="number" id="quantite" name="quantite" value="{{ facture.quantite }}" min="0.5">
 
                 <label for="quantite">Prix unitaire du produit</label>
                 <input class="form-control" type="number" id="prixUnit" name="prixUnit" value="{{ facture.prixUnit }}" >
