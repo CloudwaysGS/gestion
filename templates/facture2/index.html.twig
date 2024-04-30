@@ -347,7 +347,7 @@
                 <input type="number" class="form-control custom-input custom-input-small" name="quantityDetail" id="quantityDetail_${item.id}" value="1" min="1">
             </td>
             <td>
-                <a title="Ajouter" href="javascript:void(0);" onclick="addToFactureDetail('${item.path}', ${item.id})">
+                <a class="btn btn-primary btn-circle btn-sm" title="Ajouter" href="javascript:void(0);" onclick="addToFactureDetail('${item.path}', ${item.id})">
                     <i class="fa fa-cart-plus" aria-hidden="true"></i>
                 </a>
             </td>
@@ -432,10 +432,10 @@
                 row.innerHTML = `
             <th>${item.libelle}</th>
             <td>
-                <input type="number" class="form-control custom-input" name="quantity" id="quantity_${item.id}" value="1" min="1">
+                <input type="number" class="form-control custom-input custom-input-small" name="quantity" id="quantity_${item.id}" value="1" min="1">
             </td>
             <td>
-                <a title="Ajouter" href="javascript:void(0);" onclick="addToFacture('${item.path}', ${item.id})">
+                <a class="btn btn-primary btn-circle btn-sm" title="Ajouter" href="javascript:void(0);" onclick="addToFacture('${item.path}', ${item.id})">
                     <i class="fa fa-cart-plus" aria-hidden="true"></i>
                 </a>
             </td>
