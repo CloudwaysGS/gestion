@@ -209,8 +209,8 @@
                 <div id="flash-message" class="alert alert-danger">{{ message }}</div>
             {% endfor %}
 
-            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_delete_all') }}'">Save</button>
-            <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'">Factures</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('facture2_delete_all') }}'">Enreg</button>
+            <button class="glow-on-hover" onclick="window.location.href='{{ path('liste_chargement') }}'">Mes Facts</button>
             <button class="glow-on-hover" onclick="window.location.href='{{ path('client_add') }}'">+Client</button>
             {% if is_granted("ROLE_GESTION_STOCK") %}
                 <button class="glow-on-hover" onclick="window.location.href='{{ path('produit_liste') }}'">+Produits</button>
