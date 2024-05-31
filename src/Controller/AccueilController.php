@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\TotalMensuel;
 use App\Repository\ChargementRepository;
 use App\Repository\EntreeRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\SortieRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,6 +19,7 @@ class AccueilController extends AbstractController
                           SortieRepository $sort,
                           EntreeRepository $entree,
                           ChargementRepository $charge,
+                            EntityManagerInterface $entityManager
     ): Response
     {
 
@@ -51,35 +54,44 @@ class AccueilController extends AbstractController
 
 
         // obtenir la date de début et de fin du mois en cours
-        $firstDayOfMonth = new \DateTime('first day of this month');
-        $lastDayOfMonth = new \DateTime('last day of this month');
-        $lastDayOfMonth->setTime(23, 59, 59); // Fixe l'heure à la fin de la journée
+        $firstDayOfMonth = date('Y-m-01');
+        $lastDayOfMonth = date('Y-m-t');
 
-        $sumTotalMonth = $charge->createQueryBuilder('c')
-            ->select('COALESCE(SUM(c.total), 0)')
-            ->where('c.date >= :startOfMonth AND c.date <= :endOfMonth')
-            ->setParameter('startOfMonth', $firstDayOfMonth)
-            ->setParameter('endOfMonth', $lastDayOfMonth)
-            ->getQuery()
-            ->getSingleScalarResult();
+// Vérifier si la date actuelle est égale à la dernière journée du mois
 
-        // le calcul du total des sorties effectuées dans le mois courant
-        $anneeCourante = date('Y');
-        $moisCourant = date('m');
+            $sumTotalMonth = $charge->createQueryBuilder('c')
+                ->select('COALESCE(SUM(c.total), 0)')
+                ->where('c.date BETWEEN :startOfMonth AND :endOfMonth')
+                ->setParameter('startOfMonth', $firstDayOfMonth)
+                ->setParameter('endOfMonth', $lastDayOfMonth . ' 23:59:59')
+                ->getQuery()
+                ->getSingleScalarResult();
 
-        $firstDayOfMonth = new \DateTime("$anneeCourante-$moisCourant-01");
-        $lastDayOfMonth = clone $firstDayOfMonth; // Clonage pour éviter la référence à la même instance
-        $lastDayOfMonth->modify('last day of this month');
+            $sortieTotalMonthQuery = $sort->createQueryBuilder('s')
+                ->select('COALESCE(SUM(s.total), 0)')
+                ->where('s.dateSortie BETWEEN :startOfMonth AND :endOfMonth')
+                ->setParameter('startOfMonth', $firstDayOfMonth)
+                ->setParameter('endOfMonth', $lastDayOfMonth . ' 23:59:59')
+                ->getQuery();
 
-        $sortieTotalMonthQuery = $sort->createQueryBuilder('s')
-            ->select('COALESCE(SUM(s.total), 0)')
-            ->where('s.dateSortie BETWEEN :startOfMonth AND :endOfMonth')
-            ->setParameter('startOfMonth', $firstDayOfMonth)
-            ->setParameter('endOfMonth', $lastDayOfMonth)
-            ->getQuery();
+            $sortieTotalMonth = $sortieTotalMonthQuery->getSingleScalarResult();
+            $sortieTotalMonth += $sumTotalMonth;
 
-        $sortieTotalMonth = $sortieTotalMonthQuery->getSingleScalarResult();
-        $sortieTotalMonth += $sumTotalMonth;
+        if (date('Y-m-d') === $lastDayOfMonth) {
+            $existingTotalMensuel = $entityManager->getRepository(TotalMensuel::class)->findOneBy([
+                'dateCalcul' => new \DateTime(date('Y-m-d')) // Utilisation de DateTime pour la comparaison
+            ]);
+            if (!$existingTotalMensuel) {
+                // Enregistrement du total dans une nouvelle entité TotalMensuel
+                $totalMensuel = new TotalMensuel();
+                $totalMensuel->setTotalMonth($sortieTotalMonth); // Assurez-vous que $sortieTotalMonth contient le total calculé
+                $totalMensuel->setDateCalcul(new \DateTime(date('Y-m-d'))); // Utilisation de DateTime pour la date de calcul
+                $entityManager->persist($totalMensuel);
+                $entityManager->flush();
+            }
+        }
+
+
 
         // Somme totale des entrées des dernières 24 heures
         $twentyFourHoursAgo = new \DateTime('-24 hours');
