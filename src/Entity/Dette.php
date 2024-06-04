@@ -26,12 +26,12 @@ class Dette
     private ?\DateTimeInterface $datePaiement = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', nullable: true)]
-    private ?string $montantAvance = null;
+    private ?string $tag = null;
 
     #[ORM\ManyToOne(inversedBy: 'dette')]
     private ?Client $client = null;
 
-    #[ORM\Column(length: 255,nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $statut = null;
 
     #[ORM\OneToMany(mappedBy: 'dette', targetEntity: Paiement::class)]
@@ -88,18 +88,6 @@ class Dette
     public function setDatePaiement(?\DateTimeInterface $datePaiement): self
     {
         $this->datePaiement = $datePaiement;
-
-        return $this;
-    }
-
-    public function getMontantAvance(): ?string
-    {
-        return $this->montantAvance;
-    }
-
-    public function setMontantAvance(?string $montantAvance): self
-    {
-        $this->montantAvance = $montantAvance;
 
         return $this;
     }
@@ -192,5 +180,19 @@ class Dette
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
+    public function getTag(): ?string
+    {
+        return $this->tag;
+    }
 
+    /**
+     * @param string|null $tag
+     */
+    public function setTag(?string $tag): void
+    {
+        $this->tag = $tag;
+    }
 }

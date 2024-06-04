@@ -19,44 +19,33 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Knp\Component\Pager\PaginatorInterface;
 
 class ChargementController extends AbstractController
 {
     #[Route('/chargement', name: 'liste_chargement')]
-    public function index(ChargementRepository $charge, Request $request): Response
+    public function index(ChargementRepository $charge, Request $request, PaginatorInterface $paginator): Response
     {
-        $firstDayOfMonth = new \DateTime('first day of this month');
-        $lastDayOfMonth = new \DateTime('last day of this month');
-        $sumTotalMonth = $charge->createQueryBuilder('c')
-            ->select('SUM(c.total)')
-            ->where('c.date BETWEEN :startOfMonth AND :endOfMonth')
-            ->setParameter('startOfMonth', $firstDayOfMonth)
-            ->setParameter('endOfMonth', $lastDayOfMonth)
-            ->getQuery()
-            ->getSingleScalarResult();
-        $sumTotalMonth = is_null($sumTotalMonth) ? 0 : $sumTotalMonth;
-        $today = new DateTimeImmutable();
+
         $search = new Search();
         $form2 = $this->createForm(SearchType::class, $search);
         $form2->handleRequest($request);
         $nom = $search->getNom();
 
-        $chargement = $nom ? $charge->findByName($nom) : $charge->findAllOrderedByDate();
+        //$chargement = $nom ? $charge->findByName($nom) : $charge->findAllOrderedByDate();
 
-        $page = $request->query->getInt('page', 1);
-        $limit = 10; // number of products to display per page
-        $total = count($chargement);
-        $offset = ($page - 1) * $limit;
-        $chargement = array_slice($chargement, $offset, $limit);
+        $pagination = $paginator->paginate(
+            ($nom !== null && $nom !== '') ? $charge->findByName($nom) : $charge->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
         $f = null;
 
         return $this->render('chargement/index.html.twig', [
             'controller_name' => 'ChargementController',
-            'chargement' => $chargement,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
-            'f' => $f
+            'pagination' => $pagination,
+            'f' => $f,
+            'form2' => $form2->createView(),
         ]);
     }
 
@@ -281,16 +270,64 @@ class ChargementController extends AbstractController
     }
 
     #[Route('/chargement/retour/{id}', name: 'retour')]
-    public function retour(Chargement $chargement)
+    public function retour(Chargement $chargement, EntityManagerInterface $entityManager)
     {
-        $facture = new Facture();
-        $factures = $chargement->addFacture($facture);
-        foreach ($factures->getFacture() as $facture) {
-            $f = $facture->getChargement()->getFacture()->toArray();
-            array_pop($f);
-            return $this->render('chargement/extraire.html.twig', ['f' => $f]);
+
+        $verifierFacture1 = $entityManager->getRepository(Facture::class)->findBy(['etat' => 1]);
+        $verifierFacture2 = $entityManager->getRepository(Facture2::class)->findBy(['etat' => 1]);
+        if (empty($verifierFacture1)) {
+
+            $nomProduit = $chargement->getFacture()->toArray();
+
+            foreach ($nomProduit as $fac) {
+                $facture = new Facture();
+
+                $nomProd = $fac->getNomProduit();
+                $qte = $fac->getQuantite();
+                $montant = $fac->getMontant();
+                $prixUnit = $fac->getPrixUnit();
+                $connect = $fac->getConnect();
+                $client = $fac->getClient();
+                $nomClient = $fac->getNomClient();
+
+                $facture->setNomProduit($nomProd);
+                $facture->setQuantite($qte);
+                $facture->setPrixUnit($prixUnit);
+                $facture->setMontant($montant);
+                $facture->setConnect($connect);
+                $facture->setClient($client);
+                $facture->setNomClient($nomClient);
+                $entityManager->persist($facture);
+            }
+        } elseif (empty($verifierFacture2)) {
+            $nomProduit = $chargement->getFacture()->toArray();
+
+            foreach ($nomProduit as $fac) {
+                $facture = new Facture2();
+
+                $nomProd = $fac->getNomProduit();
+                $qte = $fac->getQuantite();
+                $montant = $fac->getMontant();
+                $prixUnit = $fac->getPrixUnit();
+                $connect = $fac->getConnect();
+
+                $facture->setNomProduit($nomProd);
+                $facture->setQuantite($qte);
+                $facture->setPrixUnit($prixUnit);
+                $facture->setMontant($montant);
+                $facture->setConnect($connect);
+
+                $entityManager->persist($facture);
+            }
+        } else {
+            $this->addFlash('danger', 'Facture1 et Facture2 sont occupées.');
+            return $this->redirectToRoute('liste_chargement');
         }
+
+        $entityManager->flush();
+        return $this->redirectToRoute('facture_liste');
     }
+    
     #[Route('/chargement/retour_produit/{id}', name: 'retour_produit')]
     public function retourProduit(Facture $facture, FactureRepository $repository, EntityManagerInterface $entityManager)
     {
@@ -351,6 +388,87 @@ class ChargementController extends AbstractController
             return $this->redirectToRoute('liste_chargement');
         }
         $this->addFlash('error', 'Erreur lors de la suppression de la facture.');
+        return $this->redirectToRoute('liste_chargement');
+    }
+
+    #[Route('/chargement/payer/{id}', name: 'payer')]
+    public function payer(Request $request, Chargement $chargement, EntityManagerInterface $entityManager)
+    {
+        if ($chargement->getStatut() !== "payée") {
+            // Mettre à jour le statut de la facture à "payée"
+            $chargement->setStatut('payée');
+
+            // Rechercher le client associé à la facture
+            $nomClient = $chargement->getNomClient();
+            $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
+
+            if ($client) {
+                // Rechercher les dettes impayées du client
+                $dettes = $entityManager->getRepository(Dette::class)->findBy(['client' => $client, 'statut' => 'impayé']);
+
+                if (!empty($dettes)) {
+                    // Mettre à jour la première dette trouvée à "payée" et définir le reste à 0
+                    $dette = $dettes[0];
+                    $dette->setStatut('payée');
+                    $dette->setReste('0');
+                    $entityManager->persist($dette);
+                }
+            }
+
+            // Enregistrer les modifications dans la base de données
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La facture a été payée avec succès.');
+        } else {
+            $this->addFlash('danger', 'Facture déjà payée.');
+        }
+
+        return $this->redirectToRoute('liste_chargement');
+    }
+
+    #[Route('/chargement/remboursement/{id}', name: 'remboursement')]
+    public function rembourserDettes(Request $request, Chargement $chargement, EntityManagerInterface $entityManager)
+    {
+
+        $nomClient = $chargement->getNomClient();
+        // Trouver le client
+        $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]); // Remplacez $nomClient par le nom du client concerné
+
+        // Vérifier si le client a des dettes impayées
+        $dettesImpayees = $entityManager->getRepository(Dette::class)->findBy([
+            'client' => $client,
+            'statut' => 'impayé'
+        ]);
+        if (!empty($dettesImpayees)) {
+            // Mettre à jour le statut des dettes impayées et le montant restant
+            foreach ($dettesImpayees as $dette) {
+
+                if ($dette->getTag() !== '1' && $chargement->getStatut() !== 'payée') {
+
+                    $nouveauTotal = $chargement->getTotal() + $dette->getMontantDette();
+                    $chargement->setTotal($nouveauTotal);
+                    $chargement->setStatut('ajoutée');
+                    $dette->setMontantDette($nouveauTotal);
+                    $dette->setReste($nouveauTotal);
+                    $dette->setTag('1');
+                    $entityManager->persist($dette);
+                } else {
+                    $this->addFlash('danger', 'Dette déjà ajouté au total précédemment.');
+                    return $this->redirectToRoute('liste_chargement');
+                }
+            }
+
+            // Enregistrer les modifications dans la base de données
+            $entityManager->flush();
+
+            // Ajouter un message de succès
+            $this->addFlash('success', 'Les dettes impayées ont été remboursées avec succès.');
+        } else {
+            // Ajouter un message d'erreur si aucune dette impayée n'a été trouvée pour ce client
+            $this->addFlash('danger', 'Le client n\'a aucune dette impayée à rembourser.');
+        }
+
+        // Rediriger l'utilisateur vers la page de liste des chargements ou toute autre page appropriée
         return $this->redirectToRoute('liste_chargement');
     }
 }

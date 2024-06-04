@@ -73,10 +73,180 @@ class FactureController extends AbstractController
             $differenceQuantite = $quantiteNouvelle - $quantiteInitiale;
             $prixUnit = $request->request->get('prixUnit');
             $produitId = $request->request->get('produit');
-            $produit = $entityManager->getRepository(Produit::class)->find($produitId);
 
-            if ($facture->getNomProduit() == $produit->getNomProduitDetail()){
+            if ($produitId == null) {
 
+                $produitId = $facture->getProduit()->getOwner()->getNomProduit();
+
+
+                $produit = $entityManager->getRepository(Produit::class)->findBy(['libelle' => $produitId]);
+
+                if(!empty($produit)){
+                    
+                    // Mettre à jour la facture avec les nouvelles données
+                    $facture->setQuantite($quantiteNouvelle);
+                    $facture->setNomProduit($produit[0]->getLibelle());
+                    $facture->setPrixUnit($prixUnit);
+                    $facture->setMontant($quantiteNouvelle * $prixUnit);
+
+                    // Mettre à jour la quantité en stock du produit
+                    $quantiteStockActuelle = $produit[0]->getQtStock();
+
+                    if ($differenceQuantite > 0) {
+                        // Nouvelle quantité est supérieure à l'ancienne
+                        $nouvelleQuantiteStock = $quantiteStockActuelle - $differenceQuantite;
+                    } elseif ($differenceQuantite < 0) {
+                        // Nouvelle quantité est inférieure à l'ancienne
+                        $nouvelleQuantiteStock = $quantiteStockActuelle + abs($differenceQuantite);
+                    } elseif ($differenceQuantite == 0) {
+                        $total = $this->factureService->updateTotalForFactures();
+                        $facture->setTotal($total);
+                        // Nouvelle quantité est égale à l'ancienne
+                        $entityManager->flush();
+                        return $this->redirectToRoute('facture_liste');
+                    }
+
+                    // Assurez-vous que la quantité en stock ne devient pas négative
+                    $produit[0]->setQtStock(max(0, $nouvelleQuantiteStock));
+                    $produit[0]->setTotal($produit[0]->getQtStock() * $produit[0]->getPrixUnit());
+
+                    if ($produit[0]->getNombre() != null) {
+                        $produit[0]->setQtStockDetail($produit[0]->getNombre() * $produit[0]->getQtStock());
+                    }
+
+                    $total = $this->factureService->updateTotalForFactures();
+                    $facture->setTotal($total);
+
+                    $entityManager->flush();
+                    return $this->redirectToRoute('facture_liste');
+                }else{
+
+                    $produitId = $facture->getNomProduit();
+                    $produit = $entityManager->getRepository(Produit::class)->findBy(['nomProduitDetail' => $produitId]);
+
+                    // Mettre à jour la facture avec les nouvelles données
+                    $facture->setQuantite($quantiteNouvelle);
+                    $facture->setNomProduit($produit[0]->getNomProduitDetail());
+                    $facture->setPrixUnit($prixUnit);
+                    $facture->setMontant($quantiteNouvelle * $prixUnit);
+                    // Mettre à jour la quantité en stock du produit
+                    $quantiteStockActuelle = $produit[0]->getQtStockDetail();
+                    $nombre = $produit[0]->getNombre();
+
+                    if ($differenceQuantite > 0) {
+
+                        // Nouvelle quantité est supérieure à l'ancienne
+                        $nouvelleQuantiteStockDetail = $quantiteStockActuelle - $differenceQuantite;
+                        $nouvelleQuantiteStock = $nouvelleQuantiteStockDetail / $nombre;
+                        $nouvelleNombreVendu = $differenceQuantite / $nombre;
+                    } elseif ($differenceQuantite < 0) {
+
+                        // Nouvelle quantité est inférieure à l'ancienne
+                        $nouvelleQuantiteStockDetail = $quantiteStockActuelle + abs($differenceQuantite);
+                        $nouvelleQuantiteStock = $nouvelleQuantiteStockDetail / $nombre;
+                        $nouvelleNombreVendu = abs($differenceQuantite) / $nombre;
+                    } elseif ($differenceQuantite == 0) {
+
+                        // Nouvelle quantité est égale à l'ancienne
+                        $entityManager->flush();
+                        return $this->redirectToRoute('facture_liste');
+                    }
+                    // Assurez-vous que la quantité en stock ne devient pas négative
+                    $produit[0]->setQtStockDetail(max(0, $nouvelleQuantiteStockDetail));
+                    $produit[0]->setQtStock($nouvelleQuantiteStock);
+                    $produit[0]->setNbreVendu($nouvelleNombreVendu);
+                    $produit[0]->setTotal($produit[0]->getQtStock() * $produit[0]->getPrixUnit());
+
+                    $total = $this->factureService->updateTotalForFactures();
+                    $facture->setTotal($total);
+                    // Enregistrez les modifications
+                    $entityManager->flush();
+
+                    return $this->redirectToRoute('facture_liste');
+                }
+            
+            }
+
+                $produit = $entityManager->getRepository(Produit::class)->find($produitId);
+                
+                //Produit en gros qui n'ont pas de nombre en détail (Vente en gros seulement)
+                if($produit->getNombre() == null){
+                    
+                    $facture->setQuantite($quantiteNouvelle);
+                    $facture->setNomProduit($produit);
+                    $facture->setPrixUnit($prixUnit);
+                    $facture->setMontant($quantiteNouvelle * $prixUnit);
+
+                    // Mettre à jour la quantité en stock du produit
+                    $quantiteStockActuelle = $produit->getQtStock();
+
+                    if ($differenceQuantite > 0) {
+                        // Nouvelle quantité est supérieure à l'ancienne
+                        $nouvelleQuantiteStock = $quantiteStockActuelle - $differenceQuantite;
+                    } elseif ($differenceQuantite < 0) {
+                        // Nouvelle quantité est inférieure à l'ancienne
+                        $nouvelleQuantiteStock = $quantiteStockActuelle + abs($differenceQuantite);
+                    } elseif ($differenceQuantite == 0) {
+                        $total = $this->factureService->updateTotalForFactures();
+                        $facture->setTotal($total);
+                        // Nouvelle quantité est égale à l'ancienne
+                        $entityManager->flush();
+                        return $this->redirectToRoute('facture_liste');
+                    }
+
+                    // Assurez-vous que la quantité en stock ne devient pas négative
+                    $produit->setQtStock(max(0, $nouvelleQuantiteStock));
+                    $produit->setTotal($produit->getQtStock() * $produit->getPrixUnit());
+
+                    if ($produit->getNombre() != null) {
+                        $produit->setQtStockDetail($produit->getNombre() * $produit->getQtStock());
+                    }
+                }
+                elseif($facture->getNomProduit() == $produit->getLibelle()){
+
+                // Mettre à jour la facture avec les nouvelles données
+                $facture->setQuantite($quantiteNouvelle);
+                $facture->setNomProduit($produit);
+                $facture->setPrixUnit($prixUnit);
+                $facture->setMontant($quantiteNouvelle * $prixUnit);
+
+
+                // Mettre à jour la quantité en stock du produit
+                $quantiteStockActuelle = $produit->getQtStock();
+
+                if ($differenceQuantite > 0) {
+                    // Nouvelle quantité est supérieure à l'ancienne
+                    $nouvelleQuantiteStock = $quantiteStockActuelle - $differenceQuantite;
+                } elseif ($differenceQuantite < 0) {
+                    // Nouvelle quantité est inférieure à l'ancienne
+                    $nouvelleQuantiteStock = $quantiteStockActuelle + abs($differenceQuantite);
+                } elseif ($differenceQuantite == 0) {
+
+                    // Nouvelle quantité est égale à l'ancienne
+                    $entityManager->flush();
+                    return $this->redirectToRoute('facture_liste');
+                }
+
+                // Assurez-vous que la quantité en stock ne devient pas négative
+                $produit->setQtStock(max(0, $nouvelleQuantiteStock));
+                $produit->setTotal($produit->getQtStock() * $produit->getPrixUnit());
+
+                if ($produit->getNombre() != null) {
+                    $produit->setQtStockDetail($produit->getNombre() * $produit->getQtStock());
+                }
+
+                $total = $this->factureService->updateTotalForFactures();
+                $facture->setTotal($total);
+                // Enregistrez les modifications
+                $entityManager->flush();
+
+                return $this->redirectToRoute('facture_liste');
+                    
+                }
+                                
+
+            if ($facture->getNomProduit() == $produit->getNomProduitDetail()) {
+            
                 // Mettre à jour la facture avec les nouvelles données
                 $facture->setQuantite($quantiteNouvelle);
                 $facture->setNomProduit($produit->getNomProduitDetail());
@@ -92,14 +262,12 @@ class FactureController extends AbstractController
                     $nouvelleQuantiteStockDetail = $quantiteStockActuelle - $differenceQuantite;
                     $nouvelleQuantiteStock = $nouvelleQuantiteStockDetail / $nombre;
                     $nouvelleNombreVendu = $differenceQuantite / $nombre;
-
                 } elseif ($differenceQuantite < 0) {
 
                     // Nouvelle quantité est inférieure à l'ancienne
                     $nouvelleQuantiteStockDetail = $quantiteStockActuelle + abs($differenceQuantite);
                     $nouvelleQuantiteStock = $nouvelleQuantiteStockDetail / $nombre;
                     $nouvelleNombreVendu = abs($differenceQuantite) / $nombre;
-
                 } elseif ($differenceQuantite == 0) {
 
                     // Nouvelle quantité est égale à l'ancienne
@@ -110,7 +278,7 @@ class FactureController extends AbstractController
                 $produit->setQtStockDetail(max(0, $nouvelleQuantiteStockDetail));
                 $produit->setQtStock($nouvelleQuantiteStock);
                 $produit->setNbreVendu($nouvelleNombreVendu);
-                $produit->setTotal($produit->getQtStock()* $produit->getPrixUnit());
+                $produit->setTotal($produit->getQtStock() * $produit->getPrixUnit());
 
                 $total = $this->factureService->updateTotalForFactures();
                 $facture->setTotal($total);
@@ -118,37 +286,6 @@ class FactureController extends AbstractController
                 $entityManager->flush();
 
                 return $this->redirectToRoute('facture_liste');
-            }
-
-            // Mettre à jour la facture avec les nouvelles données
-            $facture->setQuantite($quantiteNouvelle);
-            $facture->setNomProduit($produit);
-            $facture->setPrixUnit($prixUnit);
-            $facture->setMontant($quantiteNouvelle * $prixUnit);
-
-
-            // Mettre à jour la quantité en stock du produit
-            $quantiteStockActuelle = $produit->getQtStock();
-
-            if ($differenceQuantite > 0) {
-                // Nouvelle quantité est supérieure à l'ancienne
-                $nouvelleQuantiteStock = $quantiteStockActuelle - $differenceQuantite;
-            } elseif ($differenceQuantite < 0) {
-                // Nouvelle quantité est inférieure à l'ancienne
-                $nouvelleQuantiteStock = $quantiteStockActuelle + abs($differenceQuantite);
-            } elseif ($differenceQuantite == 0) {
-
-                // Nouvelle quantité est égale à l'ancienne
-                $entityManager->flush();
-                return $this->redirectToRoute('facture_liste');
-            }
-
-            // Assurez-vous que la quantité en stock ne devient pas négative
-            $produit->setQtStock(max(0, $nouvelleQuantiteStock));
-            $produit->setTotal($produit->getQtStock()* $produit->getPrixUnit());
-
-            if ($produit->getNombre() != null){
-                $produit->setQtStockDetail($produit->getNombre() * $produit->getQtStock());
             }
 
             $total = $this->factureService->updateTotalForFactures();
@@ -167,6 +304,7 @@ class FactureController extends AbstractController
             'produits' => $produits,
         ]);
     }
+
 
     #[Route('/facture/delete/{id}', name: 'facture_delete')]
     public function delete(Facture $facture,EntityManagerInterface $entityManager, FactureRepository $repository)
@@ -231,75 +369,77 @@ class FactureController extends AbstractController
     public function delete_all(EntityManagerInterface $entityManager)
     {
 
-            $repository = $entityManager->getRepository(Facture::class);
-            $factures = $repository->findBy(['etat' => 1], ['date' => 'DESC']);
+        $repository = $entityManager->getRepository(Facture::class);
+        $factures = $repository->findBy(['etat' => 1], ['date' => 'DESC']);
 
-            $client = null;
-            $adresse = null;
-            $telephone = null;
-            $nom = null;
+        $client = null;
+        $adresse = null;
+        $telephone = null;
+        $nom = null;
+        $impayé = null;
 
-            if (!empty($factures)) {
-                $firstFacture= end($factures);
-                if ($firstFacture->getClient() !== null) {
-                    $nom = $firstFacture->getNomClient();
-                    $adresse = $firstFacture->getClient()->getAdresse();
-                    $telephone = $firstFacture->getClient()->getTelephone();
-                }
-            }
-            // Save invoices to the Chargement table
-            $chargement = new Chargement();
-            $chargement->setNomClient($nom);
-            $chargement->setAdresse($adresse);
-            $chargement->setTelephone($telephone);
-            $chargement->setNombre(count($factures));
-            if ($chargement->getNombre() == 0) {
-                return $this->redirectToRoute('facture_liste');
-            }
-            $date = new \DateTime();
-            $chargement->setDate($date);
-            $total = 0;
-
-            foreach ($factures as $facture) {
-                $total = $facture->getTotal();
-                $facture->setEtat(0);
-                $facture->setChargement($chargement);
-                $chargement->addFacture($facture);
-                $entityManager->persist($facture);
-            }
-            $chargement->setConnect($facture->getConnect());
-            $chargement->setNumeroFacture('FACTURE-' . $facture->getId() );
-            $chargement->setStatut('En cours');
-            $chargement->setTotal($total);
-
-            $entityManager->persist($chargement);
-            $entityManager->flush();
-
-        $dette = new Dette();
-        $date = new \DateTime();
-        $dette->setMontantDette($chargement->getTotal());
-        $dette->setReste($chargement->getTotal());
-        $dette->setDateCreated($date);
-        $dette->setStatut('impayé');
-        $nomClient = $chargement->getNomClient();
-        $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
-        $dette->setClient($client);
-        $dette->setCommentaire('Dette de la facture');
-        $dettes = $entityManager->getRepository(Dette::class)->findAll();
-        foreach ( $dettes as $s) {
-            if ( $dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "impayé" && $s->getReste() != 0) {
-                $chargement->setStatut('impayé');
-                $entityManager->flush();
-                $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette non payée.');
-                return $this->redirectToRoute('liste_chargement');
+        if (!empty($factures)) {
+            $firstFacture = end($factures);
+            if ($firstFacture->getClient() !== null) {
+                $nom = $firstFacture->getNomClient();
+                $adresse = $firstFacture->getClient()->getAdresse();
+                $telephone = $firstFacture->getClient()->getTelephone();
+            } else {
+                $endFacture = reset($factures);
+                $nom = $endFacture->getNomClient();
+                $adresse = $endFacture->getClient()->getAdresse();
+                $telephone = $endFacture->getClient()->getTelephone();
             }
         }
 
-        $entityManager->persist($dette);
+        if ($nom) {
+            $dettesImpayees = $entityManager->getRepository(Dette::class)->findBy([
+                'statut' => 'impayé',
+                'client' => $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nom])
+            ]);
+            if (!empty($dettesImpayees)) {
+                $impayé = $dettesImpayees[0]->getReste();
+            }
+        }
+
+        // Save invoices to the Chargement table
+        $chargement = new Chargement();
+        $chargement->setNomClient($nom);
+        $chargement->setAdresse($adresse);
+        $chargement->setTelephone($telephone);
+        $chargement->setNombre(count($factures));
+        $chargement->setDetteImpaye($impayé);
+        if ($chargement->getNombre() == 0) {
+            return $this->redirectToRoute('facture_liste');
+        }
+        $date = new \DateTime();
+        $chargement->setDate($date);
+        $total = 0;
+        foreach ($factures as $facture) {
+            $total = $facture->getTotal();
+
+            $facture->setEtat(0);
+            $facture->setChargement($chargement);
+            $chargement->addFacture($facture);
+            $entityManager->persist($facture);
+        }
+
+        $chargement->setConnect($facture->getConnect());
+        $chargement->setNumeroFacture('FACTURE-' . $facture->getId());
+        $chargement->setStatut('En cours');
+
+        if ($total == null) {
+            foreach ($factures as $montantTotal) {
+                $total += $montantTotal->getMontant();
+            }
+        }
+
+        $chargement->setTotal($total);
+
+        $entityManager->persist($chargement);
         $entityManager->flush();
 
-        return $this->redirectToRoute('facture_liste');
-
+        return $this->redirectToRoute('liste_chargement');
     }
 
     private $factureService;
