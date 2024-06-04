@@ -53,9 +53,7 @@
 									</td>
 									<td>{{ f.montant | number_format(0, ',', ' ') }}</td>
 									<td>
-										<a class="popup-link" title="retour_produit" href="{{ path('retour_produit', {'id':f.id}) }}">
-											<i class="fa fa-backspace"></i>
-										</a>
+
 									</td>
 								</tr>
 								{% set total = total + f.montant %}
