@@ -50,13 +50,7 @@ class EntreeRepository extends ServiceEntityRepository
     }
 
 
-    public function countAll(): int
-    {
-        $qb = $this->createQueryBuilder('p');
-        $qb->select('COUNT(p)');
-        $query = $qb->getQuery();
-        return $query->getSingleScalarResult();
-    }
+    
 
     public function findTotalEntrées(): float
     {
