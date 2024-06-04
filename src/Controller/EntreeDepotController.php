@@ -94,7 +94,6 @@ class EntreeDepotController extends AbstractController
             'form' => $form,
         ]);
     }
-
     #[Route('/{id}', name: 'app_entree_depot_delete', methods: ['POST'])]
     public function delete(Request $request, EntreeDepot $entreeDepot, EntreeDepotRepository $entreeDepotRepository): Response
     {

@@ -132,14 +132,18 @@ class ChargementController extends AbstractController
             $total = 0;
             foreach ($f as $facture) {
                 $data[] = array(
-                        'Quantité achetée' => $facture->getQuantite(),
-                        'Produit' => $facture->getNomProduit(),
-                        'Prix unitaire' => $facture->getPrixUnit(),
-                        'Montant' => $facture->getMontant(),
-                    );
+                    'Quantité achetée' => $facture->getQuantite(),
+                    'Produit' => $facture->getNomProduit(),
+                    'Prix unitaire' => $facture->getPrixUnit(),
+                    'Montant' => $facture->getMontant(),
+                );
 
-                    $total += $facture->getMontant();
+                $total += $facture->getMontant();
             }
+            $reste = $chargement->getReste();
+            $avance = $chargement->getAvance();
+
+
         } else {
 
             $facture = new Facture2();
@@ -178,8 +182,7 @@ class ChargementController extends AbstractController
             'Prix unitaire',
             'Montant',
         );
-        $filename = $client !== null ? $client->getNom() : '';
-        $filename .= date("Y-m-d_H-i", time()) . ".pdf";
+        $filename = ($client !== null ? $client->getNom() : '') . date("Y-m-d_H-i", time()) . ".pdf";
 
         // Initialisation du PDF
         $pdf = new \FPDF();
@@ -208,7 +211,15 @@ class ChargementController extends AbstractController
         $pdf->Cell(120, 5, 'TELEPHONE : '. ($client ? $client->getTelephone() : ''), 0, 1, 'R');
 
         $pdf->Cell(70, 5, 'NINEA : 0848942 - RC : 10028', 0, 0, 'L');
-        $pdf->Cell(120, 5, 'DATE : '. ($facture->getDate()->format('Y-m-d H:i')), 0, 1, 'R'); // Adjust the date format as needed
+        $date = $facture->getDate();
+
+        if ($date !== null) {
+            $formattedDate = $date->format('Y-m-d H:i');
+        } else {
+            $formattedDate = 'Date non définie'; // ou une autre valeur par défaut appropriée
+        }
+
+        $pdf->Cell(120, 5, 'DATE : ' . $formattedDate, 0, 1, 'R');
 
         $pdf->Ln(2);
 
@@ -238,34 +249,91 @@ class ChargementController extends AbstractController
         $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
         $pdf->Cell(142.5, -10, 'Total', 0, 0, 'L', true); // true pour la couleur de fond
-        $pdf->Cell(47.5, -10, utf8_decode($total . ' F'), 1, 1, 'C',true);
+        $pdf->Cell(47.5, -10, utf8_decode($total . ' F'), 0, 1, 'C',true);
 
-        // Téléchargement du fichier PDF
+        // Affichage de l'avance si elle n'est pas nulle
+        if ($avance !== null) {
+            $pdf->Cell(14.5, 30, 'Acompte', 0, 0, 'L', false);
+            $pdf->Cell(30.5, 30, utf8_decode($avance . ' '), 0, 1, 'C', false);
+        }
+
+        // Affichage du reste si il n'est pas nul
+        if ($reste !== null) {
+            $pdf->Cell(14.5, -15, 'Reste', 0, 0, 'L', false);
+            $pdf->Cell(30.5, -15, utf8_decode($reste . ' '), 0, 1, 'C', false);
+        }
+
+
+        // Forcer le téléchargement du fichier PDF
         $pdf->Output('D', $filename);
+
         exit;
 
     }
 
     #[Route('/chargement/statut/{id}', name: 'statut')]
-    public function statut(Chargement $chargement, EntityManagerInterface $entityManager){
+    public function statut(Request $request, Chargement $chargement, EntityManagerInterface $entityManager){
 
-        $chargement->setStatut('payée');
-        $nomChargement = $chargement->getNomClient();
-        $totalCharge = $chargement->getTotal();
-        $dettes = $entityManager->getRepository(Dette::class)->findAll();
-        foreach ($dettes as $dette){
-            $nomDette = $dette->getClient()->getNom();
-            $montantDette = $dette->getReste();
-            if ($nomChargement == $nomDette && $totalCharge == $montantDette){
-                $dette->setStatut("payée");
-                $entityManager->flush();
+        $prixAvance = $request->request->get('price');
+
+
+
+
+
+        $nomClient = $chargement->getNomClient();
+        $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
+
+        if (!$prixAvance) {
+            $this->addFlash('error', 'Le prix doit être renseigné.');
+            return $this->redirectToRoute('liste_chargement');
+        }
+
+        $reste = $chargement->getTotal() - $prixAvance;
+
+        if ($reste == 0){
+            $chargement->setStatut('payée');
+            if ($client) {
+                $dettes = $entityManager->getRepository(Dette::class)->findBy(['client' => $client, 'statut' => 'impayé']);
+                foreach ($dettes as $d) {
+                    $d->setStatut('payée');
+                    $d->setReste('0');
+                }
             }
 
-        }
-        $entityManager->persist($chargement);
-        $entityManager->flush();
-        $this->addFlash('success', 'Le paiement de la facture a été effectué.');
+            $entityManager->persist($chargement);
+            $this->addFlash('success', 'Le règlement de la facture a été effectué.');
+        } elseif ($chargement->getAvance() != null){
+            $this->addFlash('danger', 'Vous avez déjà effectué un acompte auparavant.');
+        } elseif ($reste > 0 && $reste < $chargement->getTotal()) {
+            $dette = new Dette();
+            $date = new \DateTime();
+            $dette->setMontantDette($reste);
+            $dette->setReste($reste);
+            $dette->setDateCreated($date);
+            $dette->setStatut('impayé');
 
+            $chargement->setReste($reste);
+            $chargement->setAvance($prixAvance);
+            $chargement->setStatut('avance');
+
+
+            if ($client) {
+                $dettes = $entityManager->getRepository(Dette::class)->findBy(['client' => $client, 'statut' => 'impayé']);
+
+                if (!empty($dettes)) {
+                    $this->addFlash('danger', $client->getNom() . ' a déjà une dette impayée.');
+                    return $this->redirectToRoute('liste_chargement');
+                } else {
+                    $dette->setClient($client);
+                    $entityManager->persist($dette);
+                    $this->addFlash('success', 'Le paiement de la facture a été effectué.');
+                }
+            } else {
+                $this->addFlash('danger', 'Client non trouvé.');
+            }
+        }
+
+        $entityManager->flush();
         return $this->redirectToRoute('liste_chargement');
     }
 
@@ -331,6 +399,7 @@ class ChargementController extends AbstractController
     #[Route('/chargement/payer/{id}', name: 'payer')]
     public function payer(Request $request, Chargement $chargement, EntityManagerInterface $entityManager)
     {
+
         if ($chargement->getStatut() !== "payée") {
             // Mettre à jour le statut de la facture à "payée"
             $chargement->setStatut('payée');
