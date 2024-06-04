@@ -328,7 +328,7 @@ class ChargementController extends AbstractController
         return $this->redirectToRoute('facture_liste');
     }
     
-    #[Route('/chargement/retour_produit/{id}', name: 'retour_produit')]
+    /*#[Route('/chargement/retour_produit/{id}', name: 'retour_produit')]
     public function retourProduit(Facture $facture, FactureRepository $repository, EntityManagerInterface $entityManager)
     {
 
@@ -389,7 +389,7 @@ class ChargementController extends AbstractController
         }
         $this->addFlash('error', 'Erreur lors de la suppression de la facture.');
         return $this->redirectToRoute('liste_chargement');
-    }
+    }*/
 
     #[Route('/chargement/payer/{id}', name: 'payer')]
     public function payer(Request $request, Chargement $chargement, EntityManagerInterface $entityManager)
